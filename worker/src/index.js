@@ -20,7 +20,8 @@ export default {
       return await handle(request, env);
     } catch (err) {
       console.error(err);
-      return json({ error: err.message || "Internal error" }, 500, request, env);
+      const status = Number(err.status) || 500;
+      return json({ error: err.message || "Internal error" }, status, request, env);
     }
   },
 };
@@ -210,9 +211,16 @@ function readCookie(request, name) {
   return null;
 }
 
+/** Prefer Authorization Bearer (GitHub Pages ↔ Worker); cookie is legacy fallback. */
+function readSessionToken(request) {
+  const auth = request.headers.get("Authorization") || "";
+  const m = auth.match(/^Bearer\s+(\S+)/i);
+  if (m) return m[1];
+  return readCookie(request, SESSION_COOKIE);
+}
+
 async function requireUser(request, env) {
-  const token = readCookie(request, SESSION_COOKIE);
-  const session = await verifySession(token, env);
+  const session = await verifySession(readSessionToken(request), env);
   if (!session?.login) {
     const err = new Error("GitHub login required");
     err.status = 401;
@@ -330,14 +338,18 @@ async function finishLogin(url, env, request) {
     env
   );
 
+  // Return token in the URL hash so GitHub Pages can store it in sessionStorage.
+  // Cross-site cookies (github.io → workers.dev) are blocked by modern browsers.
   const dest = new URL(state.return_to || pagesReturnUrl(env));
   dest.searchParams.set("logged_in", "1");
+  dest.hash = "session=" + encodeURIComponent(session);
 
   return cors(
     new Response(null, {
       status: 302,
       headers: {
         Location: dest.toString(),
+        // Best-effort cookie for same-site / local testing; Pages uses Bearer.
         "Set-Cookie": setSessionCookie(session, env, request),
       },
     }),
@@ -347,19 +359,14 @@ async function finishLogin(url, env, request) {
 }
 
 async function me(request, env) {
-  const token = readCookie(request, SESSION_COOKIE);
-  const session = await verifySession(token, env);
+  const session = await verifySession(readSessionToken(request), env);
   if (!session?.login) {
     return json({ user: null }, 200, request, env);
   }
   if (await isBanned(session.login, env)) {
-    return json(
-      { user: null, error: "banned" },
-      200,
-      request,
-      env,
-      { "Set-Cookie": clearSessionCookie(env, request) }
-    );
+    return json({ user: null, error: "banned" }, 200, request, env, {
+      "Set-Cookie": clearSessionCookie(env, request),
+    });
   }
   return json(
     {
@@ -376,13 +383,9 @@ async function me(request, env) {
 }
 
 async function logout(request, env) {
-  return json(
-    { ok: true },
-    200,
-    request,
-    env,
-    { "Set-Cookie": clearSessionCookie(env, request) }
-  );
+  return json({ ok: true }, 200, request, env, {
+    "Set-Cookie": clearSessionCookie(env, request),
+  });
 }
 
 /* ── Ban list ────────────────────────────────────────────────── */

@@ -127,6 +127,13 @@ The Worker reloads this file on each submit (short cache). You can also set a
 comma-separated `BANNED_USERS` Worker secret for an emergency block without a
 commit.
 
+## Auth note (GitHub Pages)
+
+The form cannot rely on cross-site cookies (`github.io` → `workers.dev`). After
+OAuth, the Worker redirects with `#session=<token>`; the page stores it in
+`sessionStorage` and sends `Authorization: Bearer …` on API calls.
+`SESSION_SECRET` stays only on the Worker (never in the frontend).
+
 ## Local development
 
 ```sh

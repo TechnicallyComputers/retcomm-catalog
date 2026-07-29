@@ -2,6 +2,7 @@ import { CONFIG } from "./config.js";
 import { hashRomFile } from "./hash.js";
 
 const $ = (id) => document.getElementById(id);
+const TOKEN_KEY = "retcomm_submit_session";
 
 const state = {
   user: null,
@@ -9,15 +10,42 @@ const state = {
   platformDefaults: null,
 };
 
+function getSessionToken() {
+  return sessionStorage.getItem(TOKEN_KEY) || "";
+}
+
+function setSessionToken(token) {
+  if (token) sessionStorage.setItem(TOKEN_KEY, token);
+  else sessionStorage.removeItem(TOKEN_KEY);
+}
+
+/** Capture `#session=…` from OAuth redirect and persist for Bearer auth. */
+function captureSessionFromHash() {
+  const raw = (window.location.hash || "").replace(/^#/, "");
+  if (!raw) return false;
+  const hash = new URLSearchParams(raw);
+  const token = hash.get("session");
+  if (!token) return false;
+  setSessionToken(token);
+  const url = new URL(window.location.href);
+  url.hash = "";
+  history.replaceState({}, "", url.pathname + url.search);
+  return true;
+}
+
 async function api(path, opts = {}) {
+  const headers = {
+    Accept: "application/json",
+    ...(opts.body ? { "Content-Type": "application/json" } : {}),
+    ...(opts.headers || {}),
+  };
+  const token = getSessionToken();
+  if (token) headers.Authorization = `Bearer ${token}`;
+
   const res = await fetch(`${CONFIG.API_BASE}${path}`, {
     credentials: "include",
     ...opts,
-    headers: {
-      Accept: "application/json",
-      ...(opts.body ? { "Content-Type": "application/json" } : {}),
-      ...(opts.headers || {}),
-    },
+    headers,
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
@@ -70,7 +98,12 @@ function setLoggedIn(user) {
     </div>`;
   actions.innerHTML = `<button type="button" id="logoutBtn">Sign out</button>`;
   $("logoutBtn").onclick = async () => {
-    await api("/auth/logout", { method: "POST" });
+    try {
+      await api("/auth/logout", { method: "POST" });
+    } catch {
+      /* ignore */
+    }
+    setSessionToken("");
     setLoggedIn(null);
   };
   $("submitBtn").disabled = false;
@@ -252,27 +285,41 @@ async function init() {
     state.platformDefaults = {};
   }
 
+  const gotSession = captureSessionFromHash();
   const params = new URLSearchParams(window.location.search);
   if (params.get("error") === "banned") {
+    setSessionToken("");
     showBanner(
       "danger",
       "This GitHub account is banned from catalog submissions."
     );
-  } else if (params.get("logged_in") === "1") {
-    showBanner("ok", "Signed in with GitHub.");
+    history.replaceState({}, "", window.location.pathname);
+  } else if (params.get("logged_in") === "1" || gotSession) {
     history.replaceState({}, "", window.location.pathname);
   }
 
   try {
     const me = await api("/auth/me");
     if (me.error === "banned") {
+      setSessionToken("");
       showBanner(
         "danger",
         "This GitHub account is banned from catalog submissions."
       );
       setLoggedIn(null);
-    } else {
+    } else if (me.user) {
       setLoggedIn(me.user);
+      if (gotSession || params.get("logged_in") === "1") {
+        showBanner("ok", `Signed in as <strong>@${me.user.login}</strong>.`);
+      }
+    } else {
+      setLoggedIn(null);
+      if (params.get("logged_in") === "1" || gotSession) {
+        showBanner(
+          "warn",
+          "Sign-in finished but the session was not accepted. Try signing in again; if it persists, redeploy the Worker with the latest auth fix."
+        );
+      }
     }
   } catch (err) {
     setLoggedIn(null);
