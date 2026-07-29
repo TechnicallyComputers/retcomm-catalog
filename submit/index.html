@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Submit a title — RetComM Catalog</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="wrap">
+      <header class="hero">
+        <p class="hint" style="margin: 0">
+          <a href="https://github.com/TechnicallyComputers/retcomm-catalog"
+            >retcomm-catalog</a
+          >
+          · title submission
+        </p>
+        <h1 class="brand">RetComM Catalog</h1>
+        <p class="lede">
+          Propose a GitHub recomp/decomp source for the official catalog. Sign
+          in with GitHub, paste the repo URL, review auto-filled digests and
+          release globs, then submit for maintainer approval.
+        </p>
+      </header>
+
+      <div class="bar" id="authBar">
+        <div class="user" id="userSlot">
+          <span class="hint">Checking session…</span>
+        </div>
+        <div class="actions" id="authActions"></div>
+      </div>
+
+      <div id="banner" class="banner hidden" role="status"></div>
+
+      <div class="grid" id="appRoot">
+        <section class="panel needs-auth">
+          <h2>1. Source repository</h2>
+          <div class="row one">
+            <label>
+              <strong>GitHub repo</strong>
+              <input
+                id="repoInput"
+                type="text"
+                placeholder="owner/repo or https://github.com/owner/repo"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+          <div class="actions">
+            <button type="button" class="primary" id="probeBtn">
+              Fetch &amp; auto-fill
+            </button>
+          </div>
+          <p class="hint">
+            Reads public README / DISC.md for ROM digests and the latest release
+            assets for install globs. You can edit every field afterward.
+          </p>
+          <div class="chips" id="assetChips"></div>
+
+          <h3>Identity</h3>
+          <div class="row">
+            <label>
+              <strong>id</strong>
+              <span class="src" data-src="id"></span>
+              <input id="f_id" />
+            </label>
+            <label>
+              <strong>name</strong>
+              <span class="src" data-src="name"></span>
+              <input id="f_name" />
+            </label>
+          </div>
+          <div class="row three">
+            <label>
+              <strong>kind</strong>
+              <select id="f_kind">
+                <option value="recomp">recomp</option>
+                <option value="decomp">decomp</option>
+              </select>
+            </label>
+            <label>
+              <strong>platform</strong>
+              <span class="src" data-src="platform"></span>
+              <select id="f_platform">
+                <option value="">— select —</option>
+                <option value="snes">snes</option>
+                <option value="gba">gba</option>
+                <option value="psx">psx</option>
+                <option value="n64">n64</option>
+                <option value="genesis">genesis</option>
+              </select>
+            </label>
+            <label>
+              <strong>install_dir_name</strong>
+              <input id="f_install_dir_name" />
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>description</strong>
+              <input id="f_description" />
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              <strong>homepage</strong>
+              <input id="f_homepage" />
+            </label>
+            <label>
+              <strong>release.github</strong>
+              <input id="f_release_github" />
+            </label>
+          </div>
+
+          <h3>Release assets</h3>
+          <div class="row three">
+            <label>
+              <strong>asset_glob.linux</strong>
+              <input id="f_glob_linux" placeholder="*linux*" />
+            </label>
+            <label>
+              <strong>asset_glob.windows</strong>
+              <input id="f_glob_windows" placeholder="*windows*" />
+            </label>
+            <label>
+              <strong>asset_glob.macos</strong>
+              <input id="f_glob_macos" placeholder="*macos*" />
+            </label>
+          </div>
+          <label style="margin-bottom: 0.75rem">
+            <span
+              style="
+                display: flex;
+                align-items: center;
+                gap: 0.45rem;
+                color: var(--ink);
+              "
+            >
+              <input id="f_allow_prerelease" type="checkbox" />
+              <strong>allow_prerelease</strong>
+            </span>
+          </label>
+          <div class="row three">
+            <label>
+              <strong>launch.linux</strong>
+              <input id="f_launch_linux" />
+            </label>
+            <label>
+              <strong>launch.windows</strong>
+              <input id="f_launch_windows" />
+            </label>
+            <label>
+              <strong>launch.macos</strong>
+              <input id="f_launch_macos" />
+            </label>
+          </div>
+
+          <h3>ROM identity</h3>
+          <p class="hint">
+            Comma-separated values. Leave blank arrays empty. Optional: hash a
+            local dump in the browser (never uploaded).
+          </p>
+          <div class="drop" id="romDrop">
+            Drop a ROM/disc image here, or
+            <label style="display: inline; color: var(--accent); cursor: pointer">
+              <strong>choose a file</strong>
+              <input id="romFile" type="file" hidden />
+            </label>
+            <div id="romHashStatus" class="hint"></div>
+          </div>
+          <div class="row">
+            <label>
+              <strong>crc32</strong>
+              <input id="f_crc32" placeholder="f2ab92d4" />
+            </label>
+            <label>
+              <strong>md5</strong>
+              <input id="f_md5" placeholder="32 hex" />
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              <strong>sha1</strong>
+              <input id="f_sha1" placeholder="40 hex" />
+            </label>
+            <label>
+              <strong>sha256</strong>
+              <input id="f_sha256" placeholder="64 hex" />
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              <strong>disc_serials</strong>
+              <input id="f_disc_serials" placeholder="SLUS-00561" />
+            </label>
+            <label>
+              <strong>sizes (bytes)</strong>
+              <input id="f_sizes" placeholder="16777216" />
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>filenames</strong>
+              <input id="f_filenames" placeholder="Game (USA).sfc" />
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>rom_extensions</strong>
+              <input id="f_rom_extensions" placeholder=".sfc, .smc" />
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>romm.platforms</strong>
+              <input id="f_romm_platforms" placeholder="snes" />
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>notes</strong>
+              <textarea id="f_notes"></textarea>
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>Note to maintainers</strong> (optional, not stored in
+              JSON)
+              <textarea
+                id="f_submitter_note"
+                style="font-family: var(--sans)"
+              ></textarea>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button type="button" class="primary" id="submitBtn" disabled>
+              Submit for approval
+            </button>
+            <button type="button" id="downloadBtn">Download JSON</button>
+            <button type="button" id="copyBtn">Copy JSON</button>
+          </div>
+          <p class="hint">
+            Submit opens a review issue and emails human catalog contributors.
+            GitHub login is required so abusive accounts can be banned in
+            <code>submit/banned-users.json</code>.
+          </p>
+        </section>
+
+        <aside class="panel">
+          <h2>Preview</h2>
+          <p class="hint" id="metaLine">Probe a repo to begin.</p>
+          <pre class="preview" id="preview">{}</pre>
+        </aside>
+      </div>
+
+      <footer class="site">
+        Schema:
+        <a href="https://github.com/TechnicallyComputers/retcomm-catalog/blob/main/SCHEMA.md"
+          >SCHEMA.md</a
+        >
+        · Existing titles stay under
+        <code>titles/</code>. Submissions are not published until approved.
+      </footer>
+    </div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

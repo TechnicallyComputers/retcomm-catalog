@@ -89,8 +89,14 @@ subset without schema churn:
 
 ## Adding a title
 
-1. Create `catalog/titles/<id>.json`.
-2. Append `"<id>"` to `catalog/index.json` → `titles`.
+**Preferred:** use the [submission form](https://technicallycomputers.github.io/retcomm-catalog/submit/)
+(GitHub login). It auto-fills digests and release globs from the source repo;
+maintainers approve via issue + email before anything lands in `titles/`.
+
+**Manual:**
+
+1. Create `titles/<id>.json`.
+2. Append `"<id>"` to `index.json` → `titles`.
 3. Fill `rom_identity` from the game's launcher gate / README baserom table
    (prefer publishing every digest you know; leave unused keys as `[]`).
 4. Point `release.github` at the shipping repo once releases exist.

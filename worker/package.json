@@ -1,0 +1,13 @@
+{
+  "name": "retcomm-catalog-submit-api",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^4.22.0"
+  }
+}

@@ -12,7 +12,20 @@ of app updates.
 index.json          # title id list + platform BIOS defaults
 titles/<id>.json    # one manifest per title
 SCHEMA.md           # field documentation
+submit/             # GitHub Pages submission form
+worker/             # Cloudflare Worker (OAuth, probe, email, issues)
+docs/SUBMIT_SETUP.md
 ```
+
+## Propose a title
+
+Use the [submission form](https://technicallycomputers.github.io/retcomm-catalog/submit/)
+(GitHub login required). It probes the source repo for digests/release assets,
+lets you complete or override fields, then opens an approval issue and emails
+human contributors listed in [`submit/contributors.json`](submit/contributors.json)
+(plus repo collaborators). Setup notes: [docs/SUBMIT_SETUP.md](docs/SUBMIT_SETUP.md).
+
+Ban abusers via [`submit/banned-users.json`](submit/banned-users.json).
 
 ## Releases
 

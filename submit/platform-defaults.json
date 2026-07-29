@@ -1,0 +1,29 @@
+{
+  "snes": {
+    "rom_extensions": [".sfc", ".smc", ".fig", ".swc"],
+    "romm_platforms": ["snes"],
+    "saves": { "sram_glob": ["*.srm", "saves/*.srm"] }
+  },
+  "gba": {
+    "rom_extensions": [".gba"],
+    "romm_platforms": ["gba"],
+    "saves": { "sram_glob": ["*.sav", "saves/*.sav"] },
+    "bios_inherited": true
+  },
+  "psx": {
+    "rom_extensions": [".cue", ".chd", ".iso", ".bin"],
+    "romm_platforms": ["ps", "psx", "ps1"],
+    "saves": { "memcard_glob": ["saves/*.mcd", "saves/*.mcr", "*.mcd", "*.mcr"] },
+    "bios_inherited": true
+  },
+  "n64": {
+    "rom_extensions": [".z64", ".n64", ".v64"],
+    "romm_platforms": ["n64"],
+    "saves": { "sram_glob": ["*.srm", "saves/*.srm"] }
+  },
+  "genesis": {
+    "rom_extensions": [".bin", ".md", ".gen", ".smd"],
+    "romm_platforms": ["genesis", "smd", "megadrive"],
+    "saves": { "sram_glob": ["*.srm", "saves/*.srm"] }
+  }
+}

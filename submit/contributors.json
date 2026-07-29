@@ -1,0 +1,20 @@
+{
+  "notes": "Human catalog contributors notified on new submissions. Add a login when someone joins; fill email for Resend. GitHub issue assignment uses login. Bots are ignored. The Worker also merges direct repo collaborators from the GitHub API.",
+  "contributors": [
+    {
+      "login": "TechnicallyComputers",
+      "email": "alex@technicallycomputers.ca",
+      "name": "Alex Vanderveen"
+    },
+    {
+      "login": "mstan",
+      "email": "",
+      "name": "Matt Stanley"
+    },
+    {
+      "login": "JRickey",
+      "email": "",
+      "name": "Jrickey"
+    }
+  ]
+}
