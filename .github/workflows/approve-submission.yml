@@ -1,8 +1,8 @@
 name: Approve catalog submission
 
-# Apply label `approved` (or `approved-update`) on a `catalog-submission` issue
-# to merge the proposed titles/<id>.json, update index.json, and publish a new
-# catalog.zip release for launchers.
+# Apply label `approved` (or `approved-update`) on a submission issue to merge
+# the proposed titles/<id>.json, update index.json, and publish catalog.zip.
+# Ensures submission labels exist and auto-applies `catalog-submission` if missing.
 
 on:
   issues:
@@ -23,13 +23,13 @@ jobs:
       github.event.label.name == 'approved-update'
     runs-on: ubuntu-latest
     steps:
-      - name: Require catalog-submission label
+      - uses: actions/checkout@v4
+
+      - name: Ensure submission labels exist
         env:
-          LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
-        run: |
-          echo "labels=$LABELS"
-          echo "$LABELS" | tr ',' '\n' | grep -qx 'catalog-submission' \
-            || { echo "Issue lacks catalog-submission label"; exit 1; }
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: bash .github/scripts/ensure_submission_labels.sh
 
       - name: Verify actor can approve
         env:
@@ -54,7 +54,23 @@ jobs:
               ;;
           esac
 
-      - uses: actions/checkout@v4
+      - name: Ensure catalog-submission on issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Form submissions should already have this; older/retry issues may not.
+          # Auto-apply so adding `approved` alone is enough to publish.
+          ISSUE=${{ github.event.issue.number }}
+          REPO="${{ github.repository }}"
+          labels="$(gh api "repos/${REPO}/issues/${ISSUE}" --jq '[.labels[].name] | join(",")')"
+          echo "labels(before)=$labels"
+          if ! echo "$labels" | tr ',' '\n' | grep -qx 'catalog-submission'; then
+            echo "Applying catalog-submission to #$ISSUE"
+            gh api --method POST "repos/${REPO}/issues/${ISSUE}/labels" \
+              -f 'labels[]=catalog-submission'
+          fi
+          labels="$(gh api "repos/${REPO}/issues/${ISSUE}" --jq '[.labels[].name] | join(",")')"
+          echo "labels(after)=$labels"
 
       - name: Apply submission
         id: apply

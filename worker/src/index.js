@@ -622,6 +622,53 @@ async function ghApi(path, env, opts = {}) {
   return res;
 }
 
+/** Create catalog submission labels if missing (idempotent; ignores 422 exists). */
+async function ensureSubmissionLabels(env, catalogRepo) {
+  const labels = [
+    {
+      name: "catalog-submission",
+      color: "5319E7",
+      description: "New title submission from the catalog form",
+    },
+    {
+      name: "approved",
+      color: "0E8A16",
+      description: "Approve submission: merge title and publish catalog.zip",
+    },
+    {
+      name: "approved-update",
+      color: "1D76DB",
+      description: "Approve and overwrite an existing titles/<id>.json",
+    },
+  ];
+  for (const label of labels) {
+    const res = await ghApi(`/repos/${catalogRepo}/labels`, env, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(label),
+    });
+    if (res.ok || res.status === 422) {
+      // 422 = already exists
+      continue;
+    }
+    // Best-effort: token may lack label-admin; form can still work if labels exist.
+    await res.text().catch(() => {});
+  }
+}
+
+async function addIssueLabel(env, catalogRepo, issueNumber, labelName) {
+  const res = await ghApi(
+    `/repos/${catalogRepo}/issues/${issueNumber}/labels`,
+    env,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ labels: [labelName] }),
+    }
+  );
+  return res.ok;
+}
+
 async function fetchRepoText(slug, path, env) {
   const res = await ghApi(
     `/repos/${slug}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`,
@@ -799,15 +846,16 @@ function validateManifest(m) {
     errors.push("launch needs at least one OS binary name");
   }
   const id = m.rom_identity || {};
-  const hasIdentity =
+  // Submissions must include digests from hashing a local dump (form requires
+  // the browser file hasher). disc_serial alone is not enough.
+  const hasDigest =
     (id.crc32 && id.crc32.length) ||
     (id.md5 && id.md5.length) ||
     (id.sha1 && id.sha1.length) ||
-    (id.sha256 && id.sha256.length) ||
-    (id.disc_serials && id.disc_serials.length);
-  if (!hasIdentity) {
+    (id.sha256 && id.sha256.length);
+  if (!hasDigest) {
     errors.push(
-      "rom_identity needs at least one digest or disc_serial (ownership check)"
+      "rom_identity needs at least one digest (crc32 / md5 / sha1 / sha256) from a local ROM hash"
     );
   }
   if (m.netplay && m.netplay.supported) {
@@ -959,6 +1007,8 @@ async function submit(request, env) {
     .filter((l) => l !== undefined)
     .join("\n");
 
+  await ensureSubmissionLabels(env, catalogRepo);
+
   const issueRes = await ghApi(`/repos/${catalogRepo}/issues`, env, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -974,28 +1024,61 @@ async function submit(request, env) {
   let issueWarning = null;
   if (!issueRes.ok) {
     const detail = await issueRes.text();
-    // Retry without assignees/labels if they fail (label missing, can't assign)
-    const retry = await ghApi(`/repos/${catalogRepo}/issues`, env, {
+    // Assignees often fail for non-collaborators — retry with label only.
+    const retryLabeled = await ghApi(`/repos/${catalogRepo}/issues`, env, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, body: issueBody }),
+      body: JSON.stringify({
+        title,
+        body: issueBody,
+        labels: ["catalog-submission"],
+      }),
     });
-    if (!retry.ok) {
-      return json(
-        {
-          error: "Failed to create GitHub issue",
-          detail: await retry.text(),
-          first: detail,
-        },
-        502,
-        request,
-        env
+    if (retryLabeled.ok) {
+      issue = await retryLabeled.json();
+      issueWarning =
+        "Issue created without assignees (add submit/contributors or collaborators).";
+    } else {
+      // Last resort: bare issue, then attach catalog-submission.
+      const retry = await ghApi(`/repos/${catalogRepo}/issues`, env, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title, body: issueBody }),
+      });
+      if (!retry.ok) {
+        return json(
+          {
+            error: "Failed to create GitHub issue",
+            detail: await retry.text(),
+            first: detail,
+            labeled: await retryLabeled.text(),
+          },
+          502,
+          request,
+          env
+        );
+      }
+      issue = await retry.json();
+      const labeled = await addIssueLabel(
+        env,
+        catalogRepo,
+        issue.number,
+        "catalog-submission"
       );
+      issueWarning = labeled
+        ? "Issue created; catalog-submission label applied after create."
+        : "Issue created without catalog-submission label; approve workflow will add it.";
     }
-    issue = await retry.json();
-    issueWarning = "Issue created without labels/assignees; check token permissions and label exists.";
   } else {
     issue = await issueRes.json();
+  }
+
+  // Belt-and-suspenders: ensure the submission label is present.
+  const hasLabel = Array.isArray(issue.labels)
+    ? issue.labels.some((l) => (l.name || l) === "catalog-submission")
+    : false;
+  if (!hasLabel && issue.number) {
+    await addIssueLabel(env, catalogRepo, issue.number, "catalog-submission");
   }
 
   const emailResult = await sendApproverEmail(env, {

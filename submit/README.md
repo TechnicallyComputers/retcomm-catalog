@@ -10,7 +10,7 @@ https://technicallycomputers.github.io/retcomm-catalog/submit/
 1. Requires **GitHub login** (OAuth via Cloudflare Worker)
 2. Probes a public recomp/decomp repo (README, `DISC.md`, latest release assets)
 3. Auto-fills a catalog manifest; submitter can edit every field
-4. Optional **client-side** ROM hashing (file never uploaded)
+4. **Required** client-side ROM hashing under “Rom Checksum Submission” (file never uploaded; submit blocked until digests are generated)
 5. On submit:
    - Opens a GitHub issue (label `catalog-submission`) assigned to human contributors
    - Emails addresses from [`contributors.json`](./contributors.json) (Resend)

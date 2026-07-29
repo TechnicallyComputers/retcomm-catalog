@@ -28,11 +28,17 @@ it they still get GitHub issue notifications when assigned.
 
 ## 2. Create labels
 
-In this repo, create issue labels:
+These labels are created automatically by the approve workflow and (when the
+Worker token allows) by the submit Worker. You can also seed them once:
+
+```sh
+export GITHUB_REPOSITORY=TechnicallyComputers/retcomm-catalog
+bash .github/scripts/ensure_submission_labels.sh
+```
 
 | Label | Purpose |
 |---|---|
-| `catalog-submission` | Applied by the form on new issues |
+| `catalog-submission` | Applied by the form on new issues (auto-applied on approve if missing) |
 | `approved` | Maintainer adds this → merge title + publish `catalog.zip` |
 | `approved-update` | Same, but overwrites an existing `titles/<id>.json` |
 

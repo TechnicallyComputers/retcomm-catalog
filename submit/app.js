@@ -8,6 +8,9 @@ const state = {
   user: null,
   fieldSources: {},
   platformDefaults: null,
+  /** True after the user successfully hashed a local ROM/disc dump. */
+  romChecksumDone: false,
+  romChecksumFile: "",
 };
 
 function getSessionToken() {
@@ -295,16 +298,17 @@ function validateManifest(m) {
   if (!launch.linux && !launch.windows && !launch.macos) {
     errors.push("launch needs at least one OS binary name");
   }
-  const id = m?.rom_identity || {};
-  const hasIdentity =
-    id.crc32?.length ||
-    id.md5?.length ||
-    id.sha1?.length ||
-    id.sha256?.length ||
-    id.disc_serials?.length;
-  if (!hasIdentity) {
+  if (!state.romChecksumDone) {
     errors.push(
-      "rom_identity needs at least one digest or disc_serial (ownership check)"
+      "Rom Checksum Submission is required — hash your local ROM/disc dump with the file picker before submitting"
+    );
+  }
+  const id = m?.rom_identity || {};
+  const hasDigest =
+    id.crc32?.length || id.md5?.length || id.sha1?.length || id.sha256?.length;
+  if (!hasDigest) {
+    errors.push(
+      "rom_identity needs digests from the local ROM hash (crc32 / md5 / sha1 / sha256)"
     );
   }
   if (m?.netplay?.supported) {
@@ -327,9 +331,23 @@ function mergeUnique(id, values) {
   csvSet(id, [...cur]);
 }
 
+function setChecksumUi(kind, message) {
+  const status = $("romHashStatus");
+  const block = $("checksumBlock");
+  const drop = $("romDrop");
+  status.classList.remove("pending", "ok", "err");
+  if (kind) status.classList.add(kind);
+  status.textContent = message;
+  const done = kind === "ok";
+  block?.classList.toggle("done", done);
+  drop?.classList.toggle("hashed", done);
+}
+
 async function onRomFile(file) {
   if (!file) return;
-  $("romHashStatus").textContent = `Hashing ${file.name}…`;
+  state.romChecksumDone = false;
+  state.romChecksumFile = "";
+  setChecksumUi("pending", `Hashing ${file.name}…`);
   try {
     const h = await hashRomFile(file);
     mergeUnique("f_crc32", [h.crc32]);
@@ -338,12 +356,19 @@ async function onRomFile(file) {
     mergeUnique("f_sha256", [h.sha256]);
     mergeUnique("f_sizes", [String(h.hashed_size)]);
     mergeUnique("f_filenames", [h.filename]);
-    $("romHashStatus").textContent = h.header_stripped
-      ? `Hashed ${file.name} (stripped 512-byte SMC header). Digests merged into the form.`
-      : `Hashed ${file.name}. Digests merged into the form. File was not uploaded.`;
+    state.romChecksumDone = true;
+    state.romChecksumFile = file.name;
+    setChecksumUi(
+      "ok",
+      h.header_stripped
+        ? `Hashed ${file.name} (stripped 512-byte SMC header). Digests filled — you can submit.`
+        : `Hashed ${file.name}. Digests filled — file was not uploaded. You can submit.`
+    );
     refreshPreview();
   } catch (err) {
-    $("romHashStatus").textContent = `Hash failed: ${err.message}`;
+    state.romChecksumDone = false;
+    state.romChecksumFile = "";
+    setChecksumUi("err", `Hash failed: ${err.message}`);
   }
 }
 
@@ -455,7 +480,7 @@ async function init() {
       fillForm(data.draft, data.meta);
       showBanner(
         "ok",
-        "Repo probed. Review highlighted/auto-filled fields, complete gaps, then submit."
+        "Repo probed. Review fields, then hash your local ROM under <strong>Rom Checksum Submission</strong> before submitting."
       );
     } catch (err) {
       showBanner("danger", err.message);
@@ -527,6 +552,10 @@ async function init() {
 
   const drop = $("romDrop");
   const fileInput = $("romFile");
+  setChecksumUi(
+    "pending",
+    "No ROM hashed yet — submit stays blocked until this step succeeds."
+  );
   fileInput.addEventListener("change", () => onRomFile(fileInput.files?.[0]));
   drop.addEventListener("dragover", (e) => {
     e.preventDefault();

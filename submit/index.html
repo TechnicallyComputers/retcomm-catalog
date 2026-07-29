@@ -216,20 +216,35 @@
 
           <h3>ROM identity</h3>
           <p class="hint">
-            <span class="req" aria-hidden="true">*</span> At least one digest
-            (<code>crc32</code> / <code>md5</code> / <code>sha1</code> /
-            <code>sha256</code>) or <code>disc_serials</code> is required.
-            Comma-separated values. Optional: hash a local dump in the browser
-            (never uploaded).
+            Digests prove ownership for RetComM’s library scan. You
+            <strong>must</strong> hash a local dump below before submitting —
+            auto-fill from the repo is not enough. The file never leaves your
+            browser.
           </p>
-          <div class="drop" id="romDrop">
-            Drop a ROM/disc image here, or
-            <label style="display: inline; color: var(--accent); cursor: pointer">
-              <strong>choose a file</strong>
-              <input id="romFile" type="file" hidden />
-            </label>
-            <div id="romHashStatus" class="hint"></div>
-          </div>
+
+          <section class="checksum-block" id="checksumBlock" aria-labelledby="checksumHeading">
+            <header class="checksum-heading">
+              <p class="checksum-kicker">Required for submission</p>
+              <h3 id="checksumHeading">Rom Checksum Submission</h3>
+              <p class="checksum-lede">
+                Drop or choose your verified ROM / disc image. We compute
+                CRC32, MD5, SHA-1, and SHA-256 locally and fill the fields
+                below.
+              </p>
+            </header>
+            <div class="drop drop-required" id="romDrop">
+              Drop a ROM/disc image here, or
+              <label class="file-pick">
+                <strong>choose a file</strong>
+                <input id="romFile" type="file" hidden />
+              </label>
+              <div id="romHashStatus" class="hint checksum-status">
+                No ROM hashed yet — submit stays blocked until this step
+                succeeds.
+              </div>
+            </div>
+          </section>
+
           <div class="row">
             <label>
               <strong
@@ -256,11 +271,7 @@
           </div>
           <div class="row">
             <label>
-              <strong
-                >disc_serials<span class="req" aria-hidden="true"
-                  >*</span
-                ></strong
-              >
+              <strong>disc_serials</strong>
               <input id="f_disc_serials" placeholder="SLUS-00561" />
             </label>
             <label>
