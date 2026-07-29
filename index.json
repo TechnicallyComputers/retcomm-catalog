@@ -5,43 +5,23 @@
     "gba": {
       "bios_identity": {
         "required": true,
-        "crc32": [
-          "81977335"
-        ],
+        "crc32": ["81977335"],
         "md5": [],
-        "sha1": [
-          "300c20df6731a33952ded8c436f7f186d25d3492"
-        ],
+        "sha1": ["300c20df6731a33952ded8c436f7f186d25d3492"],
         "sha256": [],
-        "sizes": [
-          16384
-        ],
-        "filenames": [
-          "gba_bios.bin",
-          "gba_bios.rom",
-          "bios.bin"
-        ]
+        "sizes": [16384],
+        "filenames": ["gba_bios.bin", "gba_bios.rom", "bios.bin"]
       }
     },
     "psx": {
       "bios_identity": {
         "required": true,
-        "crc32": [
-          "37157331"
-        ],
+        "crc32": ["37157331"],
         "md5": [],
-        "sha1": [
-          "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
-        ],
+        "sha1": ["10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"],
         "sha256": [],
-        "sizes": [
-          524288
-        ],
-        "filenames": [
-          "SCPH1001.BIN",
-          "scph1001.bin",
-          "ps-22a.bin"
-        ]
+        "sizes": [524288],
+        "filenames": ["SCPH1001.BIN", "scph1001.bin", "ps-22a.bin"]
       }
     }
   },
@@ -49,7 +29,6 @@
     "metal-warriors-snes",
     "megaman-x-snes",
     "super-mario-world-snes",
-    "super-mario-world-coop-snes",
     "star-fox-snes",
     "zelda-alttp-snes",
     "masters-of-teras-kasi-psx",
