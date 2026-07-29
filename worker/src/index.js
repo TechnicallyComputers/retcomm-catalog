@@ -571,14 +571,32 @@ function mergeDigestSets(...parts) {
 function inferAssetGlobs(assetNames) {
   const globs = { linux: "", windows: "", macos: "" };
   const names = assetNames || [];
-  const has = (re) => names.some((n) => re.test(n));
-  if (has(/linux/i)) globs.linux = "*linux*";
-  if (has(/windows|win64|win32|\.exe/i)) globs.windows = "*windows*";
-  if (has(/macos|osx|darwin/i)) globs.macos = "*macos*";
-  // Fallbacks commonly used in this catalog
-  if (!globs.linux && names.length) globs.linux = "*linux*";
-  if (!globs.windows && names.length) globs.windows = "*windows*";
-  if (!globs.macos && names.length) globs.macos = "*macos*";
+  const first = (re) => names.find((n) => re.test(n)) || "";
+
+  const win = first(/windows|win64|win-?x64|win_x64|win32|(?:^|[^a-z])win(?:[^a-z]|$)/i);
+  if (win) {
+    if (/windows/i.test(win)) globs.windows = "*windows*";
+    else if (/win-?x64|win_x64/i.test(win)) globs.windows = "*win*x64*";
+    else if (/win64/i.test(win)) globs.windows = "*win64*";
+    else if (/win32/i.test(win)) globs.windows = "*win32*";
+    else globs.windows = "*-win*"; // hyphenated token; avoid bare *win* (matches "wine")
+  }
+
+  const lin = first(/linux|appimage/i);
+  if (lin) {
+    if (/appimage/i.test(lin)) globs.linux = "*appimage*";
+    else globs.linux = "*linux*";
+  }
+
+  const mac = first(/macos|osx|darwin|(?:^|[^a-z])mac(?:[^a-z]|$)/i);
+  if (mac) {
+    if (/darwin/i.test(mac)) globs.macos = "*darwin*";
+    else if (/osx/i.test(mac)) globs.macos = "*osx*";
+    else if (/macos/i.test(mac)) globs.macos = "*macos*";
+    else globs.macos = "*mac*";
+  }
+
+  // Do not invent globs for OSes with no matching assets (Windows-only releases).
   return globs;
 }
 

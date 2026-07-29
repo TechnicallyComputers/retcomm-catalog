@@ -31,11 +31,11 @@ Ban abusers via [`submit/banned-users.json`](submit/banned-users.json).
 
 ## Releases
 
-Catalog releases use **dated tags** (`vYYYY.MM.DD…`). Approving a submission or
-tagging `v*` / running **Publish catalog** stamps `catalog_date` + `release_tag`
-into `index.json`, packs `catalog.zip`, and publishes a GitHub Release. RetComM
-checks that release identity on startup and downloads the zip only when it
-changed:
+Catalog releases use **date/time tags** (`vYYYY.MM.DD.HHMMSS…`). Approving a
+submission or tagging `v*` / running **Publish catalog** stamps `catalog_date`
+(UTC ISO-8601) + `release_tag` into `index.json`, packs `catalog.zip`, and
+publishes a GitHub Release (not a draft). RetComM checks that release identity /
+stamp on startup and downloads the zip only when the remote catalog is newer:
 
 `https://github.com/TechnicallyComputers/retcomm-catalog/releases/latest/download/catalog.zip`
 

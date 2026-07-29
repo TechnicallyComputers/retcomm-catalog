@@ -6,32 +6,17 @@
   "description": "Super Mario World (USA) recompiled with snesrecomp; co-op/netplay builds available upstream.",
   "homepage": "https://github.com/mstan/SuperMarioWorldRecomp",
   "rom_identity": {
-    "crc32": [
-      "b19ed489"
-    ],
-    "md5": [
-      "cdd3c8c37322978ca8669b34bc89c804"
-    ],
-    "sha1": [
-      "6b47bb75d16514b6a476aa0c73a683a2a4c18765"
-    ],
+    "crc32": ["b19ed489"],
+    "md5": ["cdd3c8c37322978ca8669b34bc89c804"],
+    "sha1": ["6b47bb75d16514b6a476aa0c73a683a2a4c18765"],
     "sha256": [
       "0838e531fe22c077528febe14cb3ff7c492f1f5fa8de354192bdff7137c27f5b"
     ],
     "disc_serials": [],
-    "sizes": [
-      524288
-    ],
-    "filenames": [
-      "Super Mario World (USA).sfc"
-    ]
+    "sizes": [524288],
+    "filenames": ["Super Mario World (USA).sfc"]
   },
-  "rom_extensions": [
-    ".sfc",
-    ".smc",
-    ".fig",
-    ".swc"
-  ],
+  "rom_extensions": [".sfc", ".smc", ".fig", ".swc"],
   "release": {
     "github": "mstan/SuperMarioWorldRecomp",
     "asset_glob": {
@@ -40,22 +25,17 @@
       "macos": "*macos*"
     }
   },
-  "install_dir_name": "SuperMarioWorldRecomp",
+  "install_dir_name": "SuperMarioWorldSNESRecomp",
   "launch": {
-    "linux": "SuperMarioWorldRecomp",
-    "windows": "SuperMarioWorldRecomp.exe",
-    "macos": "SuperMarioWorldRecomp"
+    "linux": "SuperMarioWorldSNESRecomp",
+    "windows": "SuperMarioWorldSNESRecomp.exe",
+    "macos": "SuperMarioWorldSNESRecomp"
   },
   "romm": {
-    "platforms": [
-      "snes"
-    ]
+    "platforms": ["snes"]
   },
   "saves": {
-    "sram_glob": [
-      "*.srm",
-      "saves/*.srm"
-    ]
+    "sram_glob": ["*.srm", "saves/*.srm"]
   },
   "notes": "Canonical mstan/SuperMarioWorldRecomp. Coop variant remains catalog id super-mario-world-coop-snes."
 }

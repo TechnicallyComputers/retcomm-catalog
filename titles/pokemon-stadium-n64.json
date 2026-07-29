@@ -34,9 +34,9 @@
   "release": {
     "github": "mstan/PokemonStadiumRecomp",
     "asset_glob": {
-      "linux": "*linux*",
-      "windows": "*windows*",
-      "macos": "*macos*"
+      "linux": "",
+      "windows": "*win64*",
+      "macos": ""
     }
   },
   "install_dir_name": "PokemonStadiumRecomp",

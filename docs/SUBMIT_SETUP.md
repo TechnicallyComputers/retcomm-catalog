@@ -107,7 +107,7 @@ human contributors (GitHub notification email if watching/assigned).
 2. Add label **`approved`** (or **`approved-update`** to replace an existing id).
 3. [`.github/workflows/approve-submission.yml`](../.github/workflows/approve-submission.yml)
    writes `titles/<id>.json`, updates `index.json`, pushes to the default branch,
-   creates a dated `vYYYY.MM.DD.<issue>` release with `catalog.zip`, comments,
+   creates a dated `vYYYY.MM.DD.HHMMSS.<issue>` release with `catalog.zip`, comments,
    and closes the issue.
 
 Launchers pick up the new zip on the next catalog sync / auto-update.

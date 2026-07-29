@@ -28,9 +28,9 @@
   "release": {
     "github": "mstan/PocketMonstersStadiumRecomp",
     "asset_glob": {
-      "linux": "*linux*",
-      "windows": "*windows*",
-      "macos": "*macos*"
+      "linux": "",
+      "windows": "*win*x64*",
+      "macos": ""
     }
   },
   "install_dir_name": "PocketMonstersStadiumRecomp",

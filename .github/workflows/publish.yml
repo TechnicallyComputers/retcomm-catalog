@@ -18,17 +18,28 @@ jobs:
       - name: Resolve release tag
         id: meta
         run: |
+          DATETIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
           if [ "${{ github.event_name }}" = "push" ]; then
             TAG="${GITHUB_REF_NAME}"
           else
-            TAG="v$(date -u +%Y.%m.%d).manual.${{ github.run_number }}"
+            # vYYYY.MM.DD.HHMMSS.manual.<run> — published (not draft) for launchers
+            TAG="v$(date -u +%Y.%m.%d.%H%M%S).manual.${{ github.run_number }}"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Using release tag $TAG"
+          echo "datetime=$DATETIME" >> "$GITHUB_OUTPUT"
+          echo "Using release tag $TAG ($DATETIME)"
 
       - name: Stamp index.json
         run: |
-          python3 .github/scripts/stamp_catalog_release.py --tag "${{ steps.meta.outputs.tag }}"
+          # Manual runs pass wall-clock UTC; tag pushes derive date/time from the tag.
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            python3 .github/scripts/stamp_catalog_release.py \
+              --tag "${{ steps.meta.outputs.tag }}" \
+              --datetime "${{ steps.meta.outputs.datetime }}"
+          else
+            python3 .github/scripts/stamp_catalog_release.py \
+              --tag "${{ steps.meta.outputs.tag }}"
+          fi
 
       - name: Validate JSON
         run: |
@@ -72,14 +83,18 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Dated draft release (manual run)
+      - name: Dated release (manual run)
         if: github.event_name == 'workflow_dispatch'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.meta.outputs.tag }}
           name: Catalog ${{ steps.meta.outputs.tag }}
           files: catalog.zip
-          draft: true
+          draft: false
           generate_release_notes: true
+          body: |
+            Manual catalog publish (${{ steps.meta.outputs.datetime }} UTC).
+            Stamped `catalog_date` / `release_tag` in `index.json`.
+            Launchers fetch: `…/releases/latest/download/catalog.zip`.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

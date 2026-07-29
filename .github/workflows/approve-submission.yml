@@ -117,16 +117,22 @@ jobs:
         id: meta
         run: |
           ISSUE=${{ github.event.issue.number }}
-          TAG="v$(date -u +%Y.%m.%d).${ISSUE}"
+          # vYYYY.MM.DD.HHMMSS.<issue> — time allows multiple same-day publishes
+          STAMP="$(date -u +%Y.%m.%d.%H%M%S)"
+          DATETIME="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          TAG="v${STAMP}.${ISSUE}"
           if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
             TAG="${TAG}.${{ github.run_number }}"
           fi
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
-          echo "Using $TAG"
+          echo "datetime=$DATETIME" >> "$GITHUB_OUTPUT"
+          echo "Using $TAG ($DATETIME)"
 
-      - name: Stamp index.json with catalog date
+      - name: Stamp index.json with catalog date/time
         run: |
-          python3 .github/scripts/stamp_catalog_release.py --tag "${{ steps.meta.outputs.tag }}"
+          python3 .github/scripts/stamp_catalog_release.py \
+            --tag "${{ steps.meta.outputs.tag }}" \
+            --datetime "${{ steps.meta.outputs.datetime }}"
 
       - name: Commit title to main
         run: |
@@ -162,7 +168,7 @@ jobs:
               "Automated publish from approved submission #${ISSUE} by @${{ github.actor }}." \
               "" \
               "Title: \`${{ steps.apply.outputs.tid }}\`" \
-              "Catalog date: stamped in \`index.json\` (\`catalog_date\` / \`release_tag\`)." \
+              "Catalog stamp: \`${{ steps.meta.outputs.datetime }}\` in \`index.json\` (\`catalog_date\` / \`release_tag\`)." \
               "Launchers fetch: \`…/releases/latest/download/catalog.zip\`." )"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
           echo "url=https://github.com/${{ github.repository }}/releases/tag/${TAG}" >> "$GITHUB_OUTPUT"

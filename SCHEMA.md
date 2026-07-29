@@ -9,8 +9,8 @@ each `titles/<id>.json` describes one supported recomp/decomp.
 {
   "schema_version": 1,
   "name": "RetComM supported titles",
-  "catalog_date": "2026-07-29",
-  "release_tag": "v2026.07.29.12",
+  "catalog_date": "2026-07-29T18:41:00Z",
+  "release_tag": "v2026.07.29.184100.12",
   "platform_defaults": {
     "gba": { "bios_identity": { "required": true, "crc32": ["81977335"], "…": "…" } },
     "psx": { "bios_identity": { "required": true, "crc32": ["37157331"], "…": "…" } }
@@ -21,8 +21,8 @@ each `titles/<id>.json` describes one supported recomp/decomp.
 
 | Field | Type | Notes |
 |---|---|---|
-| `catalog_date` | string | `YYYY-MM-DD` stamp written by publish CI (dated releases) |
-| `release_tag` | string | GitHub release tag for this zip (e.g. `v2026.07.29.12`) |
+| `catalog_date` | string | UTC stamp from publish CI: `YYYY-MM-DDTHH:MM:SSZ` (preferred) or legacy `YYYY-MM-DD` |
+| `release_tag` | string | GitHub release tag (e.g. `v2026.07.29.184100.12` = date + `HHMMSS` + issue) |
 | `platform_defaults` | object | Optional per-platform defaults keyed by catalog `platform` |
 | `platform_defaults.<platform>.bios_identity` | object | Applied to titles on that platform that omit `bios_identity` |
 
@@ -59,7 +59,7 @@ Title manifests may still set `bios_identity` to override the default, or
 | `release` | object | Where to fetch builds |
 | `release.github` | string | `owner/repo` |
 | `release.allow_prerelease` | bool | Allow GitHub pre-releases when no stable latest exists |
-| `release.asset_glob` | object | Per-OS glob: `linux`, `windows`, `macos` |
+| `release.asset_glob` | object | Per-OS glob: `linux`, `windows`, `macos`. Prefer a pattern from the real asset name (`*win64*`, `*win*x64*`, `*windows*`, …). The launcher also treats Windows/Linux/macOS synonyms as matches. |
 | `install_dir_name` | string | Folder under `apps/` |
 | `launch` | object | Relative binary names: `linux`, `windows`, `macos` |
 | `romm` | object | Optional match hints |
