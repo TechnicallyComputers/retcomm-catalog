@@ -27,6 +27,8 @@ human contributors listed in [`submit/contributors.json`](submit/contributors.js
 title and publish a new `catalog.zip`. Setup notes:
 [docs/SUBMIT_SETUP.md](docs/SUBMIT_SETUP.md).
 
+If you have a bulk submission request or a submission request that is not maintained on GH and isn't compatible with the tool, please contact us directly, or open an issue on this repo, and we can make arrangements to have it added manually somehow.
+
 Ban abusers via [`submit/banned-users.json`](submit/banned-users.json).
 
 ## Releases
