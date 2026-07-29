@@ -14,7 +14,9 @@ https://technicallycomputers.github.io/retcomm-catalog/submit/
 5. On submit:
    - Opens a GitHub issue (label `catalog-submission`) assigned to human contributors
    - Emails addresses from [`contributors.json`](./contributors.json) (Resend)
-6. Abusers can be blocked by adding their GitHub login to [`banned-users.json`](./banned-users.json)
+6. A maintainer adds label **`approved`** → CI merges the title, updates
+   `index.json`, and publishes a new `catalog.zip` release
+7. Abusers can be blocked by adding their GitHub login to [`banned-users.json`](./banned-users.json)
 
 Keep [`contributors.json`](./contributors.json) updated when people join; fill each
 `email` for Resend delivery.

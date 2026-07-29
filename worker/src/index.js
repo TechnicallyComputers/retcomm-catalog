@@ -902,7 +902,7 @@ async function submit(request, env) {
     `- [ ] Digests match the game's ownership gate / No-Intro / Redump`,
     `- [ ] Release asset globs match real assets`,
     `- [ ] Launch binary names verified`,
-    `- [ ] Add file + append id to \`index.json\``,
+    `- [ ] Add label \`approved\` to merge into the catalog and publish \`catalog.zip\` (use \`approved-update\` only to overwrite an existing id)`,
     ``,
     `_Submitted via the catalog submission form._`,
   ]

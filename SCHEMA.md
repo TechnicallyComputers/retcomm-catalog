@@ -9,6 +9,8 @@ each `titles/<id>.json` describes one supported recomp/decomp.
 {
   "schema_version": 1,
   "name": "RetComM supported titles",
+  "catalog_date": "2026-07-29",
+  "release_tag": "v2026.07.29.12",
   "platform_defaults": {
     "gba": { "bios_identity": { "required": true, "crc32": ["81977335"], "…": "…" } },
     "psx": { "bios_identity": { "required": true, "crc32": ["37157331"], "…": "…" } }
@@ -19,6 +21,8 @@ each `titles/<id>.json` describes one supported recomp/decomp.
 
 | Field | Type | Notes |
 |---|---|---|
+| `catalog_date` | string | `YYYY-MM-DD` stamp written by publish CI (dated releases) |
+| `release_tag` | string | GitHub release tag for this zip (e.g. `v2026.07.29.12`) |
 | `platform_defaults` | object | Optional per-platform defaults keyed by catalog `platform` |
 | `platform_defaults.<platform>.bios_identity` | object | Applied to titles on that platform that omit `bios_identity` |
 
@@ -92,8 +96,11 @@ subset without schema churn:
 ## Adding a title
 
 **Preferred:** use the [submission form](https://technicallycomputers.github.io/retcomm-catalog/submit/)
-(GitHub login). It auto-fills digests and release globs from the source repo;
-maintainers approve via issue + email before anything lands in `titles/`.
+(GitHub login). It auto-fills digests and release globs from the source repo and
+opens a review issue. A maintainer with write access adds the **`approved`**
+label to merge `titles/<id>.json`, update `index.json`, and publish a new
+`catalog.zip` release (use **`approved-update`** only to overwrite an existing
+id).
 
 **Manual:**
 
@@ -104,3 +111,4 @@ maintainers approve via issue + email before anything lands in `titles/`.
 4. Point `release.github` at the shipping repo once releases exist.
 5. For GBA/PSX, BIOS identity is inherited from `platform_defaults` unless
    the title sets its own `bios_identity` (or `null` to opt out).
+6. Tag `v*` or run **Publish catalog** so launchers get a new zip.

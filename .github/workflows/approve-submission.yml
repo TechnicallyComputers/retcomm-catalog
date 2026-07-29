@@ -1,0 +1,188 @@
+name: Approve catalog submission
+
+# Apply label `approved` (or `approved-update`) on a `catalog-submission` issue
+# to merge the proposed titles/<id>.json, update index.json, and publish a new
+# catalog.zip release for launchers.
+
+on:
+  issues:
+    types: [labeled]
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: approve-submission-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  apply-and-publish:
+    if: >
+      github.event.label.name == 'approved' ||
+      github.event.label.name == 'approved-update'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require catalog-submission label
+        env:
+          LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
+        run: |
+          echo "labels=$LABELS"
+          echo "$LABELS" | tr ',' '\n' | grep -qx 'catalog-submission' \
+            || { echo "Issue lacks catalog-submission label"; exit 1; }
+
+      - name: Verify actor can approve
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          perm="$(gh api "repos/${{ github.repository }}/collaborators/${{ github.actor }}/permission" --jq .permission 2>/dev/null)"
+          status=$?
+          set -e
+          if [ "$status" -ne 0 ] || [ -z "$perm" ]; then
+            perm="none"
+          fi
+          echo "actor=${{ github.actor }} permission=$perm"
+          case "$perm" in
+            admin|maintain|write) ;;
+            *)
+              gh issue comment ${{ github.event.issue.number }} \
+                --repo "${{ github.repository }}" \
+                --body "❌ @${{ github.actor }} cannot approve (need write+ on this repo; got \`$perm\`)."
+              gh api --method DELETE "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels/${{ github.event.label.name }}" || true
+              exit 1
+              ;;
+          esac
+
+      - uses: actions/checkout@v4
+
+      - name: Apply submission
+        id: apply
+        env:
+          BODY: ${{ github.event.issue.body }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          printf '%s' "$BODY" > /tmp/issue-body.md
+          ALLOW=()
+          if [ "${{ github.event.label.name }}" = "approved-update" ]; then
+            ALLOW=(--allow-update)
+          fi
+          set +e
+          out="$(python3 .github/scripts/apply_submission.py --body-file /tmp/issue-body.md "${ALLOW[@]}" 2>&1)"
+          status=$?
+          set -e
+          echo "$out"
+          if [ "$status" -ne 0 ]; then
+            {
+              echo "❌ Approval failed while applying the manifest:"
+              echo
+              echo '```'
+              echo "$out"
+              echo '```'
+              echo
+              echo "Remove the approval label, fix the issue body JSON, then re-add \`approved\`."
+            } > /tmp/fail-comment.md
+            gh issue comment ${{ github.event.issue.number }} \
+              --repo "${{ github.repository }}" \
+              --body-file /tmp/fail-comment.md
+            gh api --method DELETE "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels/${{ github.event.label.name }}" || true
+            exit 1
+          fi
+          # Last stdout line is action:id
+          result="$(echo "$out" | tail -n1)"
+          echo "result=$result" >> "$GITHUB_OUTPUT"
+          echo "tid=${result#*:}" >> "$GITHUB_OUTPUT"
+
+      - name: Validate catalog tree
+        run: |
+          python3 -c "import json; json.load(open('index.json'))"
+          for f in titles/*.json; do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          idx = json.load(open("index.json"))
+          ids = idx.get("titles", [])
+          missing = [i for i in ids if not Path(f"titles/{i}.json").is_file()]
+          extras = sorted({p.stem for p in Path("titles").glob("*.json")} - set(ids))
+          if missing:
+              raise SystemExit(f"index lists missing files: {missing}")
+          if extras:
+              raise SystemExit(f"titles not in index: {extras}")
+          print(f"{len(ids)} titles ok")
+          PY
+
+      - name: Choose dated release tag
+        id: meta
+        run: |
+          ISSUE=${{ github.event.issue.number }}
+          TAG="v$(date -u +%Y.%m.%d).${ISSUE}"
+          if git ls-remote --tags origin "refs/tags/${TAG}" | grep -q .; then
+            TAG="${TAG}.${{ github.run_number }}"
+          fi
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "Using $TAG"
+
+      - name: Stamp index.json with catalog date
+        run: |
+          python3 .github/scripts/stamp_catalog_release.py --tag "${{ steps.meta.outputs.tag }}"
+
+      - name: Commit title to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.json "titles/${{ steps.apply.outputs.tid }}.json"
+          if git diff --staged --quiet; then
+            echo "No file changes to commit (already on main?)."
+          else
+            git commit -m "Add catalog title ${{ steps.apply.outputs.tid }} (issue #${{ github.event.issue.number }})"
+            git push origin HEAD:${{ github.event.repository.default_branch }}
+          fi
+
+      - name: Pack catalog.zip
+        run: |
+          rm -f catalog.zip
+          zip -qr catalog.zip index.json titles SCHEMA.md README.md
+          ls -lah catalog.zip
+
+      - name: Create release tag and publish catalog.zip
+        id: release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.meta.outputs.tag }}"
+          ISSUE=${{ github.event.issue.number }}
+          git tag "$TAG"
+          git push origin "$TAG"
+          gh release create "$TAG" catalog.zip \
+            --repo "${{ github.repository }}" \
+            --title "Catalog ${TAG}" \
+            --notes "$(printf '%s\n' \
+              "Automated publish from approved submission #${ISSUE} by @${{ github.actor }}." \
+              "" \
+              "Title: \`${{ steps.apply.outputs.tid }}\`" \
+              "Catalog date: stamped in \`index.json\` (\`catalog_date\` / \`release_tag\`)." \
+              "Launchers fetch: \`…/releases/latest/download/catalog.zip\`." )"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "url=https://github.com/${{ github.repository }}/releases/tag/${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Comment and close issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          {
+            echo "✅ Approved by @${{ github.actor }}"
+            echo
+            echo "- Wrote \`titles/${{ steps.apply.outputs.tid }}.json\` and updated \`index.json\`"
+            echo "- Published catalog release: ${{ steps.release.outputs.url }}"
+            echo "- Launchers will pick this up on the next catalog sync / auto-update"
+            echo
+            echo "Closing this submission."
+          } > /tmp/ok-comment.md
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --body-file /tmp/ok-comment.md
+          gh issue close ${{ github.event.issue.number }} \
+            --repo "${{ github.repository }}" \
+            --reason completed

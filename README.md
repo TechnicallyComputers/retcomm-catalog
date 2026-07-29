@@ -23,14 +23,19 @@ Use the [submission form](https://technicallycomputers.github.io/retcomm-catalog
 (GitHub login required). It probes the source repo for digests/release assets,
 lets you complete or override fields, then opens an approval issue and emails
 human contributors listed in [`submit/contributors.json`](submit/contributors.json)
-(plus repo collaborators). Setup notes: [docs/SUBMIT_SETUP.md](docs/SUBMIT_SETUP.md).
+(plus repo collaborators). Maintainers add the **`approved`** label to merge the
+title and publish a new `catalog.zip`. Setup notes:
+[docs/SUBMIT_SETUP.md](docs/SUBMIT_SETUP.md).
 
 Ban abusers via [`submit/banned-users.json`](submit/banned-users.json).
 
 ## Releases
 
-Tag `v*` (or run **Publish catalog**) to build `catalog.zip` and attach it to a
-GitHub Release. RetComM fetches:
+Catalog releases use **dated tags** (`vYYYY.MM.DD…`). Approving a submission or
+tagging `v*` / running **Publish catalog** stamps `catalog_date` + `release_tag`
+into `index.json`, packs `catalog.zip`, and publishes a GitHub Release. RetComM
+checks that release identity on startup and downloads the zip only when it
+changed:
 
 `https://github.com/TechnicallyComputers/retcomm-catalog/releases/latest/download/catalog.zip`
 

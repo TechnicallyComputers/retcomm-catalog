@@ -26,9 +26,18 @@ it they still get GitHub issue notifications when assigned.
 2. Merge/push so [`.github/workflows/pages.yml`](../.github/workflows/pages.yml) runs
 3. Confirm: https://technicallycomputers.github.io/retcomm-catalog/submit/
 
-## 2. Create label
+## 2. Create labels
 
-In this repo, create issue label **`catalog-submission`** (any color).
+In this repo, create issue labels:
+
+| Label | Purpose |
+|---|---|
+| `catalog-submission` | Applied by the form on new issues |
+| `approved` | Maintainer adds this → merge title + publish `catalog.zip` |
+| `approved-update` | Same, but overwrites an existing `titles/<id>.json` |
+
+Only users with **write** (or higher) on the repo can successfully approve.
+Rejecting a submission is just closing the issue (no special label).
 
 ## 3. GitHub OAuth App
 
@@ -91,6 +100,17 @@ Update the OAuth App callback URL to match the deployed Worker.
 
 Until Resend is configured, submissions still create a GitHub issue and assign
 human contributors (GitHub notification email if watching/assigned).
+
+## Approving a submission
+
+1. Review the issue’s JSON and checklist.
+2. Add label **`approved`** (or **`approved-update`** to replace an existing id).
+3. [`.github/workflows/approve-submission.yml`](../.github/workflows/approve-submission.yml)
+   writes `titles/<id>.json`, updates `index.json`, pushes to the default branch,
+   creates a dated `vYYYY.MM.DD.<issue>` release with `catalog.zip`, comments,
+   and closes the issue.
+
+Launchers pick up the new zip on the next catalog sync / auto-update.
 
 ## Banning abusers
 
