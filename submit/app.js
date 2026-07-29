@@ -249,6 +249,42 @@ function refreshPreview() {
   $("preview").textContent = JSON.stringify(readManifest(), null, 2);
 }
 
+/** Mirror worker validateManifest so required fields fail before the API call. */
+function validateManifest(m) {
+  const errors = [];
+  if (!m?.id || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(m.id)) {
+    errors.push("id must be a lowercase slug (e.g. megaman-x-snes)");
+  }
+  if (!m?.name) errors.push("name is required");
+  if (!m?.kind || !["recomp", "decomp"].includes(m.kind)) {
+    errors.push('kind must be "recomp" or "decomp"');
+  }
+  if (!m?.platform) errors.push("platform is required");
+  if (!m?.release?.github) errors.push("release.github is required");
+  const glob = m?.release?.asset_glob || {};
+  if (!glob.linux && !glob.windows && !glob.macos) {
+    errors.push("release.asset_glob needs at least one OS pattern");
+  }
+  if (!m?.install_dir_name) errors.push("install_dir_name is required");
+  const launch = m?.launch || {};
+  if (!launch.linux && !launch.windows && !launch.macos) {
+    errors.push("launch needs at least one OS binary name");
+  }
+  const id = m?.rom_identity || {};
+  const hasIdentity =
+    id.crc32?.length ||
+    id.md5?.length ||
+    id.sha1?.length ||
+    id.sha256?.length ||
+    id.disc_serials?.length;
+  if (!hasIdentity) {
+    errors.push(
+      "rom_identity needs at least one digest or disc_serial (ownership check)"
+    );
+  }
+  return errors;
+}
+
 function mergeUnique(id, values) {
   const cur = new Set(csvGet(id));
   for (const v of values) cur.add(v);
@@ -388,12 +424,23 @@ async function init() {
 
   $("submitBtn").onclick = async () => {
     hideBanner();
+    const manifest = readManifest();
+    const localErrors = validateManifest(manifest);
+    if (localErrors.length) {
+      showBanner(
+        "danger",
+        `Missing or invalid required fields:<ul>${localErrors
+          .map((e) => `<li>${e}</li>`)
+          .join("")}</ul>`
+      );
+      return;
+    }
     $("submitBtn").disabled = true;
     try {
       const data = await api("/api/submit", {
         method: "POST",
         body: JSON.stringify({
-          manifest: readManifest(),
+          manifest,
           submitter_note: $("f_submitter_note").value.trim(),
         }),
       });

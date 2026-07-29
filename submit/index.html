@@ -63,31 +63,39 @@
           </p>
           <div class="chips" id="assetChips"></div>
 
+          <p class="hint">
+            <span class="req" aria-hidden="true">*</span> Required for
+            submission. For launch binaries, asset globs, and ROM digests, at
+            least one value in the group is enough.
+          </p>
+
           <h3>Identity</h3>
           <div class="row">
             <label>
-              <strong>id</strong>
+              <strong>id<span class="req" aria-hidden="true">*</span></strong>
               <span class="src" data-src="id"></span>
-              <input id="f_id" />
+              <input id="f_id" required />
             </label>
             <label>
-              <strong>name</strong>
+              <strong>name<span class="req" aria-hidden="true">*</span></strong>
               <span class="src" data-src="name"></span>
-              <input id="f_name" />
+              <input id="f_name" required />
             </label>
           </div>
           <div class="row three">
             <label>
-              <strong>kind</strong>
-              <select id="f_kind">
+              <strong>kind<span class="req" aria-hidden="true">*</span></strong>
+              <select id="f_kind" required>
                 <option value="recomp">recomp</option>
                 <option value="decomp">decomp</option>
               </select>
             </label>
             <label>
-              <strong>platform</strong>
+              <strong
+                >platform<span class="req" aria-hidden="true">*</span></strong
+              >
               <span class="src" data-src="platform"></span>
-              <select id="f_platform">
+              <select id="f_platform" required>
                 <option value="">— select —</option>
                 <option value="snes">snes</option>
                 <option value="gba">gba</option>
@@ -97,8 +105,12 @@
               </select>
             </label>
             <label>
-              <strong>install_dir_name</strong>
-              <input id="f_install_dir_name" />
+              <strong
+                >install_dir_name<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
+              <input id="f_install_dir_name" required />
             </label>
           </div>
           <div class="row one">
@@ -113,23 +125,44 @@
               <input id="f_homepage" />
             </label>
             <label>
-              <strong>release.github</strong>
-              <input id="f_release_github" />
+              <strong
+                >release.github<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
+              <input id="f_release_github" required />
             </label>
           </div>
 
           <h3>Release assets</h3>
+          <p class="hint">
+            <span class="req" aria-hidden="true">*</span> At least one
+            <code>asset_glob</code> pattern is required (match the GitHub
+            release archive names).
+          </p>
           <div class="row three">
             <label>
-              <strong>asset_glob.linux</strong>
+              <strong
+                >asset_glob.linux<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_glob_linux" placeholder="*linux*" />
             </label>
             <label>
-              <strong>asset_glob.windows</strong>
+              <strong
+                >asset_glob.windows<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_glob_windows" placeholder="*win64* / *windows*" />
             </label>
             <label>
-              <strong>asset_glob.macos</strong>
+              <strong
+                >asset_glob.macos<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_glob_macos" placeholder="*macos*" />
             </label>
           </div>
@@ -146,25 +179,48 @@
               <strong>allow_prerelease</strong>
             </span>
           </label>
+          <p class="hint">
+            <span class="req" aria-hidden="true">*</span> Launch binary names
+            must match the executable filenames inside each OS release archive
+            so RetComM can find and launch the program after install. Auto-fill
+            guesses from the repo name — verify against the real binary (e.g.
+            <code>Sonic3KRecomp</code> / <code>Sonic3KRecomp.exe</code>). At
+            least one OS is required.
+          </p>
           <div class="row three">
             <label>
-              <strong>launch.linux</strong>
+              <strong
+                >launch.linux<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_launch_linux" />
             </label>
             <label>
-              <strong>launch.windows</strong>
+              <strong
+                >launch.windows<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_launch_windows" />
             </label>
             <label>
-              <strong>launch.macos</strong>
+              <strong
+                >launch.macos<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_launch_macos" />
             </label>
           </div>
 
           <h3>ROM identity</h3>
           <p class="hint">
-            Comma-separated values. Leave blank arrays empty. Optional: hash a
-            local dump in the browser (never uploaded).
+            <span class="req" aria-hidden="true">*</span> At least one digest
+            (<code>crc32</code> / <code>md5</code> / <code>sha1</code> /
+            <code>sha256</code>) or <code>disc_serials</code> is required.
+            Comma-separated values. Optional: hash a local dump in the browser
+            (never uploaded).
           </p>
           <div class="drop" id="romDrop">
             Drop a ROM/disc image here, or
@@ -176,27 +232,35 @@
           </div>
           <div class="row">
             <label>
-              <strong>crc32</strong>
+              <strong
+                >crc32<span class="req" aria-hidden="true">*</span></strong
+              >
               <input id="f_crc32" placeholder="f2ab92d4" />
             </label>
             <label>
-              <strong>md5</strong>
+              <strong>md5<span class="req" aria-hidden="true">*</span></strong>
               <input id="f_md5" placeholder="32 hex" />
             </label>
           </div>
           <div class="row">
             <label>
-              <strong>sha1</strong>
+              <strong>sha1<span class="req" aria-hidden="true">*</span></strong>
               <input id="f_sha1" placeholder="40 hex" />
             </label>
             <label>
-              <strong>sha256</strong>
+              <strong
+                >sha256<span class="req" aria-hidden="true">*</span></strong
+              >
               <input id="f_sha256" placeholder="64 hex" />
             </label>
           </div>
           <div class="row">
             <label>
-              <strong>disc_serials</strong>
+              <strong
+                >disc_serials<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
               <input id="f_disc_serials" placeholder="SLUS-00561" />
             </label>
             <label>

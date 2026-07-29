@@ -282,6 +282,12 @@ button:disabled {
   margin: 0.35rem 0 0;
 }
 
+.req {
+  color: var(--danger);
+  font-weight: 700;
+  margin-left: 0.15rem;
+}
+
 .chips {
   display: flex;
   flex-wrap: wrap;
