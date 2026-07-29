@@ -810,6 +810,17 @@ function validateManifest(m) {
       "rom_identity needs at least one digest or disc_serial (ownership check)"
     );
   }
+  if (m.netplay && m.netplay.supported) {
+    if (m.netplay.stack && m.netplay.stack !== "recomp-net") {
+      errors.push('netplay.stack must be "recomp-net" when supported');
+    }
+    if (!m.netplay.game_name) {
+      errors.push("netplay.game_name is required when netplay is supported");
+    }
+    if (m.netplay.game_version == null || m.netplay.game_version === "") {
+      errors.push("netplay.game_version is required when netplay is supported");
+    }
+  }
   return errors;
 }
 
@@ -855,6 +866,24 @@ function normalizeManifest(m) {
     if (m.romm.igdb_ids?.length) out.romm.igdb_ids = m.romm.igdb_ids;
   }
   if (m.saves && Object.keys(m.saves).length) out.saves = m.saves;
+  if (m.netplay && m.netplay.supported) {
+    let max_slots = Number(m.netplay.max_slots);
+    if (!Number.isFinite(max_slots) || max_slots < 2) max_slots = 2;
+    const netplay = {
+      supported: true,
+      stack: "recomp-net",
+      game_name: String(m.netplay.game_name || "").trim(),
+      game_version: String(m.netplay.game_version ?? "").trim(),
+      max_slots,
+    };
+    const transports = emptyArr(m.netplay.transports).map(String).filter(Boolean);
+    if (transports.length) netplay.transports = transports;
+    const schema = String(m.netplay.match_caps_schema || "").trim();
+    if (schema) netplay.match_caps_schema = schema;
+    const lobby = String(m.netplay.lobby_url || "").trim();
+    if (lobby) netplay.lobby_url = lobby;
+    out.netplay = netplay;
+  }
   if (m.author_notes) out.author_notes = String(m.author_notes);
   if (m.notes) out.notes = String(m.notes);
   if (m.bios_identity === null) out.bios_identity = null;

@@ -66,6 +66,15 @@ Title manifests may still set `bios_identity` to override the default, or
 | `romm.platforms` | string[] | RomM platform slugs |
 | `romm.igdb_ids` | number[] | Optional |
 | `saves` | object | Optional paths relative to install for sync later |
+| `netplay` | object | Optional; omit when the title has no recomp-net lobby |
+| `netplay.supported` | bool | Must be `true` to advertise in the hub lobby |
+| `netplay.stack` | string | Currently only `"recomp-net"` |
+| `netplay.game_name` | string | Exact WS `create`/`join`/`list` wire name (may differ from catalog `name` / `id`) |
+| `netplay.game_version` | string | Lobby pin; align with baked `PSX_GAME_VERSION` / `SNES_GAME_VERSION` (empty → server `"dev"`) |
+| `netplay.max_slots` | number | Optional; default `2` |
+| `netplay.lobby_url` | string | Optional per-title WS override (else launcher `config.netplay.lobby_url`) |
+| `netplay.transports` | string[] | Optional UI hints: `"lan"`, `"ice"`, `"direct"` |
+| `netplay.match_caps_schema` | string | Optional host-settings family (`psx-v1`, `snes-v1`) |
 
 A title is considered to have a ROM identity when **any** of `crc32`, `md5`,
 `sha1`, `sha256`, or `disc_serials` is non-empty. Matching succeeds if **any**
@@ -75,6 +84,29 @@ algorithm their gate uses).
 Identity should mirror what each game passes into `recomp-ui`
 (`known_sha1_hex` / `expected_crc` / MD5 tables / disc verify) so RetComM and
 the game agree on “verified.”
+
+### `netplay` (recomp-net)
+
+Omit the object entirely when unsupported. When present with
+`supported: true`, RetComM may list the title in the multi-game lobby browser.
+Rooms are still keyed by `game_name` + `game_version` on the lobby server —
+peers must match exactly.
+
+```json
+"netplay": {
+  "supported": true,
+  "stack": "recomp-net",
+  "game_name": "Star Wars: Masters of Teras Kasi",
+  "game_version": "0.1.0",
+  "max_slots": 2,
+  "transports": ["lan", "ice"],
+  "match_caps_schema": "psx-v1"
+}
+```
+
+Do **not** put ICE/TURN secrets or full default `match_caps` in the catalog;
+hosts choose match caps at create time. Keep `game_version` in sync with the
+release pin baked into shipping binaries.
 
 ### Submission-ready `rom_identity` template
 

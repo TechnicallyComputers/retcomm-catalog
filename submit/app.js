@@ -175,6 +175,23 @@ function readManifest() {
   }
   const romm = csvGet("f_romm_platforms");
   if (romm.length) manifest.romm = { platforms: romm };
+  if ($("f_netplay_supported").checked) {
+    const maxRaw = $("f_netplay_max_slots").value.trim();
+    let max_slots = maxRaw ? Number(maxRaw) : 2;
+    if (!Number.isFinite(max_slots) || max_slots < 2) max_slots = 2;
+    const netplay = {
+      supported: true,
+      stack: "recomp-net",
+      game_name: $("f_netplay_game_name").value.trim(),
+      game_version: $("f_netplay_game_version").value.trim(),
+      max_slots,
+    };
+    const transports = csvGet("f_netplay_transports");
+    if (transports.length) netplay.transports = transports;
+    const schema = $("f_netplay_match_caps").value.trim();
+    if (schema) netplay.match_caps_schema = schema;
+    manifest.netplay = netplay;
+  }
   const author_notes = $("f_author_notes").value.trim();
   if (author_notes) manifest.author_notes = author_notes;
   const notes = $("f_notes").value.trim();
@@ -219,6 +236,14 @@ function fillForm(draft, meta = {}) {
   csvSet("f_filenames", ri.filenames);
   csvSet("f_rom_extensions", draft.rom_extensions);
   csvSet("f_romm_platforms", draft.romm?.platforms);
+  const np = draft.netplay || {};
+  $("f_netplay_supported").checked = !!(np.supported && np.stack !== "none");
+  $("f_netplay_game_name").value = np.game_name || "";
+  $("f_netplay_game_version").value = np.game_version || "";
+  $("f_netplay_max_slots").value =
+    np.max_slots != null && np.max_slots !== "" ? String(np.max_slots) : "";
+  $("f_netplay_match_caps").value = np.match_caps_schema || "";
+  csvSet("f_netplay_transports", np.transports);
   $("f_author_notes").value = draft.author_notes || "";
   $("f_notes").value = draft.notes || "";
 
@@ -281,6 +306,17 @@ function validateManifest(m) {
     errors.push(
       "rom_identity needs at least one digest or disc_serial (ownership check)"
     );
+  }
+  if (m?.netplay?.supported) {
+    if (m.netplay.stack && m.netplay.stack !== "recomp-net") {
+      errors.push('netplay.stack must be "recomp-net" when supported');
+    }
+    if (!m.netplay.game_name) {
+      errors.push("netplay.game_name is required when netplay is supported");
+    }
+    if (m.netplay.game_version == null || m.netplay.game_version === "") {
+      errors.push("netplay.game_version is required when netplay is supported");
+    }
   }
   return errors;
 }
@@ -390,6 +426,12 @@ async function init() {
     "f_filenames",
     "f_rom_extensions",
     "f_romm_platforms",
+    "f_netplay_supported",
+    "f_netplay_game_name",
+    "f_netplay_game_version",
+    "f_netplay_max_slots",
+    "f_netplay_match_caps",
+    "f_netplay_transports",
     "f_author_notes",
     "f_notes",
   ]) {

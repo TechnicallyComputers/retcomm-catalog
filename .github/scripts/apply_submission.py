@@ -79,6 +79,18 @@ def validate(manifest: dict) -> None:
                 "rom_identity needs at least one digest or disc_serial"
             )
 
+    netplay = manifest.get("netplay")
+    if isinstance(netplay, dict) and netplay.get("supported"):
+        stack = str(netplay.get("stack") or "").strip()
+        if stack and stack != "recomp-net":
+            errors.append('netplay.stack must be "recomp-net" when supported')
+        if not str(netplay.get("game_name") or "").strip():
+            errors.append("netplay.game_name is required when netplay is supported")
+        if netplay.get("game_version") is None or str(netplay.get("game_version")).strip() == "":
+            errors.append(
+                "netplay.game_version is required when netplay is supported"
+            )
+
     if errors:
         raise SystemExit("Validation failed:\n- " + "\n- ".join(errors))
 

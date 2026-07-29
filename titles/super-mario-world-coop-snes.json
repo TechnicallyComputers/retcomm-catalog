@@ -37,5 +37,14 @@
   "saves": {
     "sram_glob": ["*.srm", "saves/*.srm"]
   },
-  "notes": "Placeholder launch names for coop packages; pin hashes when locking a build. Stock USA ROM; co-op build applies bundled IPS at runtime."
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Super Mario World Co-op",
+    "game_version": "smw-coop-netplay-1",
+    "max_slots": 2,
+    "transports": ["lan", "ice"],
+    "match_caps_schema": "snes-v1"
+  },
+  "notes": "Placeholder launch names for coop packages; pin hashes when locking a build. Stock USA ROM; co-op build applies bundled IPS at runtime. Lobby pin SNES_GAME_VERSION=smw-coop-netplay-1."
 }

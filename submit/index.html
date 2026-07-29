@@ -286,6 +286,55 @@
               <input id="f_romm_platforms" placeholder="snes" />
             </label>
           </div>
+          <h3>Netplay (recomp-net)</h3>
+          <p class="hint">
+            Optional. When enabled, RetComM can list this title in the
+            multi-game lobby. <code>game_name</code> /
+            <code>game_version</code> must match the strings baked into the
+            shipping binary (WS create/join wire identity).
+          </p>
+          <div class="row one">
+            <label>
+              <input type="checkbox" id="f_netplay_supported" />
+              Supports recomp-net lobby
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              <strong
+                >game_name<span class="req" aria-hidden="true">*</span></strong
+              >
+              <input
+                id="f_netplay_game_name"
+                placeholder="Star Wars: Masters of Teras Kasi"
+              />
+            </label>
+            <label>
+              <strong
+                >game_version<span class="req" aria-hidden="true"
+                  >*</span
+                ></strong
+              >
+              <input id="f_netplay_game_version" placeholder="0.1.0" />
+            </label>
+          </div>
+          <div class="row">
+            <label>
+              <strong>max_slots</strong>
+              <input id="f_netplay_max_slots" type="number" min="2" max="16" placeholder="2" />
+            </label>
+            <label>
+              <strong>match_caps_schema</strong>
+              <input id="f_netplay_match_caps" placeholder="psx-v1" />
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>transports</strong> (comma-separated)
+              <input id="f_netplay_transports" placeholder="lan, ice" />
+            </label>
+          </div>
+
           <div class="row one">
             <label>
               <strong>author_notes</strong> — shown in RetComM as “Author's

@@ -56,5 +56,14 @@
       "saves/*.srm"
     ]
   },
-  "notes": "Shipping playtest builds as GitHub pre-releases (e.g. Alpha-1). Assets: metalwarriors-{linux,windows,macos}-*.zip."
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Metal Warriors",
+    "game_version": "0.1.0",
+    "max_slots": 2,
+    "transports": ["lan", "ice"],
+    "match_caps_schema": "snes-v1"
+  },
+  "notes": "Shipping playtest builds as GitHub pre-releases (e.g. Alpha-1). Assets: metalwarriors-{linux,windows,macos}-*.zip. Lobby pin from VERSION (0.1.0); Release builds bake SNES_GAME_VERSION."
 }
