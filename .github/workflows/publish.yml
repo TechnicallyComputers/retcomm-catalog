@@ -1,0 +1,70 @@
+name: Publish catalog
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Validate JSON
+        run: |
+          python3 -c "import json; json.load(open('index.json'))"
+          for f in titles/*.json; do
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+            echo "ok $f"
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          idx = json.load(open("index.json"))
+          ids = idx.get("titles", [])
+          missing = [i for i in ids if not Path(f"titles/{i}.json").is_file()]
+          extras = sorted({p.stem for p in Path("titles").glob("*.json")} - set(ids))
+          if missing:
+              raise SystemExit(f"index lists missing files: {missing}")
+          if extras:
+              print(f"warning: titles not in index: {extras}")
+          print(f"{len(ids)} titles ok")
+          PY
+
+      - name: Pack catalog.zip
+        run: |
+          rm -f catalog.zip
+          zip -qr catalog.zip index.json titles SCHEMA.md README.md
+          ls -lah catalog.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: catalog-zip
+          path: catalog.zip
+
+      - name: GitHub Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: catalog.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Draft release (manual run)
+        if: github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: catalog-${{ github.run_number }}
+          name: Catalog build ${{ github.run_number }}
+          files: catalog.zip
+          draft: true
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
