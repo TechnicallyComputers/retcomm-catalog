@@ -224,8 +224,20 @@
           </div>
           <div class="row one">
             <label>
-              <strong>notes</strong>
-              <textarea id="f_notes"></textarea>
+              <strong>author_notes</strong> — shown in RetComM as “Author's
+              Notes” (instructions, caveats, anything for players)
+              <textarea
+                id="f_author_notes"
+                style="font-family: var(--sans); min-height: 7rem"
+                placeholder="e.g. Widescreen is experimental. Use the USA Rev 1 dump. Report issues at …"
+              ></textarea>
+            </label>
+          </div>
+          <div class="row one">
+            <label>
+              <strong>notes</strong> — catalog/maintainer footnotes only (not
+              shown in the hub)
+              <textarea id="f_notes" placeholder="e.g. SHA-1 from DISC.md / No-Intro"></textarea>
             </label>
           </div>
           <div class="row one">

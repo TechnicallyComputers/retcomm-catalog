@@ -834,6 +834,7 @@ function normalizeManifest(m) {
     if (m.romm.igdb_ids?.length) out.romm.igdb_ids = m.romm.igdb_ids;
   }
   if (m.saves && Object.keys(m.saves).length) out.saves = m.saves;
+  if (m.author_notes) out.author_notes = String(m.author_notes);
   if (m.notes) out.notes = String(m.notes);
   if (m.bios_identity === null) out.bios_identity = null;
   else if (m.bios_identity && typeof m.bios_identity === "object") {

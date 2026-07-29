@@ -142,6 +142,8 @@ function readManifest() {
   }
   const romm = csvGet("f_romm_platforms");
   if (romm.length) manifest.romm = { platforms: romm };
+  const author_notes = $("f_author_notes").value.trim();
+  if (author_notes) manifest.author_notes = author_notes;
   const notes = $("f_notes").value.trim();
   if (notes) manifest.notes = notes;
   if (!manifest.description) delete manifest.description;
@@ -184,6 +186,7 @@ function fillForm(draft, meta = {}) {
   csvSet("f_filenames", ri.filenames);
   csvSet("f_rom_extensions", draft.rom_extensions);
   csvSet("f_romm_platforms", draft.romm?.platforms);
+  $("f_author_notes").value = draft.author_notes || "";
   $("f_notes").value = draft.notes || "";
 
   applyPlatformDefaults(draft.platform);
@@ -304,6 +307,7 @@ async function init() {
     "f_filenames",
     "f_rom_extensions",
     "f_romm_platforms",
+    "f_author_notes",
     "f_notes",
   ]) {
     $(id).addEventListener("input", refreshPreview);
