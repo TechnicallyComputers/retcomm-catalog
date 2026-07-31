@@ -70,8 +70,9 @@
     "pokemon-ruby-gba",
     "pokemon-sapphire-gba",
     "megaman-zero-gba",
-    "xenogears-psx"
+    "xenogears-psx",
+    "tekken1-psx"
   ],
-  "catalog_date": "2026-07-29T22:58:43Z",
-  "release_tag": "v2026.07.29.225843.1"
+  "catalog_date": "2026-07-31T00:29:37Z",
+  "release_tag": "v2026.07.31.002937.2"
 }
