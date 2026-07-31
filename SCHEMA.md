@@ -60,6 +60,14 @@ Title manifests may still set `bios_identity` to override the default, or
 | `release.github` | string | `owner/repo` |
 | `release.allow_prerelease` | bool | Allow GitHub pre-releases when no stable latest exists |
 | `release.asset_glob` | object | Per-OS glob: `linux`, `windows`, `macos`. Prefer a pattern from the real asset name (`*win64*`, `*win*x64*`, `*windows*`, …). The launcher also treats Windows/Linux/macOS synonyms as matches. |
+| `build` | object | Optional local generate + cmake recipe. When `enabled`, RetComM **Install** prefers this path; omit for third-party zip-only titles. |
+| `build.enabled` | bool | Primary install uses generate + toolchain packs |
+| `build.source.github` | string | `owner/repo` for the source zipball (default: `release.github`) |
+| `build.source.ref` | string | Tag / branch / commit pin for the source archive |
+| `build.sdk` | object | Tools pack (`id`, `github`, `asset_glob.{linux,windows,macos}`) — snesrecomp or psxrecomp CLI |
+| `build.toolchain` | object | C/cmake toolchain pack (same shape as `sdk`; typically `TechnicallyComputers/retcomm-toolchains`) |
+| `build.generate` | object | Engine-specific generate args (see below) |
+| `build.cmake` | object | `build_dir`, `target`, `config` (Release) |
 | `install_dir_name` | string | Folder under `apps/` |
 | `launch` | object | Relative binary names: `linux`, `windows`, `macos` |
 | `romm` | object | Optional match hints |
@@ -84,6 +92,62 @@ algorithm their gate uses).
 Identity should mirror what each game passes into `recomp-ui`
 (`known_sha1_hex` / `expected_crc` / MD5 tables / disc verify) so RetComM and
 the game agree on “verified.”
+
+### `build` (local generate + cmake)
+
+Omit the object for zip-only / third-party distribution. When present with
+`enabled: true`, RetComM downloads the game source zipball, a tools SDK pack,
+and a toolchain pack from
+[retcomm-toolchains](https://github.com/TechnicallyComputers/retcomm-toolchains),
+runs the SDK CLI `generate` against the user's verified ROM/disc, then
+`cmake --build`, and stages the launch binary into `apps/…/current`.
+
+`build.generate.engine`: `"snesrecomp"` | `"psxrecomp"` (default from
+`platform`). SNES uses `cfg_dir` / `out_dir` / `funcs_h` / `cfg_roots`. PSX uses
+`config` (default `game.toml`) and passes the library disc as `--disc`.
+
+```json
+"build": {
+  "enabled": true,
+  "source": {
+    "github": "TechnicallyComputers/MetalWarriorsSNESRecomp",
+    "ref": "v0.1.0"
+  },
+  "sdk": {
+    "id": "snesrecomp-tools",
+    "github": "TechnicallyComputers/MetalWarriorsSNESRecomp",
+    "asset_glob": {
+      "linux": "*snesrecomp-tools*linux*",
+      "windows": "*snesrecomp-tools*windows*",
+      "macos": "*snesrecomp-tools*macos*"
+    }
+  },
+  "toolchain": {
+    "id": "cmake-clang-v1",
+    "github": "TechnicallyComputers/retcomm-toolchains",
+    "asset_glob": {
+      "linux": "*cmake-clang-v1*linux*",
+      "windows": "*cmake-clang-v1*windows*",
+      "macos": "*cmake-clang-v1*macos*"
+    }
+  },
+  "generate": {
+    "engine": "snesrecomp",
+    "cfg_dir": "recomp",
+    "out_dir": "src/gen",
+    "funcs_h": "recomp/funcs.h",
+    "cfg_roots": true
+  },
+  "cmake": {
+    "build_dir": "build",
+    "target": "MetalWarriorsSNESRecomp",
+    "config": "Release"
+  }
+}
+```
+
+Never put ROM bytes or generated `src/gen` / `generated/` into catalog or pack
+artifacts. Keep `rom_identity` digests aligned with the game's generate gate.
 
 ### `netplay` (recomp-net)
 

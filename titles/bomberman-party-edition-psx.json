@@ -8,24 +8,26 @@
   "rom_identity": {
     "crc32": [],
     "md5": [
-      "054204cd016afb3c56fd9e1eea80676e",
-      "74c5fbb8b2ca87b2f1d0f0c292241c03"
+      "e0ceba6e448677f3d938b1dd176be3af",
+      "13cf2c80a2811015d604ecf4496c3287"
     ],
     "sha1": [
-      "306888eee5bf95cb3cabd3a40cd836063887ab77",
-      "85c30e5da35c8d737b049079d8e72b7d3a45eb05"
+      "53a509dbe859f773856f26d966f5edacbc701b4e",
+      "4735882768678923796f62878c05f7f0e81308d5"
     ],
     "sha256": [],
     "disc_serials": [
       "SLUS-01189"
     ],
     "sizes": [
-      645566976,
-      660775584
+      660770880,
+      575365120
     ],
     "filenames": [
       "Bomberman Party Edition.cue",
-      "Bomberman - Party Edition (USA).cue"
+      "Bomberman - Party Edition (USA).cue",
+      "Bomberman - Party Edition (USA).bin",
+      "Bomberman Party Edition.iso"
     ]
   },
   "rom_extensions": [
@@ -40,6 +42,40 @@
       "linux": "*linux*",
       "windows": "*windows*",
       "macos": "*macos*"
+    }
+  },
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
+      "ref": "main"
+    },
+    "sdk": {
+      "id": "psxrecomp-tools",
+      "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
+      "asset_glob": {
+        "linux": "*psxrecomp-tools*linux*",
+        "windows": "*psxrecomp-tools*windows*",
+        "macos": "*psxrecomp-tools*macos*"
+      }
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build-release",
+      "target": "psx-runtime",
+      "config": "Release"
     }
   },
   "install_dir_name": "BombermanPartyEditionRecomp",
@@ -72,5 +108,5 @@
     "transports": ["lan", "ice"],
     "match_caps_schema": "psx-v1"
   },
-  "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. SHA-1s: source ISO (645,566,976) and prepared MODE2/2352 .bin (660,775,584) from DISC.md. Runtime expects prepared bpe/ cue+bin (tools/prepare_disc.py) plus BIOS; packages never ship disc/BIOS. Releases: bpe-*-{linux,windows,macos}-*.zip. VERSION pin 0.1.0."
+  "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. Local build: psxrecomp_cli.py generate + cmake (toolchain from TechnicallyComputers/retcomm-toolchains). Setup host zips omit game C; RetComM prefers method=build when recipe enabled. Packages never ship disc/BIOS."
 }
