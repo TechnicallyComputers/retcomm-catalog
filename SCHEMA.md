@@ -65,7 +65,7 @@ Title manifests may still set `bios_identity` to override the default, or
 | `build.source.github` | string | `owner/repo` for the source zipball (default: `release.github`) |
 | `build.source.ref` | string | Tag / branch / commit pin for the source archive |
 | `build.sdk` | object | Tools identity. Prefer harvesting emitters from the game release zip (`id` only). Optional `github` + `asset_glob.{linux,windows,macos}` remains a legacy fallback for a separate tools pack (e.g. snesrecomp). |
-| `build.toolchain` | object | Prefer downloading `cmake-clang-v1` via `github` + `asset_glob` into the shared cache (`id` required; typically `TechnicallyComputers/retcomm-toolchains`). Optional `min_version` (semver floor against `retcomm-toolchain.json` / release tag). Optional harvest of a legacy game-zip `toolchain/` when download is unavailable. Offline: `RETCOMM_TOOLCHAIN_DIR`. |
+| `build.toolchain` | object | Prefer downloading `cmake-clang-v1` via `github` + `asset_glob` into the shared cache (`id` required; typically `TechnicallyComputers/retcomm-toolchains`). Set `min_version` to a semver floor against `retcomm-toolchain.json` / release tag (catalog build titles currently require `1.0.3+`). Optional harvest of a legacy game-zip `toolchain/` when download is unavailable. Offline: `RETCOMM_TOOLCHAIN_DIR`. |
 | `build.generate` | object | Engine-specific generate args (see below) |
 | `build.cmake` | object | `build_dir`, `target`, `config` (Release) |
 | `install_dir_name` | string | Folder under `apps/` |
@@ -130,6 +130,7 @@ the library ROM as `--rom` plus optional `--bios`.
   "toolchain": {
     "id": "cmake-clang-v1",
     "github": "TechnicallyComputers/retcomm-toolchains",
+    "min_version": "1.0.3",
     "asset_glob": {
       "linux": "*cmake-clang-v1*linux*",
       "windows": "*cmake-clang-v1*windows*",
