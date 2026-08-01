@@ -59,13 +59,13 @@ Title manifests may still set `bios_identity` to override the default, or
 | `release` | object | Where to fetch builds |
 | `release.github` | string | `owner/repo` |
 | `release.allow_prerelease` | bool | Allow GitHub pre-releases when no stable latest exists |
-| `release.asset_glob` | object | Per-OS glob: `linux`, `windows`, `macos`. Prefer a pattern from the real asset name (`*win64*`, `*win*x64*`, `*windows*`, …). The launcher also treats Windows/Linux/macOS synonyms as matches. |
+| `release.asset_glob` | object | Per-OS glob: `linux`, `windows`, `macos`. Prefer a pattern from the real asset name (`bpe-*linux*`, `*win64*`, …). The launcher treats Windows/Linux/macOS synonyms as matches and deprioritizes `*tools*` assets for non-tools globs. |
 | `build` | object | Optional local generate + cmake recipe. When `enabled`, RetComM **Install** prefers this path; omit for third-party zip-only titles. |
 | `build.enabled` | bool | Primary install uses generate + toolchain packs |
 | `build.source.github` | string | `owner/repo` for the source zipball (default: `release.github`) |
 | `build.source.ref` | string | Tag / branch / commit pin for the source archive |
-| `build.sdk` | object | Tools pack (`id`, `github`, `asset_glob.{linux,windows,macos}`) — snesrecomp or psxrecomp CLI |
-| `build.toolchain` | object | C/cmake toolchain pack (same shape as `sdk`; typically `TechnicallyComputers/retcomm-toolchains`) |
+| `build.sdk` | object | Tools identity. Prefer harvesting emitters from the game release zip (`id` only). Optional `github` + `asset_glob.{linux,windows,macos}` remains a legacy fallback for a separate tools pack (e.g. snesrecomp). |
+| `build.toolchain` | object | Prefer harvesting `toolchain/` from the game zip into the shared cache (`id` required). Optional `github` + `asset_glob` download fallback (typically `TechnicallyComputers/retcomm-toolchains`). |
 | `build.generate` | object | Engine-specific generate args (see below) |
 | `build.cmake` | object | `build_dir`, `target`, `config` (Release) |
 | `install_dir_name` | string | Folder under `apps/` |
@@ -96,8 +96,10 @@ the game agree on “verified.”
 ### `build` (local generate + cmake)
 
 Omit the object for zip-only / third-party distribution. When present with
-`enabled: true`, RetComM downloads the game source zipball, a tools SDK pack,
-and a toolchain pack from
+`enabled: true`, RetComM obtains game source (preferring the host **release zip**
+when it vendors engine/UI trees — otherwise the GitHub zipball at
+`build.source.ref`), harvests tools from that zip when present (or downloads a
+legacy `build.sdk` tools pack), fetches a toolchain pack from
 [retcomm-toolchains](https://github.com/TechnicallyComputers/retcomm-toolchains),
 runs the SDK CLI `generate` against the user's verified ROM/disc, then
 `cmake --build`, and stages the launch binary into `apps/…/current`.

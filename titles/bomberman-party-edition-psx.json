@@ -39,9 +39,9 @@
   "release": {
     "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
     "asset_glob": {
-      "linux": "*linux*",
-      "windows": "*windows*",
-      "macos": "*macos*"
+      "linux": "bpe-*linux*",
+      "windows": "bpe-*windows*",
+      "macos": "bpe-*macos*"
     }
   },
   "build": {
@@ -51,13 +51,7 @@
       "ref": "main"
     },
     "sdk": {
-      "id": "psxrecomp-tools",
-      "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
-      "asset_glob": {
-        "linux": "*psxrecomp-tools*linux*",
-        "windows": "*psxrecomp-tools*windows*",
-        "macos": "*psxrecomp-tools*macos*"
-      }
+      "id": "psxrecomp-tools"
     },
     "toolchain": {
       "id": "cmake-clang-v1",
@@ -108,5 +102,5 @@
     "transports": ["lan", "ice"],
     "match_caps_schema": "psx-v1"
   },
-  "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. Local build: psxrecomp_cli.py generate + cmake (toolchain from TechnicallyComputers/retcomm-toolchains). Setup host zips omit game C; RetComM prefers method=build when recipe enabled. Packages never ship disc/BIOS."
+  "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. One bpe-* zip for install and update: vendors psxrecomp+recomp-ui+emitters+portable toolchain/ (wizard needs disc + optional retail BIOS). RetComM harvests tools and toolchain into shared caches, prunes per-title copies after build, and preserves saves/settings. Catalog build.toolchain remains a download fallback for older zips. Packages never ship disc/retail BIOS/game C."
 }
