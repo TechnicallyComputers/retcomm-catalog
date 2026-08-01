@@ -56,6 +56,7 @@
     "toolchain": {
       "id": "cmake-clang-v1",
       "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
       "asset_glob": {
         "linux": "*cmake-clang-v1*linux*",
         "windows": "*cmake-clang-v1*windows*",
@@ -102,5 +103,5 @@
     "transports": ["lan", "ice"],
     "match_caps_schema": "psx-v1"
   },
-  "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. One bpe-* zip for install and update: vendors psxrecomp+recomp-ui+emitters+portable toolchain/ (wizard needs disc + optional retail BIOS). RetComM harvests tools and toolchain into shared caches, prunes per-title copies after build, and preserves saves/settings. Catalog build.toolchain remains a download fallback for older zips. Packages never ship disc/retail BIOS/game C."
+  "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. One lean bpe-* zip for install and update: vendors psxrecomp+recomp-ui+emitters (wizard needs disc + optional retail BIOS). RetComM harvests emitters into the SDK cache and downloads cmake-clang-v1 (>=1.0.3) from retcomm-toolchains into the shared %LOCALAPPDATA%/retcomm/toolchains cache (or RETCOMM_TOOLCHAIN_DIR / offline zip). Standalone wizard uses the same path. Packages never ship disc/retail BIOS/game C or an embedded toolchain/."
 }

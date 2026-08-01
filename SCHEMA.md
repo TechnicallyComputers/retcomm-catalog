@@ -65,7 +65,7 @@ Title manifests may still set `bios_identity` to override the default, or
 | `build.source.github` | string | `owner/repo` for the source zipball (default: `release.github`) |
 | `build.source.ref` | string | Tag / branch / commit pin for the source archive |
 | `build.sdk` | object | Tools identity. Prefer harvesting emitters from the game release zip (`id` only). Optional `github` + `asset_glob.{linux,windows,macos}` remains a legacy fallback for a separate tools pack (e.g. snesrecomp). |
-| `build.toolchain` | object | Prefer harvesting `toolchain/` from the game zip into the shared cache (`id` required). Optional `github` + `asset_glob` download fallback (typically `TechnicallyComputers/retcomm-toolchains`). |
+| `build.toolchain` | object | Prefer downloading `cmake-clang-v1` via `github` + `asset_glob` into the shared cache (`id` required; typically `TechnicallyComputers/retcomm-toolchains`). Optional `min_version` (semver floor against `retcomm-toolchain.json` / release tag). Optional harvest of a legacy game-zip `toolchain/` when download is unavailable. Offline: `RETCOMM_TOOLCHAIN_DIR`. |
 | `build.generate` | object | Engine-specific generate args (see below) |
 | `build.cmake` | object | `build_dir`, `target`, `config` (Release) |
 | `install_dir_name` | string | Folder under `apps/` |
@@ -104,9 +104,12 @@ legacy `build.sdk` tools pack), fetches a toolchain pack from
 runs the SDK CLI `generate` against the user's verified ROM/disc, then
 `cmake --build`, and stages the launch binary into `apps/…/current`.
 
-`build.generate.engine`: `"snesrecomp"` | `"psxrecomp"` (default from
-`platform`). SNES uses `cfg_dir` / `out_dir` / `funcs_h` / `cfg_roots`. PSX uses
-`config` (default `game.toml`) and passes the library disc as `--disc`.
+`build.generate.engine`: `"snesrecomp"` | `"psxrecomp"` | `"gbarecomp"`
+(default from `platform`: SNES→snesrecomp, PSX→psxrecomp, GBA→gbarecomp).
+SNES uses `cfg_dir` / `out_dir` / `funcs_h` / `cfg_roots`. PSX uses `config`
+(default `game.toml`) and passes the library disc as `--disc`. GBA uses
+`config` (per-binary symbols TOML), `out_dir` (cart `generated/`), and passes
+the library ROM as `--rom` plus optional `--bios`.
 
 ```json
 "build": {
