@@ -28,12 +28,14 @@
     ],
     "filenames": [
       "Star Wars - Masters of Teras Kasi (USA).cue"
-    ]
+    ],
+    "track_counts": [
+      17
+    ],
+    "require_cue": true
   },
   "rom_extensions": [
     ".cue",
-    ".chd",
-    ".iso",
     ".bin"
   ],
   "release": {
@@ -74,5 +76,5 @@
     "transports": ["lan", "ice"],
     "match_caps_schema": "psx-v1"
   },
-  "notes": "Disc serial SLUS-00562 / boot EXE SLUS_005.62. SHA-1s: source 2448-byte ISO (480,620,736) and working MODE2/2352 .bin (461,772,864) from DISC.md. Runtime expects prepared motk/ cue+bin (tools/prepare_disc.py) plus BIOS; packages never ship disc/BIOS. VERSION pin 0.1.0."
+  "notes": "Disc serial SLUS-00562 / boot EXE SLUS_005.62. SHA-1s: source 2448-byte ISO (480,620,736) and working MODE2/2352 .bin (461,772,864) from DISC.md. Redump multi-track cue has 17 tracks (rom_identity.track_counts / game.toml [netplay] required_tracks). Runtime expects prepared motk/ cue+bin (tools/prepare_disc.py) plus BIOS; packages never ship disc/BIOS. VERSION pin 0.1.0."
 }

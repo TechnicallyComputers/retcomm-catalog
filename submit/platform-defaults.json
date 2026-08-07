@@ -11,7 +11,7 @@
     "bios_inherited": true
   },
   "psx": {
-    "rom_extensions": [".cue", ".chd", ".iso", ".bin"],
+    "rom_extensions": [".cue", ".bin"],
     "romm_platforms": ["ps", "psx", "ps1"],
     "saves": { "memcard_glob": ["saves/*.mcd", "saves/*.mcr", "*.mcd", "*.mcr"] },
     "bios_inherited": true

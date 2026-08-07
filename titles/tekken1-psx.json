@@ -29,8 +29,6 @@
   },
   "rom_extensions": [
     ".cue",
-    ".chd",
-    ".iso",
     ".bin"
   ],
   "release": {

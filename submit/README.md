@@ -8,9 +8,9 @@ https://technicallycomputers.github.io/retcomm-catalog/submit/
 ## What it does
 
 1. Requires **GitHub login** (OAuth via Cloudflare Worker)
-2. Probes a public recomp/decomp repo (README, `DISC.md`, latest release assets)
-3. Auto-fills a catalog manifest; submitter can edit every field
-4. **Required** client-side ROM hashing under “Rom Checksum Submission” (file never uploaded; submit blocked until digests are generated)
+2. Probes a public recomp/decomp repo (README, `DISC.md`, `game.toml`, latest release assets)
+3. Auto-fills a catalog manifest (including PSX `track_counts` / `require_cue` from `[netplay]`); submitter can edit every field
+4. **Required** client-side ROM hashing under “Rom Checksum Submission” (file never uploaded; submit blocked until digests are generated). PSX: drop the `.cue` first (fills `track_counts` + expected Track&nbsp;01 name), then hash that first BINARY `.bin`. `.iso` / `.chd` are rejected
 5. On submit:
    - Opens a GitHub issue (label `catalog-submission`) assigned to human contributors
    - Emails addresses from [`contributors.json`](./contributors.json) (Resend)

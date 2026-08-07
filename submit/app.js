@@ -1,5 +1,5 @@
 import { CONFIG } from "./config.js";
-import { hashRomFile } from "./hash.js";
+import { countCueTracks, cueBinaryFiles, hashRomFile } from "./hash.js";
 
 const $ = (id) => document.getElementById(id);
 const TOKEN_KEY = "retcomm_submit_session";
@@ -11,6 +11,11 @@ const state = {
   /** True after the user successfully hashed a local ROM/disc dump. */
   romChecksumDone: false,
   romChecksumFile: "",
+  /** PSX two-step: cue parsed before Track 01 .bin hash. */
+  psxCueOk: false,
+  psxCueName: "",
+  psxFirstBin: "", // basename expected for digests
+  psxTrackCount: 0,
 };
 
 function getSessionToken() {
@@ -135,6 +140,14 @@ function applyPlatformDefaults(platform) {
   if (!$("f_rom_extensions").value && d.rom_extensions) {
     csvSet("f_rom_extensions", d.rom_extensions);
   }
+  if (platform === "psx") {
+    const exts = csvGet("f_rom_extensions").filter(
+      (e) => !/\.(iso|chd)$/i.test(e)
+    );
+    if (!exts.includes(".cue")) exts.unshift(".cue");
+    if (!exts.includes(".bin")) exts.push(".bin");
+    csvSet("f_rom_extensions", exts);
+  }
   if (!$("f_romm_platforms").value && d.romm_platforms) {
     csvSet("f_romm_platforms", d.romm_platforms);
   }
@@ -156,6 +169,10 @@ function readManifest() {
       disc_serials: csvGet("f_disc_serials"),
       sizes: numCsvGet("f_sizes"),
       filenames: csvGet("f_filenames"),
+      track_counts: numCsvGet("f_track_counts").filter((n) => n >= 1),
+      require_cue:
+        $("f_require_cue").checked ||
+        numCsvGet("f_track_counts").some((n) => n > 1),
     },
     rom_extensions: csvGet("f_rom_extensions"),
     release: {
@@ -237,6 +254,10 @@ function fillForm(draft, meta = {}) {
   csvSet("f_disc_serials", ri.disc_serials);
   csvSet("f_sizes", ri.sizes);
   csvSet("f_filenames", ri.filenames);
+  csvSet("f_track_counts", ri.track_counts);
+  $("f_require_cue").checked = !!(
+    ri.require_cue || (ri.track_counts || []).some((n) => Number(n) > 1)
+  );
   csvSet("f_rom_extensions", draft.rom_extensions);
   csvSet("f_romm_platforms", draft.romm?.platforms);
   const np = draft.netplay || {};
@@ -311,6 +332,20 @@ function validateManifest(m) {
       "rom_identity needs digests from the local ROM hash (crc32 / md5 / sha1 / sha256)"
     );
   }
+  if (m?.platform === "psx") {
+    if (!state.psxCueOk) {
+      errors.push(
+        "PSX: drop the .cue sheet first (track count), then hash Track 01 .bin"
+      );
+    }
+    if (!id.track_counts?.length) {
+      errors.push("PSX: rom_identity.track_counts is required (from the .cue)");
+    }
+    const exts = m.rom_extensions || [];
+    if (exts.some((e) => /\.(iso|chd)$/i.test(String(e)))) {
+      errors.push("PSX rom_extensions must be .cue / .bin only (no .iso / .chd)");
+    }
+  }
   if (m?.netplay?.supported) {
     if (m.netplay.stack && m.netplay.stack !== "recomp-net") {
       errors.push('netplay.stack must be "recomp-net" when supported');
@@ -343,8 +378,110 @@ function setChecksumUi(kind, message) {
   drop?.classList.toggle("hashed", done);
 }
 
+function resetPsxCueState() {
+  state.psxCueOk = false;
+  state.psxCueName = "";
+  state.psxFirstBin = "";
+  state.psxTrackCount = 0;
+}
+
+function basenameLower(name) {
+  return String(name || "")
+    .split(/[/\\]/)
+    .pop()
+    .toLowerCase();
+}
+
 async function onRomFile(file) {
   if (!file) return;
+  const lower = (file.name || "").toLowerCase();
+  const platform = $("f_platform").value;
+  const isPsx = platform === "psx";
+
+  if (/\.(iso|chd)$/i.test(lower)) {
+    setChecksumUi(
+      "err",
+      `${file.name} rejected — use a Redump .cue + Track 01 .bin (not .iso/.chd).`
+    );
+    return;
+  }
+
+  /* .cue sheets are TOC metadata — parse TRACK count; digests come from Track 01. */
+  if (lower.endsWith(".cue")) {
+    try {
+      const text = await file.text();
+      const tracks = countCueTracks(text);
+      const bins = cueBinaryFiles(text);
+      if (tracks < 1) {
+        setChecksumUi(
+          "err",
+          `${file.name} has no TRACK lines — is this a valid cue sheet?`
+        );
+        return;
+      }
+      if (!bins.length) {
+        setChecksumUi(
+          "err",
+          `${file.name} has no FILE … BINARY lines — cannot locate Track 01.`
+        );
+        return;
+      }
+      state.psxCueOk = true;
+      state.psxCueName = file.name;
+      state.psxFirstBin = bins[0];
+      state.psxTrackCount = tracks;
+      /* Re-drop cue invalidates prior digests for PSX (must re-hash matching bin). */
+      if (isPsx) {
+        state.romChecksumDone = false;
+        state.romChecksumFile = "";
+      }
+      csvSet("f_track_counts", [String(tracks)]);
+      mergeUnique("f_filenames", [file.name, ...bins.slice(0, 3)]);
+      if (tracks > 1) $("f_require_cue").checked = true;
+      if (isPsx) {
+        const exts = csvGet("f_rom_extensions").filter(
+          (e) => !/\.(iso|chd)$/i.test(e)
+        );
+        if (!exts.includes(".cue")) exts.push(".cue");
+        if (!exts.includes(".bin")) exts.push(".bin");
+        csvSet("f_rom_extensions", exts);
+      }
+      setChecksumUi(
+        "pending",
+        `Cue ${file.name}: ${tracks} track(s). Next: hash “${bins[0]}” ` +
+          `(first BINARY / Track 01) — digests are not taken from the .cue.`
+      );
+      refreshPreview();
+    } catch (err) {
+      setChecksumUi("err", `Cue parse failed: ${err.message}`);
+    }
+    return;
+  }
+
+  if (isPsx) {
+    if (!state.psxCueOk || !state.psxFirstBin) {
+      setChecksumUi(
+        "err",
+        "PSX: drop the .cue sheet first, then the Track 01 .bin named in that cue."
+      );
+      return;
+    }
+    if (!lower.endsWith(".bin")) {
+      setChecksumUi(
+        "err",
+        `PSX digests must come from “${state.psxFirstBin}” (.bin), not ${file.name}.`
+      );
+      return;
+    }
+    if (basenameLower(file.name) !== basenameLower(state.psxFirstBin)) {
+      setChecksumUi(
+        "err",
+        `Expected “${state.psxFirstBin}” (cue’s first BINARY). Got ${file.name}.`
+      );
+      return;
+    }
+  }
+
   state.romChecksumDone = false;
   state.romChecksumFile = "";
   setChecksumUi("pending", `Hashing ${file.name}…`);
@@ -358,11 +495,16 @@ async function onRomFile(file) {
     mergeUnique("f_filenames", [h.filename]);
     state.romChecksumDone = true;
     state.romChecksumFile = file.name;
+    const tracksHint = isPsx
+      ? ` Cue ${state.psxCueName}: ${state.psxTrackCount} track(s).`
+      : numCsvGet("f_track_counts").length
+        ? ` track_counts=${numCsvGet("f_track_counts").join(",")}.`
+        : "";
     setChecksumUi(
       "ok",
       h.header_stripped
-        ? `Hashed ${file.name} (stripped 512-byte SMC header). Digests filled — you can submit.`
-        : `Hashed ${file.name}. Digests filled — file was not uploaded. You can submit.`
+        ? `Hashed ${file.name} (stripped 512-byte SMC header). Digests filled.${tracksHint} You can submit.`
+        : `Hashed ${file.name}. Digests filled.${tracksHint} File was not uploaded. You can submit.`
     );
     refreshPreview();
   } catch (err) {
@@ -449,6 +591,8 @@ async function init() {
     "f_disc_serials",
     "f_sizes",
     "f_filenames",
+    "f_track_counts",
+    "f_require_cue",
     "f_rom_extensions",
     "f_romm_platforms",
     "f_netplay_supported",
@@ -465,7 +609,9 @@ async function init() {
   }
 
   $("f_platform").addEventListener("change", () => {
-    applyPlatformDefaults($("f_platform").value);
+    const plat = $("f_platform").value;
+    if (plat !== "psx") resetPsxCueState();
+    applyPlatformDefaults(plat);
     refreshPreview();
   });
 

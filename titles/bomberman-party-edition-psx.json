@@ -26,14 +26,11 @@
     "filenames": [
       "Bomberman Party Edition.cue",
       "Bomberman - Party Edition (USA).cue",
-      "Bomberman - Party Edition (USA).bin",
-      "Bomberman Party Edition.iso"
+      "Bomberman - Party Edition (USA).bin"
     ]
   },
   "rom_extensions": [
     ".cue",
-    ".chd",
-    ".iso",
     ".bin"
   ],
   "release": {
@@ -100,7 +97,10 @@
     "game_name": "Bomberman Party Edition",
     "game_version": "0.1.0",
     "max_slots": 5,
-    "transports": ["lan", "ice"],
+    "transports": [
+      "lan",
+      "ice"
+    ],
     "match_caps_schema": "psx-v1"
   },
   "notes": "Disc serial SLUS-01189 / boot EXE SLUS_011.89. One lean bpe-* zip for install and update: vendors psxrecomp+recomp-ui+emitters (wizard needs disc + optional retail BIOS). RetComM harvests emitters into the SDK cache and downloads cmake-clang-v1 (>=1.0.3) from retcomm-toolchains into the shared %LOCALAPPDATA%/retcomm/toolchains cache (or RETCOMM_TOOLCHAIN_DIR / offline zip). Standalone wizard uses the same path. Packages never ship disc/retail BIOS/game C or an embedded toolchain/."

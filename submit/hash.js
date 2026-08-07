@@ -155,6 +155,33 @@ export function maybeStripSnesHeader(bytes, filename = "") {
   return bytes;
 }
 
+/** Count TRACK lines in a cue sheet (Redump / psxrecomp TOC size). */
+export function countCueTracks(cueText) {
+  if (!cueText || typeof cueText !== "string") return 0;
+  let n = 0;
+  for (const line of cueText.split(/\r?\n/)) {
+    if (/^\s*TRACK\b/i.test(line)) n += 1;
+  }
+  return n;
+}
+
+/**
+ * BINARY FILE basenames referenced by a cue, in order.
+ * First entry is the data track for typical Redump multi-track sets.
+ */
+export function cueBinaryFiles(cueText) {
+  if (!cueText || typeof cueText !== "string") return [];
+  const out = [];
+  const re = /^\s*FILE\s+(?:"([^"]+)"|(\S+))\s+BINARY\b/gim;
+  let m;
+  while ((m = re.exec(cueText)) !== null) {
+    const raw = m[1] || m[2] || "";
+    const base = raw.split(/[/\\]/).pop();
+    if (base) out.push(base);
+  }
+  return out;
+}
+
 export async function hashRomFile(file) {
   const buf = new Uint8Array(await file.arrayBuffer());
   const data = maybeStripSnesHeader(buf, file.name);

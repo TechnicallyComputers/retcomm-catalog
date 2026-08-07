@@ -6,17 +6,32 @@
   "description": "Ape Escape (SCUS-94423) static recompilation on psxrecomp.",
   "homepage": "https://github.com/mstan/ApeEscapeRecomp",
   "rom_identity": {
-    "crc32": ["c6f455bc"],
-    "md5": ["de4e7ab78c08bd03712e83c14d4cf642"],
-    "sha1": ["466cce4bcd6992f57227abd270323bcdad2fb7fc"],
+    "crc32": [
+      "c6f455bc"
+    ],
+    "md5": [
+      "de4e7ab78c08bd03712e83c14d4cf642"
+    ],
+    "sha1": [
+      "466cce4bcd6992f57227abd270323bcdad2fb7fc"
+    ],
     "sha256": [
       "1ae17e78ebb8c782c7c1785b0a0bd7b0ee28235b8a0c83c8df887129899a852a"
     ],
-    "disc_serials": ["SCUS-94423"],
-    "sizes": [432238800],
-    "filenames": ["Ape Escape (USA).cue"]
+    "disc_serials": [
+      "SCUS-94423"
+    ],
+    "sizes": [
+      432238800
+    ],
+    "filenames": [
+      "Ape Escape (USA).cue"
+    ]
   },
-  "rom_extensions": [".cue", ".chd", ".iso", ".bin"],
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
   "release": {
     "github": "mstan/ApeEscapeRecomp",
     "asset_glob": {
@@ -32,10 +47,19 @@
     "macos": "ApeEscapeRecomp"
   },
   "romm": {
-    "platforms": ["ps", "psx", "ps1"]
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
   },
   "saves": {
-    "memcard_glob": ["saves/*.mcd", "saves/*.mcr", "*.mcd", "*.mcr"]
+    "memcard_glob": [
+      "saves/*.mcd",
+      "saves/*.mcr",
+      "*.mcd",
+      "*.mcr"
+    ]
   },
   "notes": "Redump USA .bin SHA-1/size from DISC.md. Prefer bin/cue MODE2/2352 (not cooked ISO)."
 }
