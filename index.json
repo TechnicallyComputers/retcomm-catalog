@@ -45,34 +45,7 @@
       }
     }
   },
-  "titles": [
-    "metal-warriors-snes",
-    "megaman-x-snes",
-    "super-mario-world-snes",
-    "star-fox-snes",
-    "zelda-alttp-snes",
-    "masters-of-teras-kasi-psx",
-    "bomberman-party-edition-psx",
-    "ape-escape-psx",
-    "tomba-psx",
-    "tomba-2-psx",
-    "megaman-x4-psx",
-    "megaman-x5-psx",
-    "megaman-x6-psx",
-    "tsumu-light-psx",
-    "sonic-1-genesis",
-    "sonic-2-genesis",
-    "sonic-3-and-knuckles-genesis",
-    "minish-cap-gba",
-    "pokemon-emerald-gba",
-    "pokemon-firered-gba",
-    "pokemon-leafgreen-gba",
-    "pokemon-ruby-gba",
-    "pokemon-sapphire-gba",
-    "megaman-zero-gba",
-    "xenogears-psx",
-    "tekken1-psx"
-  ],
-  "catalog_date": "2026-07-31T00:29:37Z",
-  "release_tag": "v2026.07.31.002937.2"
+  "titles": [],
+  "catalog_date": "",
+  "release_tag": ""
 }
