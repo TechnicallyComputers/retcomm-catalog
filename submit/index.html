@@ -219,7 +219,9 @@
             Digests prove ownership for RetComM’s library scan. You
             <strong>must</strong> hash a local dump below before submitting —
             auto-fill from the repo is not enough. The file never leaves your
-            browser.
+            browser. PSX: <code>.cue</code> then Track&nbsp;01
+            <code>.bin</code> only — <code>.iso</code> /
+            <code>.chd</code> are rejected.
           </p>
 
           <section class="checksum-block" id="checksumBlock" aria-labelledby="checksumHeading">
@@ -227,13 +229,13 @@
               <p class="checksum-kicker">Required for submission</p>
               <h3 id="checksumHeading">Rom Checksum Submission</h3>
               <p class="checksum-lede">
-                Drop or choose your verified ROM / disc image. We compute
-                CRC32, MD5, SHA-1, and SHA-256 locally and fill the fields
-                below.
+                Cart platforms: drop the ROM once. PSX: drop the
+                <code>.cue</code> first (track count), then the first BINARY
+                track <code>.bin</code> (digests).
               </p>
             </header>
             <div class="drop drop-required" id="romDrop">
-              Drop a ROM/disc image here, or
+              Drop a ROM / .cue / Track&nbsp;01 .bin here, or
               <label class="file-pick">
                 <strong>choose a file</strong>
                 <input id="romFile" type="file" hidden />
@@ -285,6 +287,28 @@
               <input id="f_filenames" placeholder="Game (USA).sfc" />
             </label>
           </div>
+          <div class="row">
+            <label>
+              <strong>track_counts</strong>
+              <input
+                id="f_track_counts"
+                placeholder="17"
+                title="Exact cue TRACK count(s) for multi-track PSX dumps"
+              />
+            </label>
+            <label class="check-inline">
+              <input type="checkbox" id="f_require_cue" />
+              <strong>require_cue</strong>
+              <span class="hint">Prefer .cue bind (multi-track)</span>
+            </label>
+          </div>
+          <p class="hint">
+            PSX: drop the <code>.cue</code> first (fills
+            <code>track_counts</code>), then hash the cue’s first BINARY
+            <code>.bin</code> (usually Track&nbsp;01). Align with
+            <code>game.toml [netplay] required_tracks</code>. No
+            <code>.iso</code>.
+          </p>
           <div class="row one">
             <label>
               <strong>rom_extensions</strong>

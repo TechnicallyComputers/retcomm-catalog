@@ -78,6 +78,19 @@ def validate(manifest: dict) -> None:
             errors.append(
                 "rom_identity needs at least one digest or disc_serial"
             )
+        tc = ri.get("track_counts")
+        if tc is not None:
+            if not isinstance(tc, list) or not all(
+                isinstance(n, int) and not isinstance(n, bool) and n >= 1
+                for n in tc
+            ):
+                errors.append(
+                    "rom_identity.track_counts must be a list of integers >= 1"
+                )
+            elif any(n > 1 for n in tc) and not ri.get("require_cue", False):
+                # Soft preference: multi-track dumps need a .cue bind.
+                # Do not hard-fail — authors may set require_cue explicitly later.
+                pass
 
     netplay = manifest.get("netplay")
     if isinstance(netplay, dict) and netplay.get("supported"):

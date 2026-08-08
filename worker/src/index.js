@@ -692,6 +692,80 @@ async function fetchRepoText(slug, path, env) {
   return null;
 }
 
+/** Pull [netplay] / [prepare_disc] fields from game.toml for form autofill. */
+function extractGameTomlDisc(text) {
+  const out = {
+    track_counts: [],
+    require_cue: false,
+    md5: [],
+    sha1: [],
+    sizes: [],
+    filenames: [],
+    disc_serials: [],
+    sources: [],
+  };
+  if (!text || typeof text !== "string") return out;
+
+  const section = (name) => {
+    const re = new RegExp(
+      `\\[${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]([^\\[]*)`,
+      "i"
+    );
+    const m = text.match(re);
+    return m ? m[1] : "";
+  };
+
+  const np = section("netplay");
+  if (np) {
+    const tr = np.match(/required_tracks\s*=\s*(\d+)/i);
+    if (tr) {
+      const n = Number(tr[1]);
+      if (Number.isFinite(n) && n >= 1) out.track_counts.push(n);
+    }
+    if (/require_cue\s*=\s*true/i.test(np)) out.require_cue = true;
+    if (out.track_counts.some((n) => n > 1)) out.require_cue = true;
+    if (out.track_counts.length || out.require_cue) out.sources.push("game.toml[netplay]");
+  }
+
+  const pd = section("prepare_disc");
+  if (pd) {
+    const arr = (key) => {
+      const m = pd.match(
+        new RegExp(`${key}\\s*=\\s*\\[([^\\]]*)\\]`, "i")
+      );
+      if (!m) return [];
+      return m[1]
+        .split(",")
+        .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+        .filter(Boolean);
+    };
+    out.md5.push(...arr("known_md5").map((s) => s.toLowerCase()));
+    out.sha1.push(...arr("known_sha1").map((s) => s.toLowerCase()));
+    out.sizes.push(
+      ...arr("known_sizes")
+        .map((s) => Number(s))
+        .filter((n) => Number.isFinite(n) && n > 0)
+    );
+    const cue = pd.match(/cue_name\s*=\s*["']([^"']+)["']/i);
+    if (cue) out.filenames.push(cue[1]);
+    if (out.md5.length || out.sha1.length || out.sizes.length || out.filenames.length)
+      out.sources.push("game.toml[prepare_disc]");
+  }
+
+  const game = section("game");
+  if (game) {
+    const id = game.match(/^\s*id\s*=\s*["']([^"']+)["']/im);
+    if (id) out.disc_serials.push(id[1]);
+    const disc = game.match(/^\s*disc\s*=\s*["']([^"']+\.cue)["']/im);
+    if (disc) {
+      const base = disc[1].split(/[/\\]/).pop();
+      if (base && !out.filenames.includes(base)) out.filenames.push(base);
+    }
+  }
+
+  return out;
+}
+
 async function probe(request, env) {
   const session = await requireUser(request, env);
   if (await isBanned(session.login, env)) {
@@ -750,13 +824,28 @@ async function probe(request, env) {
     }
   }
   const discMd = (await fetchRepoText(slug, "DISC.md", env)) || "";
+  const gameToml = (await fetchRepoText(slug, "game.toml", env)) || "";
+  const tomlDisc = extractGameTomlDisc(gameToml);
   const digests = mergeDigestSets(
     { ...extractDigests(readme), sources: readme ? ["README"] : [] },
     { ...extractDigests(discMd), sources: discMd ? ["DISC.md"] : [] }
   );
+  // prepare_disc digests are authoritative for psxrecomp titles when present.
+  if (tomlDisc.md5.length) digests.md5 = [...new Set([...tomlDisc.md5, ...digests.md5])];
+  if (tomlDisc.sha1.length) digests.sha1 = [...new Set([...tomlDisc.sha1, ...digests.sha1])];
+  if (tomlDisc.sizes.length)
+    digests.sizes = [...new Set([...tomlDisc.sizes, ...digests.sizes])];
+  if (tomlDisc.filenames.length)
+    digests.filenames = [...new Set([...tomlDisc.filenames, ...digests.filenames])];
+  if (tomlDisc.disc_serials.length)
+    digests.disc_serials = [
+      ...new Set([...tomlDisc.disc_serials, ...digests.disc_serials]),
+    ];
+  if (tomlDisc.sources.length)
+    digests.sources = [...new Set([...digests.sources, ...tomlDisc.sources])];
 
   const blob = `${repo.name} ${repo.description || ""} ${readme.slice(0, 2000)}`;
-  const platform = guessPlatform(blob);
+  const platform = guessPlatform(blob) || (gameToml ? "psx" : "");
   const asset_glob = inferAssetGlobs(assets);
   const install_dir_name = repo.name;
   const draft = {
@@ -774,8 +863,13 @@ async function probe(request, env) {
       disc_serials: digests.disc_serials,
       sizes: digests.sizes,
       filenames: digests.filenames,
+      track_counts: tomlDisc.track_counts,
+      require_cue: !!tomlDisc.require_cue,
     },
-    rom_extensions: [],
+    rom_extensions:
+      platform === "psx" || tomlDisc.track_counts.length
+        ? [".cue", ".bin"]
+        : [],
     release: {
       github: slug,
       allow_prerelease: allowPrerelease,
@@ -858,6 +952,21 @@ function validateManifest(m) {
       "rom_identity needs at least one digest (crc32 / md5 / sha1 / sha256) from a local ROM hash"
     );
   }
+  const tc = id.track_counts;
+  if (tc != null) {
+    if (
+      !Array.isArray(tc) ||
+      !tc.every((n) => Number.isInteger(n) && n >= 1)
+    ) {
+      errors.push("rom_identity.track_counts must be integers >= 1");
+    }
+  }
+  if (m.platform === "psx") {
+    const exts = m.rom_extensions || [];
+    if (exts.some((e) => /\.(iso|chd)$/i.test(String(e)))) {
+      errors.push("PSX rom_extensions must not include .iso or .chd");
+    }
+  }
   if (m.netplay && m.netplay.supported) {
     if (m.netplay.stack && m.netplay.stack !== "recomp-net") {
       errors.push('netplay.stack must be "recomp-net" when supported');
@@ -890,8 +999,21 @@ function normalizeManifest(m) {
       disc_serials: emptyArr(ri.disc_serials).map(String),
       sizes: emptyArr(ri.sizes).map(Number).filter((n) => n > 0),
       filenames: emptyArr(ri.filenames).map(String),
+      track_counts: emptyArr(ri.track_counts)
+        .map(Number)
+        .filter((n) => Number.isInteger(n) && n >= 1),
+      require_cue:
+        !!ri.require_cue ||
+        emptyArr(ri.track_counts).some((n) => Number(n) > 1),
     },
-    rom_extensions: emptyArr(m.rom_extensions).map(String),
+    rom_extensions: (() => {
+      let exts = emptyArr(m.rom_extensions).map(String);
+      if (String(m.platform || "").trim() === "psx") {
+        exts = exts.filter((e) => !/\.(iso|chd)$/i.test(e));
+        if (!exts.length) exts = [".cue", ".bin"];
+      }
+      return exts;
+    })(),
     release: {
       github: parseRepoSlug(m.release?.github) || String(m.release?.github || ""),
       asset_glob: {

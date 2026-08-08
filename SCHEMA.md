@@ -50,6 +50,8 @@ Title manifests may still set `bios_identity` to override the default, or
 | `rom_identity.disc_serials` | string[] | PSX/etc, e.g. `"SLUS-00562"` |
 | `rom_identity.sizes` | number[] | Optional byte lengths; when set, scan only hashes files of those sizes (disc dumps) |
 | `rom_identity.filenames` | string[] | Suggested basenames for the hub when unmatched (No-Intro / Redump); search hints, not hard matching |
+| `rom_identity.track_counts` | number[] | Optional exact cue `TRACK` counts (e.g. MotK Redump = `[17]`). Digests prove the data track; this proves full multi-track TOC. Empty / omit = no TOC gate |
+| `rom_identity.require_cue` | bool | When `true`, RetComM requires a `.cue` bind (auto-true when any `track_counts` entry is `> 1`). PSX titles use `.cue` + `.bin` only — not `.iso`/`.chd` |
 | `rom_extensions` | string[] | Scan filter, e.g. `[".sfc",".smc"]` |
 | `bios_identity` | object | Optional host BIOS / firmware the title needs |
 | `bios_identity.required` | bool | Default `true` when object present |
@@ -65,7 +67,7 @@ Title manifests may still set `bios_identity` to override the default, or
 | `build.source.github` | string | `owner/repo` for the source zipball (default: `release.github`) |
 | `build.source.ref` | string | Tag / branch / commit pin for the source archive |
 | `build.sdk` | object | Tools identity. Prefer harvesting emitters from the game release zip (`id` only). Optional `github` + `asset_glob.{linux,windows,macos}` remains a legacy fallback for a separate tools pack (e.g. snesrecomp). |
-| `build.toolchain` | object | Prefer harvesting `toolchain/` from the game zip into the shared cache (`id` required). Optional `github` + `asset_glob` download fallback (typically `TechnicallyComputers/retcomm-toolchains`). |
+| `build.toolchain` | object | Prefer downloading `cmake-clang-v1` via `github` + `asset_glob` into the shared cache (`id` required; typically `TechnicallyComputers/retcomm-toolchains`). Set `min_version` to a semver floor against `retcomm-toolchain.json` / release tag (catalog build titles currently require `1.0.3+`). Optional harvest of a legacy game-zip `toolchain/` when download is unavailable. Offline: `RETCOMM_TOOLCHAIN_DIR`. |
 | `build.generate` | object | Engine-specific generate args (see below) |
 | `build.cmake` | object | `build_dir`, `target`, `config` (Release) |
 | `install_dir_name` | string | Folder under `apps/` |
@@ -104,9 +106,12 @@ legacy `build.sdk` tools pack), fetches a toolchain pack from
 runs the SDK CLI `generate` against the user's verified ROM/disc, then
 `cmake --build`, and stages the launch binary into `apps/…/current`.
 
-`build.generate.engine`: `"snesrecomp"` | `"psxrecomp"` (default from
-`platform`). SNES uses `cfg_dir` / `out_dir` / `funcs_h` / `cfg_roots`. PSX uses
-`config` (default `game.toml`) and passes the library disc as `--disc`.
+`build.generate.engine`: `"snesrecomp"` | `"psxrecomp"` | `"gbarecomp"`
+(default from `platform`: SNES→snesrecomp, PSX→psxrecomp, GBA→gbarecomp).
+SNES uses `cfg_dir` / `out_dir` / `funcs_h` / `cfg_roots`. PSX uses `config`
+(default `game.toml`) and passes the library disc as `--disc`. GBA uses
+`config` (per-binary symbols TOML), `out_dir` (cart `generated/`), and passes
+the library ROM as `--rom` plus optional `--bios`.
 
 ```json
 "build": {
@@ -127,6 +132,7 @@ runs the SDK CLI `generate` against the user's verified ROM/disc, then
   "toolchain": {
     "id": "cmake-clang-v1",
     "github": "TechnicallyComputers/retcomm-toolchains",
+    "min_version": "1.0.3",
     "asset_glob": {
       "linux": "*cmake-clang-v1*linux*",
       "windows": "*cmake-clang-v1*windows*",
@@ -187,9 +193,15 @@ subset without schema churn:
   "sha256": [],
   "disc_serials": [],
   "sizes": [],
-  "filenames": ["Game Name (USA).z64"]
+  "filenames": ["Game Name (USA).z64"],
+  "track_counts": [],
+  "require_cue": false
 }
 ```
+
+For multi-track PSX titles, set `track_counts` to match `game.toml` `[netplay]
+required_tracks` (and usually `require_cue: true`) so Track-01-only dumps
+cannot pass the library / Install gate.
 
 ## Adding a title
 

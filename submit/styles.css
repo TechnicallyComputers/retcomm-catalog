@@ -23,6 +23,17 @@
   box-sizing: border-box;
 }
 
+label.check-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem 0.6rem;
+}
+label.check-inline input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
 html,
 body {
   margin: 0;

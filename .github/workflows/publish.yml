@@ -44,6 +44,7 @@ jobs:
       - name: Validate JSON
         run: |
           python3 -c "import json; json.load(open('index.json'))"
+          shopt -s nullglob
           for f in titles/*.json; do
             python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
             echo "ok $f"
