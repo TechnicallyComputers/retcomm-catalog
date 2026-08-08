@@ -1,0 +1,100 @@
+{
+  "id": "crash-bash-psx",
+  "name": "Crash Bash",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Crash Bash is a party game in which four people can play several mini-games as characters from the Crash Bandicoot series. The gameplay consists of 28 different mini-games and three distinct modes of play: Adventure, Battle, and Tournament. Crash Bash includes multiplayer compatibility for up to four human players with the use of the PlayStation Multitap. The games are organized from a central hub world from which spokes lead to different levels.",
+  "homepage": "https://github.com/TechnicallyComputers/Crash-Bash-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "69a6cd83"
+    ],
+    "md5": [
+      "637f2286b1071d42f883e5592cf2df69"
+    ],
+    "sha1": [
+      "fce2d66a12d49ec50aa1b93e138da6c6f646eb16"
+    ],
+    "sha256": [
+      "a1d6b967a2311f1444482f4af91dff2d75e083ed538419f25d57d77dd5a4d7fd"
+    ],
+    "disc_serials": [
+      "SCUS-94570"
+    ],
+    "sizes": [
+      178220448
+    ],
+    "filenames": [
+      "Crash Bash (USA).cue",
+      "Crash Bash (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Crash-Bash-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Crash-Bash-Recomp",
+  "launch": {
+    "linux": "Crash_Bash__Recompiled",
+    "windows": "Crash_Bash__Recompiled.exe",
+    "macos": "Crash_Bash__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Crash Bash",
+    "game_version": "0.1.0",
+    "max_slots": 4,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Crash-Bash-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
