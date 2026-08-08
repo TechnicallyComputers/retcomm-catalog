@@ -10,7 +10,7 @@ https://technicallycomputers.github.io/retcomm-catalog/submit/
 1. Requires **GitHub login** (OAuth via Cloudflare Worker)
 2. Probes a public recomp/decomp repo (`catalog_identity.json`, README, `DISC.md`, `game.toml`, `VERSION`, CMake, latest release assets)
 3. Auto-fills a catalog manifest — marketing **description**, PSX `track_counts` / `require_cue`, **netplay** lobby fields, and a RetComM **build** recipe when applicable; submitter can edit every field
-4. **Required** client-side ROM hashing under “Rom Checksum Submission” (file never uploaded; submit blocked until digests are generated). PSX: drop the `.cue` first (fills `track_counts` + expected Track&nbsp;01 name), then hash that first BINARY `.bin`. `.iso` / `.chd` are rejected
+4. **Required** client-side ROM hashing under “Rom Checksum Submission” (file never uploaded; submit blocked until digests are generated). Cart platforms: one file drop. PSX: two labeled slots — `.cue` (fills `track_counts` + expected Track&nbsp;01 name), then that first BINARY `.bin`. `.iso` / `.chd` are rejected
 5. On submit:
    - Opens a GitHub issue (label `catalog-submission`) assigned to human contributors
    - Emails addresses from [`contributors.json`](./contributors.json) (Resend)

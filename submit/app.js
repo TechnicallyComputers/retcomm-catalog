@@ -18,6 +18,8 @@ const state = {
   psxCueName: "",
   psxFirstBin: "", // basename expected for digests
   psxTrackCount: 0,
+  /** Basename while digests are computing (disc bin slot status). */
+  romHashingFile: "",
 };
 
 function getSessionToken() {
@@ -295,6 +297,19 @@ function fillForm(draft, meta = {}) {
 
   applyPlatformDefaults(draft.platform);
 
+  // Probe does not carry client-side hashes — reset checksum UI for the platform.
+  state.romChecksumDone = false;
+  state.romChecksumFile = "";
+  state.romHashingFile = "";
+  resetPsxCueState();
+  syncChecksumSlots();
+  setChecksumUi(
+    "pending",
+    isDiscPlatform(draft.platform)
+      ? "PSX: add the .cue sheet, then hash Track 01 .bin — submit stays blocked until both succeed."
+      : "No ROM hashed yet — submit stays blocked until this step succeeds."
+  );
+
   const chips = $("assetChips");
   chips.innerHTML = "";
   for (const a of meta.assets || []) {
@@ -388,16 +403,110 @@ function mergeUnique(id, values) {
   csvSet(id, [...cur]);
 }
 
+function isDiscPlatform(platform = $("f_platform").value) {
+  return platform === "psx";
+}
+
+function setSlotStatus(id, kind, message) {
+  const el = $(id);
+  if (!el) return;
+  el.classList.remove("pending", "ok", "err");
+  if (kind) el.classList.add(kind);
+  el.textContent = message || "";
+}
+
+function refreshDiscSlotUi() {
+  const cueDrop = $("cueDrop");
+  const binDrop = $("binDrop");
+  const binFile = $("binFile");
+  const binHint = $("binSlotHint");
+  if (!cueDrop || !binDrop) return;
+
+  cueDrop.classList.toggle("hashed", !!state.psxCueOk);
+  binDrop.classList.toggle("drop-disabled", !state.psxCueOk);
+  binDrop.classList.toggle("hashed", !!state.romChecksumDone && !!state.psxCueOk);
+  if (binFile) binFile.disabled = !state.psxCueOk;
+
+  if (binHint) {
+    binHint.innerHTML = state.psxFirstBin
+      ? `Hash <strong>${state.psxFirstBin}</strong> (first BINARY / Track&nbsp;01 from the cue). Digests come from this file, not the cue.`
+      : "Hash the first BINARY track named in the cue (usually Track&nbsp;01). Digests come from this file, not the cue.";
+  }
+
+  if (state.psxCueOk) {
+    setSlotStatus(
+      "cueHashStatus",
+      "ok",
+      `${state.psxCueName}: ${state.psxTrackCount} track(s)`
+    );
+  } else {
+    setSlotStatus("cueHashStatus", "", "");
+  }
+
+  if (state.romChecksumDone && state.psxCueOk) {
+    setSlotStatus(
+      "binHashStatus",
+      "ok",
+      `Hashed ${state.romChecksumFile}`
+    );
+  } else if (state.romHashingFile && state.psxCueOk) {
+    setSlotStatus(
+      "binHashStatus",
+      "pending",
+      `Hashing ${state.romHashingFile}…`
+    );
+  } else if (state.psxCueOk) {
+    setSlotStatus(
+      "binHashStatus",
+      "pending",
+      state.psxFirstBin
+        ? `Waiting for “${state.psxFirstBin}”`
+        : "Waiting for Track 01 .bin"
+    );
+  } else {
+    setSlotStatus("binHashStatus", "", "");
+  }
+}
+
+/** Show cart (single) or disc (cue + bin) checksum slots from platform. */
+function syncChecksumSlots() {
+  const disc = isDiscPlatform();
+  const cart = $("cartChecksumSlots");
+  const discSlots = $("discChecksumSlots");
+  const lede = $("checksumLede");
+  const block = $("checksumBlock");
+
+  cart?.classList.toggle("hidden", disc);
+  discSlots?.classList.toggle("hidden", !disc);
+  block?.classList.toggle("disc-mode", disc);
+
+  if (lede) {
+    lede.innerHTML = disc
+      ? "PSX / disc titles need two local files: the Redump <code>.cue</code>, then Track&nbsp;01 <code>.bin</code>. Nothing is uploaded — only digests are filled."
+      : "Drop your ROM below. The file never leaves your browser — only digests are filled into the form.";
+  }
+
+  if (disc) {
+    refreshDiscSlotUi();
+  } else {
+    $("romDrop")?.classList.toggle("hashed", !!state.romChecksumDone);
+  }
+}
+
 function setChecksumUi(kind, message) {
   const status = $("romHashStatus");
   const block = $("checksumBlock");
-  const drop = $("romDrop");
   status.classList.remove("pending", "ok", "err");
   if (kind) status.classList.add(kind);
   status.textContent = message;
   const done = kind === "ok";
   block?.classList.toggle("done", done);
-  drop?.classList.toggle("hashed", done);
+
+  if (isDiscPlatform()) {
+    refreshDiscSlotUi();
+  } else {
+    $("romDrop")?.classList.toggle("hashed", done);
+  }
 }
 
 function resetPsxCueState() {
@@ -506,6 +615,7 @@ async function onRomFile(file) {
 
   state.romChecksumDone = false;
   state.romChecksumFile = "";
+  state.romHashingFile = file.name;
   setChecksumUi("pending", `Hashing ${file.name}…`);
   try {
     const h = await hashRomFile(file);
@@ -517,6 +627,7 @@ async function onRomFile(file) {
     mergeUnique("f_filenames", [h.filename]);
     state.romChecksumDone = true;
     state.romChecksumFile = file.name;
+    state.romHashingFile = "";
     const tracksHint = isPsx
       ? ` Cue ${state.psxCueName}: ${state.psxTrackCount} track(s).`
       : numCsvGet("f_track_counts").length
@@ -532,6 +643,7 @@ async function onRomFile(file) {
   } catch (err) {
     state.romChecksumDone = false;
     state.romChecksumFile = "";
+    state.romHashingFile = "";
     setChecksumUi("err", `Hash failed: ${err.message}`);
   }
 }
@@ -633,8 +745,18 @@ async function init() {
 
   $("f_platform").addEventListener("change", () => {
     const plat = $("f_platform").value;
-    if (plat !== "psx") resetPsxCueState();
+    state.romChecksumDone = false;
+    state.romChecksumFile = "";
+    state.romHashingFile = "";
+    resetPsxCueState();
     applyPlatformDefaults(plat);
+    syncChecksumSlots();
+    setChecksumUi(
+      "pending",
+      isDiscPlatform(plat)
+        ? "PSX: add the .cue sheet, then hash Track 01 .bin — submit stays blocked until both succeed."
+        : "No ROM hashed yet — submit stays blocked until this step succeeds."
+    );
     refreshPreview();
   });
 
@@ -719,23 +841,49 @@ async function init() {
     showBanner("ok", "JSON copied to clipboard.");
   };
 
-  const drop = $("romDrop");
-  const fileInput = $("romFile");
+  function bindDropZone(dropEl, fileInput, { acceptExt } = {}) {
+    if (!dropEl || !fileInput) return;
+    fileInput.addEventListener("change", () => {
+      onRomFile(fileInput.files?.[0]);
+      fileInput.value = "";
+    });
+    dropEl.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      if (!dropEl.classList.contains("drop-disabled")) dropEl.classList.add("drag");
+    });
+    dropEl.addEventListener("dragleave", () => dropEl.classList.remove("drag"));
+    dropEl.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropEl.classList.remove("drag");
+      if (dropEl.classList.contains("drop-disabled")) return;
+      const file = e.dataTransfer.files?.[0];
+      if (!file) return;
+      if (acceptExt) {
+        const lower = (file.name || "").toLowerCase();
+        const ok = acceptExt.some((ext) => lower.endsWith(ext));
+        if (!ok) {
+          setChecksumUi(
+            "err",
+            `${file.name} rejected — this slot accepts ${acceptExt.join(" / ")} only.`
+          );
+          return;
+        }
+      }
+      onRomFile(file);
+    });
+  }
+
+  bindDropZone($("romDrop"), $("romFile"));
+  bindDropZone($("cueDrop"), $("cueFile"), { acceptExt: [".cue"] });
+  bindDropZone($("binDrop"), $("binFile"), { acceptExt: [".bin"] });
+
+  syncChecksumSlots();
   setChecksumUi(
     "pending",
-    "No ROM hashed yet — submit stays blocked until this step succeeds."
+    isDiscPlatform()
+      ? "PSX: add the .cue sheet, then hash Track 01 .bin — submit stays blocked until both succeed."
+      : "No ROM hashed yet — submit stays blocked until this step succeeds."
   );
-  fileInput.addEventListener("change", () => onRomFile(fileInput.files?.[0]));
-  drop.addEventListener("dragover", (e) => {
-    e.preventDefault();
-    drop.classList.add("drag");
-  });
-  drop.addEventListener("dragleave", () => drop.classList.remove("drag"));
-  drop.addEventListener("drop", (e) => {
-    e.preventDefault();
-    drop.classList.remove("drag");
-    onRomFile(e.dataTransfer.files?.[0]);
-  });
 
   refreshPreview();
 }

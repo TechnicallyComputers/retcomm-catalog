@@ -357,12 +357,76 @@ button:disabled {
   max-width: 40rem;
 }
 
-.checksum-block .drop {
+.checksum-slots {
+  padding: 0;
+}
+
+.checksum-slots.hidden {
+  display: none;
+}
+
+.checksum-block .cart-slots .drop {
   margin: 0;
   border: none;
   border-radius: 0;
-  padding: 1.15rem 1.1rem 1.25rem;
+  padding: 1.15rem 1.1rem 1rem;
   background: transparent;
+}
+
+.disc-slots {
+  display: grid;
+  gap: 0;
+}
+
+.disc-slot {
+  padding: 0.95rem 1.1rem 1rem;
+  border-bottom: 1px solid rgba(13, 107, 92, 0.18);
+}
+
+.disc-slot:last-child {
+  border-bottom: none;
+}
+
+.disc-slot-title {
+  margin: 0 0 0.3rem;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+
+.disc-slot-title code {
+  font-size: 0.88em;
+}
+
+.disc-slot-hint {
+  margin: 0 0 0.65rem;
+  font-size: 0.86rem;
+}
+
+.checksum-block .disc-slot .drop {
+  margin: 0;
+  border: 1.5px dashed rgba(13, 107, 92, 0.35);
+  border-radius: 8px;
+  padding: 0.85rem 0.9rem;
+  background: #fff;
+}
+
+.checksum-block .disc-slot .drop.drop-disabled {
+  opacity: 0.55;
+  background: #f3f1eb;
+  pointer-events: none;
+}
+
+.checksum-block .disc-slot .drop.hashed {
+  background: var(--ok-bg);
+  border-color: var(--ok);
+}
+
+.checksum-status-main {
+  margin: 0;
+  padding: 0.75rem 1.1rem 1.05rem;
+  border-top: 1px solid rgba(13, 107, 92, 0.18);
 }
 
 .drop {

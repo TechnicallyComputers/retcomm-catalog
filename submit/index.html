@@ -232,22 +232,75 @@
             <header class="checksum-heading">
               <p class="checksum-kicker">Required for submission</p>
               <h3 id="checksumHeading">Rom Checksum Submission</h3>
-              <p class="checksum-lede">
-                Cart platforms: drop the ROM once. PSX: drop the
-                <code>.cue</code> first (track count), then the first BINARY
-                track <code>.bin</code> (digests).
+              <p class="checksum-lede" id="checksumLede">
+                Drop your ROM below. The file never leaves your browser —
+                only digests are filled into the form.
               </p>
             </header>
-            <div class="drop drop-required" id="romDrop">
-              Drop a ROM / .cue / Track&nbsp;01 .bin here, or
-              <label class="file-pick">
-                <strong>choose a file</strong>
-                <input id="romFile" type="file" hidden />
-              </label>
-              <div id="romHashStatus" class="hint checksum-status">
-                No ROM hashed yet — submit stays blocked until this step
-                succeeds.
+
+            <!-- Cart / single-file platforms -->
+            <div class="checksum-slots cart-slots" id="cartChecksumSlots">
+              <div class="drop drop-required" id="romDrop">
+                Drop a ROM here, or
+                <label class="file-pick">
+                  <strong>choose a file</strong>
+                  <input id="romFile" type="file" hidden />
+                </label>
               </div>
+            </div>
+
+            <!-- PSX / disc: separate .cue then Track 01 .bin -->
+            <div class="checksum-slots disc-slots hidden" id="discChecksumSlots">
+              <div class="disc-slot" id="cueSlot">
+                <h4 class="disc-slot-title">
+                  1. Cue sheet <code>.cue</code>
+                </h4>
+                <p class="hint disc-slot-hint">
+                  Redump cue sheet — fills <code>track_counts</code> and the
+                  expected Track&nbsp;01 filename.
+                </p>
+                <div class="drop drop-required" id="cueDrop">
+                  Drop the <code>.cue</code> here, or
+                  <label class="file-pick">
+                    <strong>choose .cue</strong>
+                    <input
+                      id="cueFile"
+                      type="file"
+                      accept=".cue,text/plain"
+                      hidden
+                    />
+                  </label>
+                  <div id="cueHashStatus" class="hint checksum-status"></div>
+                </div>
+              </div>
+              <div class="disc-slot" id="binSlot">
+                <h4 class="disc-slot-title">
+                  2. Track&nbsp;01 binary <code>.bin</code>
+                </h4>
+                <p class="hint disc-slot-hint" id="binSlotHint">
+                  Hash the first BINARY track named in the cue (usually
+                  Track&nbsp;01). Digests come from this file, not the cue.
+                </p>
+                <div class="drop drop-required drop-disabled" id="binDrop">
+                  Drop Track&nbsp;01 <code>.bin</code> here, or
+                  <label class="file-pick">
+                    <strong>choose .bin</strong>
+                    <input
+                      id="binFile"
+                      type="file"
+                      accept=".bin,application/octet-stream"
+                      hidden
+                      disabled
+                    />
+                  </label>
+                  <div id="binHashStatus" class="hint checksum-status"></div>
+                </div>
+              </div>
+            </div>
+
+            <div id="romHashStatus" class="hint checksum-status checksum-status-main">
+              No ROM hashed yet — submit stays blocked until this step
+              succeeds.
             </div>
           </section>
 
@@ -307,9 +360,9 @@
             </label>
           </div>
           <p class="hint">
-            PSX: drop the <code>.cue</code> first (fills
-            <code>track_counts</code>), then hash the cue’s first BINARY
-            <code>.bin</code> (usually Track&nbsp;01). Align with
+            PSX: use the two checksum slots above (<code>.cue</code> then
+            Track&nbsp;01 <code>.bin</code>). Align
+            <code>track_counts</code> with
             <code>game.toml [netplay] required_tracks</code>. No
             <code>.iso</code>.
           </p>
