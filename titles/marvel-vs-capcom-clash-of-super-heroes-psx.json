@@ -3,6 +3,7 @@
   "name": "Marvel vs. Capcom Clash of Super Heroes",
   "kind": "recomp",
   "platform": "psx",
+  "description": "This PlayStation port differs from the arcade version, in that players are unable to switch characters on-the-fly, reducing the secondary character to an assist role only. Significantly, this removes the tag team aspect of the original. It instead offers a \"Cross over\" mode where each player chooses one character, and the second character for each team is a mirror of the opponent's pick. In this mode, the players may switch characters at will, but the teams must always be identical. This compromise is most likely necessitated by the console's small memory size, as the use of identical teams alleviates the memory requirements.",
   "homepage": "https://github.com/TechnicallyComputers/Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
   "rom_identity": {
     "crc32": [
@@ -17,16 +18,20 @@
     "sha256": [
       "84611bc8aca2b628a8e423976db68c050c9c4899f7028512236045ec44c76970"
     ],
-    "disc_serials": [],
+    "disc_serials": [
+      "SLUS-01059"
+    ],
     "sizes": [
       428212176
     ],
     "filenames": [
-      "psxrecomp/docs/GAME_PROJECT_SETUP.md",
-      "psxrecomp/docs/SYMBOLS.md",
       "Marvel vs. Capcom - Clash of Super Heroes (USA).cue",
       "Marvel vs. Capcom - Clash of Super Heroes (USA).bin"
-    ]
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
   },
   "rom_extensions": [
     ".cue",
@@ -42,9 +47,35 @@
   },
   "install_dir_name": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
   "launch": {
-    "linux": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
-    "windows": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp.exe",
-    "macos": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp"
+    "linux": "Marvel_vs__Capcom__Clash_of_Super_Heroes__Recompiled",
+    "windows": "Marvel_vs__Capcom__Clash_of_Super_Heroes__Recompiled.exe",
+    "macos": "Marvel_vs__Capcom__Clash_of_Super_Heroes__Recompiled"
+  },
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
+      "ref": "master"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
   },
   "romm": {
     "platforms": [
@@ -53,5 +84,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README."
+  "notes": "Digests auto-extracted from README / catalog_identity. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
 }

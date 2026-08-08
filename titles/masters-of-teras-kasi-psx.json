@@ -25,16 +25,15 @@
       108006192
     ],
     "filenames": [
-      "DISC.md",
-      "SCPH1001.BIN",
-      "motk/Star Wars - Masters of Teras Kasi (USA).cue",
-      "ISSUES.md",
-      "motk/*.bin",
       "Star Wars - Masters of Teras Kasi (USA).cue",
       "Star Wars - Masters of Teras Kasi (USA) (Track 01).bin",
       "Star Wars - Masters of Teras Kasi (USA) (Track 02).bin",
       "Star Wars - Masters of Teras Kasi (USA) (Track 03).bin"
-    ]
+    ],
+    "track_counts": [
+      17
+    ],
+    "require_cue": true
   },
   "rom_extensions": [
     ".cue",
@@ -50,9 +49,35 @@
   },
   "install_dir_name": "MastersOfTerasKasiRecomp",
   "launch": {
-    "linux": "MastersOfTerasKasiRecomp",
-    "windows": "MastersOfTerasKasiRecomp.exe",
-    "macos": "MastersOfTerasKasiRecomp"
+    "linux": "Masters_of_Teras_Kasi_Recompiled",
+    "windows": "Masters_of_Teras_Kasi_Recompiled.exe",
+    "macos": "Masters_of_Teras_Kasi_Recompiled"
+  },
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/MastersOfTerasKasiRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
   },
   "romm": {
     "platforms": [
@@ -61,5 +86,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README, DISC.md."
+  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
 }
