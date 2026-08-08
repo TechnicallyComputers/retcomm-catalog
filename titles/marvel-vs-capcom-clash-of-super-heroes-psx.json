@@ -1,0 +1,57 @@
+{
+  "id": "marvel-vs-capcom-clash-of-super-heroes-psx",
+  "name": "Marvel vs. Capcom Clash of Super Heroes",
+  "kind": "recomp",
+  "platform": "psx",
+  "homepage": "https://github.com/TechnicallyComputers/Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "b40eca01"
+    ],
+    "md5": [
+      "ce6c6a8a1015e031fae6a9af11087c0a"
+    ],
+    "sha1": [
+      "b0301419874638bd86689cfbbde6a901585587d0"
+    ],
+    "sha256": [
+      "84611bc8aca2b628a8e423976db68c050c9c4899f7028512236045ec44c76970"
+    ],
+    "disc_serials": [],
+    "sizes": [
+      428212176
+    ],
+    "filenames": [
+      "psxrecomp/docs/GAME_PROJECT_SETUP.md",
+      "psxrecomp/docs/SYMBOLS.md",
+      "Marvel vs. Capcom - Clash of Super Heroes (USA).cue",
+      "Marvel vs. Capcom - Clash of Super Heroes (USA).bin"
+    ]
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
+  "launch": {
+    "linux": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
+    "windows": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp.exe",
+    "macos": "Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "notes": "Digests auto-extracted from README."
+}
