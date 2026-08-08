@@ -1,0 +1,65 @@
+{
+  "id": "masters-of-teras-kasi-psx",
+  "name": "Masters Of Teras Kasi",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Masters of Teras Kasi (SLUS-00562) static recompilation — game host on psxrecomp",
+  "homepage": "https://github.com/TechnicallyComputers/MastersOfTerasKasiRecomp",
+  "rom_identity": {
+    "crc32": [
+      "8159551a"
+    ],
+    "md5": [
+      "8df14d97706048c2b795942783e4cbb2"
+    ],
+    "sha1": [
+      "b9534175f589690586962f928a9198bfdb7cbb37"
+    ],
+    "sha256": [
+      "8442b57bcf9d586b8f97d789e688576bd571b5b793572d15f333edbfc09cc514"
+    ],
+    "disc_serials": [
+      "SLUS-00562"
+    ],
+    "sizes": [
+      108006192
+    ],
+    "filenames": [
+      "DISC.md",
+      "SCPH1001.BIN",
+      "motk/Star Wars - Masters of Teras Kasi (USA).cue",
+      "ISSUES.md",
+      "motk/*.bin",
+      "Star Wars - Masters of Teras Kasi (USA).cue",
+      "Star Wars - Masters of Teras Kasi (USA) (Track 01).bin",
+      "Star Wars - Masters of Teras Kasi (USA) (Track 02).bin",
+      "Star Wars - Masters of Teras Kasi (USA) (Track 03).bin"
+    ]
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/MastersOfTerasKasiRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "MastersOfTerasKasiRecomp",
+  "launch": {
+    "linux": "MastersOfTerasKasiRecomp",
+    "windows": "MastersOfTerasKasiRecomp.exe",
+    "macos": "MastersOfTerasKasiRecomp"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "notes": "Digests auto-extracted from README, DISC.md."
+}
