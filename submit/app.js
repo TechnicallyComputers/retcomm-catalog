@@ -8,6 +8,8 @@ const state = {
   user: null,
   fieldSources: {},
   platformDefaults: null,
+  /** Probe-inferred RetComM build recipe (included when f_build_enabled). */
+  probedBuild: null,
   /** True after the user successfully hashed a local ROM/disc dump. */
   romChecksumDone: false,
   romChecksumFile: "",
@@ -212,6 +214,9 @@ function readManifest() {
     if (schema) netplay.match_caps_schema = schema;
     manifest.netplay = netplay;
   }
+  if ($("f_build_enabled")?.checked && state.probedBuild?.enabled) {
+    manifest.build = state.probedBuild;
+  }
   const author_notes = $("f_author_notes").value.trim();
   if (author_notes) manifest.author_notes = author_notes;
   const notes = $("f_notes").value.trim();
@@ -260,6 +265,23 @@ function fillForm(draft, meta = {}) {
   );
   csvSet("f_rom_extensions", draft.rom_extensions);
   csvSet("f_romm_platforms", draft.romm?.platforms);
+
+  state.probedBuild = draft.build?.enabled ? draft.build : null;
+  const buildChk = $("f_build_enabled");
+  const buildPrev = $("f_build_preview");
+  if (buildChk) {
+    buildChk.checked = !!state.probedBuild;
+  }
+  if (buildPrev) {
+    if (state.probedBuild) {
+      buildPrev.style.display = "block";
+      buildPrev.textContent = JSON.stringify(state.probedBuild, null, 2);
+    } else {
+      buildPrev.style.display = "none";
+      buildPrev.textContent = "";
+    }
+  }
+
   const np = draft.netplay || {};
   $("f_netplay_supported").checked = !!(np.supported && np.stack !== "none");
   $("f_netplay_game_name").value = np.game_name || "";
@@ -574,6 +596,7 @@ async function init() {
     "f_kind",
     "f_platform",
     "f_description",
+    "f_build_enabled",
     "f_homepage",
     "f_release_github",
     "f_install_dir_name",

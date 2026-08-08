@@ -1,0 +1,88 @@
+{
+  "id": "bomberman-party-edition-psx",
+  "name": "Bomberman Party Edition",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Bomberman Party Edition (SLUS-01189) static recompilation \u2014 game host on psxrecomp",
+  "homepage": "https://github.com/TechnicallyComputers/BombermanPartyEditionRecomp",
+  "rom_identity": {
+    "crc32": [
+      "98275a08"
+    ],
+    "md5": [
+      "e0ceba6e448677f3d938b1dd176be3af",
+      "13cf2c80a2811015d604ecf4496c3287",
+      "f35d5852c178c0a1347b1ea9992daa05"
+    ],
+    "sha1": [
+      "53a509dbe859f773856f26d966f5edacbc701b4e",
+      "4735882768678923796f62878c05f7f0e81308d5"
+    ],
+    "sha256": [
+      "8bd229969aadcd9fe085ef4026209a0f230b82442a599c58d1da5da68260d3d9"
+    ],
+    "disc_serials": [
+      "SLUS-01189"
+    ],
+    "sizes": [
+      660770880
+    ],
+    "filenames": [
+      "Bomberman - Party Edition (USA).cue",
+      "Bomberman - Party Edition (USA).bin"
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "BombermanPartyEditionRecomp",
+  "launch": {
+    "linux": "Bomberman_Party_Edition_Recompiled",
+    "windows": "Bomberman_Party_Edition_Recompiled.exe",
+    "macos": "Bomberman_Party_Edition_Recompiled"
+  },
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
+}

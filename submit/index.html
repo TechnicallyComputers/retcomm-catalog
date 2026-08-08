@@ -115,7 +115,10 @@
           </div>
           <div class="row one">
             <label>
-              <strong>description</strong>
+              <strong
+                >description
+                <span class="src" data-src="description"></span
+              ></strong>
               <input id="f_description" />
             </label>
           </div>
@@ -182,10 +185,11 @@
           <p class="hint">
             <span class="req" aria-hidden="true">*</span> Launch binary names
             must match the executable filenames inside each OS release archive
-            so RetComM can find and launch the program after install. Auto-fill
-            guesses from the repo name — verify against the real binary (e.g.
-            <code>Sonic3KRecomp</code> / <code>Sonic3KRecomp.exe</code>). At
-            least one OS is required.
+            so RetComM can find and launch the program after install. Probe
+            prefers release-zip / <code>WINDOW_TITLE</code> /
+            <code>--exe-name</code> / README-SETUP (psxrecomp
+            <code>*_Recompiled</code>) — still verify before submit. At least
+            one OS is required.
           </p>
           <div class="row three">
             <label>
@@ -321,12 +325,39 @@
               <input id="f_romm_platforms" placeholder="snes" />
             </label>
           </div>
+          <h3>Local build (RetComM)</h3>
+          <p class="hint">
+            When enabled, RetComM offers <strong>Build &amp; Install</strong> /
+            <strong>Update</strong> / <strong>Generate &amp; Rebuild</strong>
+            (generate + cmake) instead of relying on the in-game setup wizard.
+            Probe fills a psxrecomp one-zip recipe when
+            <code>game.toml</code> + release assets are present.
+            <span class="src" data-src="build"></span>
+          </p>
+          <div class="row one">
+            <label>
+              <input type="checkbox" id="f_build_enabled" />
+              Include <code>build.enabled</code> recipe in the catalog title
+            </label>
+          </div>
+          <pre
+            id="f_build_preview"
+            class="hint"
+            style="
+              white-space: pre-wrap;
+              max-height: 10rem;
+              overflow: auto;
+              display: none;
+            "
+          ></pre>
+
           <h3>Netplay (recomp-net)</h3>
           <p class="hint">
             Optional. When enabled, RetComM can list this title in the
             multi-game lobby. <code>game_name</code> /
             <code>game_version</code> must match the strings baked into the
             shipping binary (WS create/join wire identity).
+            <span class="src" data-src="netplay"></span>
           </p>
           <div class="row one">
             <label>
@@ -337,8 +368,9 @@
           <div class="row">
             <label>
               <strong
-                >game_name<span class="req" aria-hidden="true">*</span></strong
-              >
+                >game_name<span class="req" aria-hidden="true">*</span>
+                <span class="src" data-src="netplay.game_name"></span
+              ></strong>
               <input
                 id="f_netplay_game_name"
                 placeholder="Star Wars: Masters of Teras Kasi"
@@ -355,7 +387,10 @@
           </div>
           <div class="row">
             <label>
-              <strong>max_slots</strong>
+              <strong
+                >max_slots
+                <span class="src" data-src="netplay.max_slots"></span
+              ></strong>
               <input id="f_netplay_max_slots" type="number" min="2" max="16" placeholder="2" />
             </label>
             <label>

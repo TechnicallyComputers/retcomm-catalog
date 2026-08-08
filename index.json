@@ -45,7 +45,10 @@
       }
     }
   },
-  "titles": [],
+  "titles": [
+    "twisted-metal4-psx",
+    "bomberman-party-edition-psx"
+  ],
   "catalog_date": "",
   "release_tag": ""
 }
