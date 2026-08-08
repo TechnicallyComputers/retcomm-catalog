@@ -1,0 +1,101 @@
+{
+  "id": "street-fighter-alpha-3-psx",
+  "name": "Street Fighter Alpha 3",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "The PlayStation port of Street Fighter Alpha 3 has added new characters to the roster, including Juli, Juni, Balrog, Dee Jay, Fei Long and T. Hawk. They come with new portraits and their own scenarios. Guile, Evil Ryu and Shin Akuma have also been added as secret characters that can be unlocked through World Tour mode, a mode that allows players to strengthen and customize the fighting style of their chosen character while traveling the world.",
+  "homepage": "https://github.com/TechnicallyComputers/Street-Fighter-Alpha-3-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "d5e20d47"
+    ],
+    "md5": [
+      "c232562dced4e65664a9c5410e6e57a3"
+    ],
+    "sha1": [
+      "ec98188f53dbfa08a59d89c981e9ca68b7f1748e"
+    ],
+    "sha256": [
+      "2cae59cc5a048066a74f58a26c8f8852545872589ea16ea164e0a48c10a4a794"
+    ],
+    "disc_serials": [
+      "SLUS-00821"
+    ],
+    "sizes": [
+      484081584
+    ],
+    "filenames": [
+      "Street Fighter Alpha 3 (USA).cue",
+      "Street Fighter Alpha 3 (USA) (Track 1).bin",
+      "Street Fighter Alpha 3 (USA) (Track 2).bin"
+    ],
+    "track_counts": [
+      2
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Street-Fighter-Alpha-3-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Street-Fighter-Alpha-3-Recomp",
+  "launch": {
+    "linux": "Street_Fighter_Alpha_3__Recompiled",
+    "windows": "Street_Fighter_Alpha_3__Recompiled.exe",
+    "macos": "Street_Fighter_Alpha_3__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Street Fighter Alpha 3",
+    "game_version": "0.1.0",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Street-Fighter-Alpha-3-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
