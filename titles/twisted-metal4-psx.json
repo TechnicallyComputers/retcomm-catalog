@@ -1,0 +1,61 @@
+{
+  "id": "twisted-metal4-psx",
+  "name": "Twisted Metal4",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Twisted Metal 4",
+  "homepage": "https://github.com/TechnicallyComputers/TwistedMetal4Recomp",
+  "rom_identity": {
+    "crc32": [
+      "020e8ae1"
+    ],
+    "md5": [
+      "0e5d822f108fcef31057645721d3d710"
+    ],
+    "sha1": [
+      "64e226413b27ea12639589b3ca2806976c795c8b"
+    ],
+    "sha256": [
+      "1be99e1d98c5b5e2d7572f3b46aa63c43ddd6f19f1b5cf179ffd853261a139f1"
+    ],
+    "disc_serials": [],
+    "sizes": [
+      384615504
+    ],
+    "filenames": [
+      "psxrecomp/docs/GAME_PROJECT_SETUP.md",
+      "psxrecomp/docs/SYMBOLS.md",
+      "Twisted Metal 4 (USA) (Rev 1).cue",
+      "Twisted Metal 4 (USA) (Rev 1) (Track 01).bin",
+      "Twisted Metal 4 (USA) (Rev 1) (Track 02).bin",
+      "Twisted Metal 4 (USA) (Rev 1) (Track 03).bin"
+    ]
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/TwistedMetal4Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    },
+    "allow_prerelease": true
+  },
+  "install_dir_name": "TwistedMetal4Recomp",
+  "launch": {
+    "linux": "TwistedMetal4Recomp",
+    "windows": "TwistedMetal4Recomp.exe",
+    "macos": "TwistedMetal4Recomp"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "notes": "Digests auto-extracted from README."
+}

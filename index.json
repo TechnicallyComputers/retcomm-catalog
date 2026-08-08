@@ -45,7 +45,9 @@
       }
     }
   },
-  "titles": [],
-  "catalog_date": "",
-  "release_tag": ""
+  "titles": [
+    "twisted-metal4-psx"
+  ],
+  "catalog_date": "2026-08-08T00:38:18Z",
+  "release_tag": "v2026.08.08.003818.4"
 }
