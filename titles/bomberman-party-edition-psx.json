@@ -1,0 +1,69 @@
+{
+  "id": "bomberman-party-edition-psx",
+  "name": "Bomberman Party Edition",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Bomberman Party Edition (SLUS-01189) static recompilation — game host on psxrecomp",
+  "homepage": "https://github.com/TechnicallyComputers/BombermanPartyEditionRecomp",
+  "rom_identity": {
+    "crc32": [
+      "98275a08"
+    ],
+    "md5": [
+      "e0ceba6e448677f3d938b1dd176be3af",
+      "13cf2c80a2811015d604ecf4496c3287",
+      "f35d5852c178c0a1347b1ea9992daa05"
+    ],
+    "sha1": [
+      "53a509dbe859f773856f26d966f5edacbc701b4e",
+      "4735882768678923796f62878c05f7f0e81308d5"
+    ],
+    "sha256": [
+      "8bd229969aadcd9fe085ef4026209a0f230b82442a599c58d1da5da68260d3d9"
+    ],
+    "disc_serials": [
+      "SLUS-01189"
+    ],
+    "sizes": [
+      660770880
+    ],
+    "filenames": [
+      "DISC.md",
+      "psxrecomp/docs/GAME_PROJECT_SETUP.md",
+      "SCPH1001.BIN",
+      "bpe/Bomberman Party Edition.cue",
+      "psxrecomp/docs/LOCAL_CODEGEN_SDK.md",
+      "ISSUES.md",
+      "bpe/*.bin",
+      "bpe/*.cue",
+      "Bomberman - Party Edition (USA).cue",
+      "Bomberman - Party Edition (USA).bin"
+    ]
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "BombermanPartyEditionRecomp",
+  "launch": {
+    "linux": "BombermanPartyEditionRecomp",
+    "windows": "BombermanPartyEditionRecomp.exe",
+    "macos": "BombermanPartyEditionRecomp"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "notes": "Digests auto-extracted from README, DISC.md."
+}
