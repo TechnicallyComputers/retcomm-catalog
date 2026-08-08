@@ -23,13 +23,15 @@
       384615504
     ],
     "filenames": [
-      "psxrecomp/docs/GAME_PROJECT_SETUP.md",
-      "psxrecomp/docs/SYMBOLS.md",
       "Twisted Metal 4 (USA) (Rev 1).cue",
       "Twisted Metal 4 (USA) (Rev 1) (Track 01).bin",
       "Twisted Metal 4 (USA) (Rev 1) (Track 02).bin",
       "Twisted Metal 4 (USA) (Rev 1) (Track 03).bin"
-    ]
+    ],
+    "track_counts": [
+      23
+    ],
+    "require_cue": true
   },
   "rom_extensions": [
     ".cue",
@@ -46,9 +48,35 @@
   },
   "install_dir_name": "TwistedMetal4Recomp",
   "launch": {
-    "linux": "TwistedMetal4Recomp",
-    "windows": "TwistedMetal4Recomp.exe",
-    "macos": "TwistedMetal4Recomp"
+    "linux": "TwistedMetal4_Recompiled",
+    "windows": "TwistedMetal4_Recompiled.exe",
+    "macos": "TwistedMetal4_Recompiled"
+  },
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/TwistedMetal4Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
   },
   "romm": {
     "platforms": [
@@ -57,5 +85,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README."
+  "notes": "Digests auto-extracted from README. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
 }

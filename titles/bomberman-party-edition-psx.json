@@ -28,17 +28,10 @@
       660770880
     ],
     "filenames": [
-      "DISC.md",
-      "psxrecomp/docs/GAME_PROJECT_SETUP.md",
-      "SCPH1001.BIN",
-      "bpe/Bomberman Party Edition.cue",
-      "psxrecomp/docs/LOCAL_CODEGEN_SDK.md",
-      "ISSUES.md",
-      "bpe/*.bin",
-      "bpe/*.cue",
       "Bomberman - Party Edition (USA).cue",
       "Bomberman - Party Edition (USA).bin"
-    ]
+    ],
+    "require_cue": true
   },
   "rom_extensions": [
     ".cue",
@@ -54,9 +47,35 @@
   },
   "install_dir_name": "BombermanPartyEditionRecomp",
   "launch": {
-    "linux": "BombermanPartyEditionRecomp",
-    "windows": "BombermanPartyEditionRecomp.exe",
-    "macos": "BombermanPartyEditionRecomp"
+    "linux": "Bomberman_Party_Edition_Recompiled",
+    "windows": "Bomberman_Party_Edition_Recompiled.exe",
+    "macos": "Bomberman_Party_Edition_Recompiled"
+  },
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/BombermanPartyEditionRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
   },
   "romm": {
     "platforms": [
@@ -65,5 +84,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README, DISC.md."
+  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
 }

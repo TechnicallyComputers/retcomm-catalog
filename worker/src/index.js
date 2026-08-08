@@ -600,12 +600,276 @@ function inferAssetGlobs(assetNames) {
   return globs;
 }
 
-function inferLaunch(repoName, assetGlobs) {
-  const base = repoName.replace(/[^A-Za-z0-9._-]/g, "");
+/** CMake string(MAKE_C_IDENTIFIER …) for WINDOW_TITLE → OUTPUT_NAME. */
+function cmakeMakeCIdentifier(title) {
+  let s = String(title || "").replace(/[^A-Za-z0-9_]/g, "_");
+  if (/^[0-9]/.test(s)) s = `_${s}`;
+  return s;
+}
+
+function isJunkLaunchName(name) {
+  const base = String(name || "").split(/[/\\]/).pop() || "";
+  const lower = base.toLowerCase();
+  if (!base || base.startsWith(".")) return true;
+  if (
+    [
+      "license",
+      "makefile",
+      "readme",
+      "version",
+      "vagrantfile",
+      "cmakeLists.txt",
+      "ctors",
+      "asm64",
+      "hello_32",
+      "uninstall.exe",
+    ].includes(lower)
+  )
+    return true;
+  if (lower.startsWith("crash-")) return true;
+  if (/\.(md|txt|json|toml|cmake|in|yml|yaml)$/i.test(base)) return true;
+  return false;
+}
+
+function isLikelyRomFilename(name) {
+  const base = String(name || "").split(/[/\\]/).pop() || "";
+  if (!base || /[/\\]/.test(String(name || ""))) return false;
+  const lower = base.toLowerCase();
+  if (/\.(md|txt|json|toml|cmake|yml|yaml|c|h|cpp|hpp)$/i.test(base)) return false;
+  if (/^scph\d+/i.test(base) || lower === "bios.bin" || lower === "gba_bios.bin")
+    return false;
+  if (lower === "disc.md" || lower === "issues.md" || lower === "readme.md") return false;
+  // Genesis dumps use .md — require a game-like basename so markdown files stay out.
+  if (lower.endsWith(".md")) {
+    return /\(|usa|eur|jpn|japan|europe|sonic|genesis/i.test(base);
+  }
+  return /\.(sfc|smc|gba|z64|n64|v64|gen|bin|cue|iso|chd|nds)$/i.test(base);
+}
+
+function scoreLaunchCandidate(name, { wantExe = false } = {}) {
+  const base = String(name || "").split(/[/\\]/).pop() || "";
+  if (isJunkLaunchName(base)) return -100;
+  // Prefer archive root entries (no nested path).
+  if (String(name).includes("/")) return -50;
+  const lower = base.toLowerCase();
+  const isExe = lower.endsWith(".exe");
+  if (wantExe && !isExe) return -40;
+  if (!wantExe && isExe) return -40;
+  if (!wantExe && base.includes(".")) return -20;
+  let score = 10;
+  if (/recompiled/i.test(base)) score += 50;
+  if (/recomp$/i.test(base.replace(/\.exe$/i, ""))) score += 5;
+  return score;
+}
+
+function pickBestLaunchName(names, { wantExe = false } = {}) {
+  let best = "";
+  let bestScore = 0;
+  for (const n of names || []) {
+    const base = String(n).split(/[/\\]/).pop() || "";
+    const score = scoreLaunchCandidate(base, { wantExe });
+    if (score > bestScore) {
+      bestScore = score;
+      best = base;
+    }
+  }
+  return bestScore >= 40 ? best : bestScore >= 10 && (names || []).length === 1 ? best : "";
+}
+
+function inferLaunchFromCmake(cmakeText) {
+  if (!cmakeText) return "";
+  const exe = cmakeText.match(/\bEXE_NAME\s+"([^"]+)"/i);
+  if (exe?.[1]) return cmakeMakeCIdentifier(exe[1]);
+  const win = cmakeText.match(/\bWINDOW_TITLE\s+"([^"]+)"/i);
+  if (win?.[1]) return cmakeMakeCIdentifier(win[1]);
+  return "";
+}
+
+function inferLaunchFromPackageScript(text) {
+  if (!text) return "";
+  const m = text.match(/--exe-name\s+(\S+)/i);
+  return m?.[1] ? m[1].replace(/^["']|["']$/g, "") : "";
+}
+
+function inferLaunchFromReadmeSetup(text) {
+  if (!text) return "";
+  // "2. Run TwistedMetal4_Recompiled." / "Run `Bomberman_Party_Edition_Recompiled`."
+  const m =
+    text.match(/^\s*\d+\.\s*Run\s+`?([A-Za-z0-9][A-Za-z0-9._-]*)`?/im) ||
+    text.match(/\bRun\s+`([A-Za-z0-9][A-Za-z0-9._-]*)`/i);
+  return m?.[1] && !isJunkLaunchName(m[1]) ? m[1] : "";
+}
+
+/** Guess OUTPUT_NAME when only the repo folder is known (psxrecomp convention). */
+function inferLaunchFromRepoName(repoName) {
+  const base = String(repoName || "").replace(/[^A-Za-z0-9._-]/g, "");
+  if (!base) return "";
+  // TwistedMetal4Recomp → TwistedMetal4_Recompiled
+  const stripped = base.replace(/Recomp$/i, "").replace(/Decomp$/i, "");
+  if (stripped && stripped !== base) {
+    return `${stripped}_Recompiled`;
+  }
+  return base;
+}
+
+/**
+ * Read top-level ZIP entry names via a Range fetch of the central directory.
+ * Falls back quietly when the CDN rejects Range or the archive is huge.
+ */
+async function listZipTopLevelNames(downloadUrl, env) {
+  if (!downloadUrl) return [];
+  try {
+    const headers = {
+      "User-Agent": "retcomm-catalog-submit",
+      Range: "bytes=-262144",
+    };
+    if (env.GITHUB_TOKEN) headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
+    const res = await fetch(downloadUrl, { headers, redirect: "follow" });
+    if (!(res.ok || res.status === 206)) return [];
+    const buf = new Uint8Array(await res.arrayBuffer());
+    if (buf.length < 22) return [];
+
+    // EOCD signature 0x06054b50
+    let eocd = -1;
+    for (let i = buf.length - 22; i >= 0; i--) {
+      if (
+        buf[i] === 0x50 &&
+        buf[i + 1] === 0x4b &&
+        buf[i + 2] === 0x05 &&
+        buf[i + 3] === 0x06
+      ) {
+        eocd = i;
+        break;
+      }
+    }
+    if (eocd < 0) return [];
+    const view = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
+    const cdSize = view.getUint32(eocd + 12, true);
+    const cdOffset = view.getUint32(eocd + 16, true);
+    const totalSize = cdOffset + cdSize + (buf.length - eocd);
+    // If our window does not include the full CD, re-fetch exactly.
+    let cd = buf;
+    let cdStartInBuf = eocd - cdSize;
+    if (cdStartInBuf < 0 || cdSize > buf.length) {
+      const from = Math.max(0, totalSize - cdSize - 256);
+      const exact = await fetch(downloadUrl, {
+        headers: {
+          ...headers,
+          Range: `bytes=${from}-${totalSize - 1}`,
+        },
+        redirect: "follow",
+      });
+      if (!(exact.ok || exact.status === 206)) return [];
+      cd = new Uint8Array(await exact.arrayBuffer());
+      // locate EOCD again
+      eocd = -1;
+      for (let i = cd.length - 22; i >= 0; i--) {
+        if (
+          cd[i] === 0x50 &&
+          cd[i + 1] === 0x4b &&
+          cd[i + 2] === 0x05 &&
+          cd[i + 3] === 0x06
+        ) {
+          eocd = i;
+          break;
+        }
+      }
+      if (eocd < 0) return [];
+      cdStartInBuf = eocd - cdSize;
+      if (cdStartInBuf < 0) return [];
+    }
+
+    const names = [];
+    let p = cdStartInBuf;
+    const cdView = new DataView(cd.buffer, cd.byteOffset, cd.byteLength);
+    while (p + 46 <= eocd) {
+      if (
+        cd[p] !== 0x50 ||
+        cd[p + 1] !== 0x4b ||
+        cd[p + 2] !== 0x01 ||
+        cd[p + 3] !== 0x02
+      )
+        break;
+      const nameLen = cdView.getUint16(p + 28, true);
+      const extraLen = cdView.getUint16(p + 30, true);
+      const commentLen = cdView.getUint16(p + 32, true);
+      const nameBytes = cd.subarray(p + 46, p + 46 + nameLen);
+      const name = new TextDecoder("utf-8", { fatal: false }).decode(nameBytes);
+      if (name && !name.endsWith("/")) names.push(name.replace(/\\/g, "/"));
+      p += 46 + nameLen + extraLen + commentLen;
+    }
+    return names;
+  } catch {
+    return [];
+  }
+}
+
+function assetMatchesGlob(name, glob) {
+  if (!glob) return false;
+  const esc = glob
+    .replace(/[.+^${}()|[\]\\]/g, "\\$&")
+    .replace(/\*/g, ".*")
+    .replace(/\?/g, ".");
+  return new RegExp(`^${esc}$`, "i").test(name);
+}
+
+async function inferLaunch(repoName, assetGlobs, opts = {}) {
+  const {
+    cmakeText = "",
+    packageScript = "",
+    readmeSetup = "",
+    releaseAssets = [],
+    env = {},
+  } = opts;
+
+  let source = "guessed";
+  let base =
+    inferLaunchFromPackageScript(packageScript) ||
+    inferLaunchFromCmake(cmakeText) ||
+    inferLaunchFromReadmeSetup(readmeSetup);
+
+  if (base) {
+    source = packageScript && inferLaunchFromPackageScript(packageScript)
+      ? "package script"
+      : cmakeText && inferLaunchFromCmake(cmakeText)
+        ? "cmake WINDOW_TITLE"
+        : "README-SETUP";
+  }
+
+  // Prefer a real top-level binary from the linux (then windows) release zip.
+  const pickAsset = (glob) =>
+    (releaseAssets || []).find((a) => assetMatchesGlob(a.name, glob));
+  for (const [osKey, wantExe] of [
+    ["linux", false],
+    ["windows", true],
+    ["macos", false],
+  ]) {
+    const glob = assetGlobs[osKey];
+    if (!glob) continue;
+    const asset = pickAsset(glob);
+    if (!asset?.browser_download_url) continue;
+    const names = await listZipTopLevelNames(asset.browser_download_url, env);
+    const hit = pickBestLaunchName(names, { wantExe });
+    if (hit) {
+      base = hit.replace(/\.exe$/i, "");
+      source = `release zip (${osKey})`;
+      break;
+    }
+  }
+
+  if (!base) {
+    base = inferLaunchFromRepoName(repoName);
+    source = "repo name → *_Recompiled";
+  }
+
+  const stem = String(base).replace(/\.exe$/i, "");
   return {
-    linux: assetGlobs.linux ? base : "",
-    windows: assetGlobs.windows ? `${base}.exe` : "",
-    macos: assetGlobs.macos ? base : "",
+    launch: {
+      linux: assetGlobs.linux ? stem : "",
+      windows: assetGlobs.windows ? `${stem}.exe` : "",
+      macos: assetGlobs.macos ? stem : "",
+    },
+    source,
   };
 }
 
@@ -692,7 +956,38 @@ async function fetchRepoText(slug, path, env) {
   return null;
 }
 
-/** Pull [netplay] / [prepare_disc] fields from game.toml for form autofill. */
+function tomlSection(text, name) {
+  const re = new RegExp(
+    `\\[${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]([^\\[]*)`,
+    "i"
+  );
+  const m = text.match(re);
+  return m ? m[1] : "";
+}
+
+function tomlString(section, key) {
+  const m = section.match(
+    new RegExp(`^\\s*${key}\\s*=\\s*["']([^"']*)["']`, "im")
+  );
+  return m ? m[1] : "";
+}
+
+function tomlInt(section, key) {
+  const m = section.match(new RegExp(`^\\s*${key}\\s*=\\s*(-?\\d+)`, "im"));
+  if (!m) return null;
+  const n = Number(m[1]);
+  return Number.isFinite(n) ? n : null;
+}
+
+/** Strip trailing " Recompiled" / similar from WINDOW_TITLE for lobby game_name. */
+function netplayNameFromWindowTitle(title) {
+  let s = String(title || "").trim();
+  if (!s) return "";
+  s = s.replace(/\s+Recompiled\s*$/i, "").replace(/\s+Recomp\s*$/i, "").trim();
+  return s;
+}
+
+/** Pull [netplay] / [prepare_disc] / [game] / [runtime] from game.toml. */
 function extractGameTomlDisc(text) {
   const out = {
     track_counts: [],
@@ -702,21 +997,17 @@ function extractGameTomlDisc(text) {
     sizes: [],
     filenames: [],
     disc_serials: [],
+    players: null,
+    game_name: "",
+    window_title: "",
+    has_netplay_section: false,
     sources: [],
   };
   if (!text || typeof text !== "string") return out;
 
-  const section = (name) => {
-    const re = new RegExp(
-      `\\[${name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\]([^\\[]*)`,
-      "i"
-    );
-    const m = text.match(re);
-    return m ? m[1] : "";
-  };
-
-  const np = section("netplay");
+  const np = tomlSection(text, "netplay");
   if (np) {
+    out.has_netplay_section = true;
     const tr = np.match(/required_tracks\s*=\s*(\d+)/i);
     if (tr) {
       const n = Number(tr[1]);
@@ -727,12 +1018,10 @@ function extractGameTomlDisc(text) {
     if (out.track_counts.length || out.require_cue) out.sources.push("game.toml[netplay]");
   }
 
-  const pd = section("prepare_disc");
+  const pd = tomlSection(text, "prepare_disc");
   if (pd) {
     const arr = (key) => {
-      const m = pd.match(
-        new RegExp(`${key}\\s*=\\s*\\[([^\\]]*)\\]`, "i")
-      );
+      const m = pd.match(new RegExp(`${key}\\s*=\\s*\\[([^\\]]*)\\]`, "i"));
       if (!m) return [];
       return m[1]
         .split(",")
@@ -752,18 +1041,132 @@ function extractGameTomlDisc(text) {
       out.sources.push("game.toml[prepare_disc]");
   }
 
-  const game = section("game");
+  const game = tomlSection(text, "game");
   if (game) {
-    const id = game.match(/^\s*id\s*=\s*["']([^"']+)["']/im);
-    if (id) out.disc_serials.push(id[1]);
-    const disc = game.match(/^\s*disc\s*=\s*["']([^"']+\.cue)["']/im);
-    if (disc) {
-      const base = disc[1].split(/[/\\]/).pop();
+    const id = tomlString(game, "id");
+    if (id) out.disc_serials.push(id);
+    const name = tomlString(game, "name");
+    if (name) out.game_name = name;
+    const players = tomlInt(game, "players");
+    if (players != null && players >= 1) out.players = players;
+    const disc = tomlString(game, "disc");
+    if (disc && /\.cue$/i.test(disc)) {
+      const base = disc.split(/[/\\]/).pop();
       if (base && !out.filenames.includes(base)) out.filenames.push(base);
     }
   }
 
+  const runtime = tomlSection(text, "runtime");
+  if (runtime) {
+    const wt = tomlString(runtime, "window_title");
+    if (wt) out.window_title = wt;
+  }
+
   return out;
+}
+
+/** Parse setup-wizard catalog_identity.json (marketing + digests). */
+function parseCatalogIdentity(text) {
+  const out = {
+    description: "",
+    publisher: "",
+    year: "",
+    region: "",
+    players: null,
+    game_name: "",
+    md5: [],
+    sha1: [],
+    sizes: [],
+    filenames: [],
+    track_counts: [],
+    require_cue: false,
+    disc_serials: [],
+    ok: false,
+  };
+  if (!text || typeof text !== "string") return out;
+  let j;
+  try {
+    j = JSON.parse(text);
+  } catch {
+    return out;
+  }
+  if (!j || typeof j !== "object") return out;
+  out.ok = true;
+  const m = j.marketing || {};
+  out.description = String(m.description || "").trim();
+  out.publisher = String(m.publisher || "").trim();
+  out.year = String(m.year || "").trim();
+  out.region = String(m.region || "").trim();
+  if (Number.isFinite(Number(m.players)) && Number(m.players) >= 1)
+    out.players = Number(m.players);
+  if (j.game?.name) out.game_name = String(j.game.name).trim();
+  if (j.game?.id) out.disc_serials.push(String(j.game.id).trim());
+  const ri = j.rom_identity || {};
+  if (ri.cue_name) out.filenames.push(String(ri.cue_name));
+  if (ri.bin_name) out.filenames.push(String(ri.bin_name));
+  if (Array.isArray(ri.track_counts)) {
+    out.track_counts = ri.track_counts
+      .map(Number)
+      .filter((n) => Number.isInteger(n) && n >= 1);
+  }
+  out.require_cue = !!ri.require_cue || out.track_counts.some((n) => n > 1);
+  const dt = ri.data_track || {};
+  if (dt.md5) out.md5.push(String(dt.md5).toLowerCase());
+  if (dt.sha1) out.sha1.push(String(dt.sha1).toLowerCase());
+  if (Number.isFinite(Number(dt.size)) && Number(dt.size) > 0)
+    out.sizes.push(Number(dt.size));
+  return out;
+}
+
+function detectNetplaySupported(cmakeText, tomlDisc) {
+  if (cmakeText) {
+    if (/\bENABLE_NETPLAY_IF_PRESENT\b/i.test(cmakeText)) return true;
+    if (/set\s*\(\s*PSX_NETPLAY\s+ON\b/i.test(cmakeText)) return true;
+    if (/PSX_NETPLAY\s+ON\s+CACHE/i.test(cmakeText)) return true;
+  }
+  // Disc TOC gate without CMake opt-in is weak — still treat as netplay-ready
+  // for psxrecomp titles that ship [netplay] required_tracks.
+  if (tomlDisc?.has_netplay_section && tomlDisc.track_counts?.length) return true;
+  return false;
+}
+
+function stripVersionV(tag) {
+  let s = String(tag || "").trim();
+  if ((s[0] === "v" || s[0] === "V") && s.length > 1 && /\d/.test(s[1]))
+    s = s.slice(1);
+  return s;
+}
+
+function inferPsxBuildRecipe(slug, launchLinux) {
+  return {
+    enabled: true,
+    source: {
+      github: slug,
+      ref: "main",
+    },
+    toolchain: {
+      id: "cmake-clang-v1",
+      github: "TechnicallyComputers/retcomm-toolchains",
+      min_version: "1.0.3",
+      asset_glob: {
+        linux: "*cmake-clang-v1*linux*",
+        windows: "*cmake-clang-v1*windows*",
+        macos: "*cmake-clang-v1*macos*",
+      },
+    },
+    generate: {
+      engine: "psxrecomp",
+      config: "game.toml",
+    },
+    cmake: {
+      build_dir: "build",
+      // psxrecomp_add_game_runtime(psx-runtime …); OUTPUT_NAME is launch binary.
+      target: "psx-runtime",
+      config: "Release",
+    },
+    // Stash for notes only — not a catalog field.
+    _launch_hint: launchLinux || "",
+  };
 }
 
 async function probe(request, env) {
@@ -807,8 +1210,13 @@ async function probe(request, env) {
       }
     }
   }
+  let releaseAssets = [];
   if (release?.assets) {
     assets = release.assets.map((a) => a.name);
+    releaseAssets = release.assets.map((a) => ({
+      name: a.name,
+      browser_download_url: a.browser_download_url,
+    }));
   }
 
   const readmeRes = await ghApi(`/repos/${slug}/readme`, env);
@@ -825,12 +1233,20 @@ async function probe(request, env) {
   }
   const discMd = (await fetchRepoText(slug, "DISC.md", env)) || "";
   const gameToml = (await fetchRepoText(slug, "game.toml", env)) || "";
+  const cmakeText = (await fetchRepoText(slug, "CMakeLists.txt", env)) || "";
+  const packageScript =
+    (await fetchRepoText(slug, "scripts/package_setup_release.sh", env)) || "";
+  const readmeSetup = (await fetchRepoText(slug, "README-SETUP.txt", env)) || "";
+  const catalogIdentityText =
+    (await fetchRepoText(slug, "catalog_identity.json", env)) || "";
+  const versionText = (await fetchRepoText(slug, "VERSION", env)) || "";
+  const catalogId = parseCatalogIdentity(catalogIdentityText);
   const tomlDisc = extractGameTomlDisc(gameToml);
   const digests = mergeDigestSets(
     { ...extractDigests(readme), sources: readme ? ["README"] : [] },
     { ...extractDigests(discMd), sources: discMd ? ["DISC.md"] : [] }
   );
-  // prepare_disc digests are authoritative for psxrecomp titles when present.
+  // prepare_disc / catalog_identity digests are authoritative for psxrecomp.
   if (tomlDisc.md5.length) digests.md5 = [...new Set([...tomlDisc.md5, ...digests.md5])];
   if (tomlDisc.sha1.length) digests.sha1 = [...new Set([...tomlDisc.sha1, ...digests.sha1])];
   if (tomlDisc.sizes.length)
@@ -843,17 +1259,75 @@ async function probe(request, env) {
     ];
   if (tomlDisc.sources.length)
     digests.sources = [...new Set([...digests.sources, ...tomlDisc.sources])];
+  if (catalogId.ok) {
+    if (catalogId.md5.length)
+      digests.md5 = [...new Set([...catalogId.md5, ...digests.md5])];
+    if (catalogId.sha1.length)
+      digests.sha1 = [...new Set([...catalogId.sha1, ...digests.sha1])];
+    if (catalogId.sizes.length)
+      digests.sizes = [...new Set([...catalogId.sizes, ...digests.sizes])];
+    if (catalogId.filenames.length)
+      digests.filenames = [
+        ...new Set([...catalogId.filenames, ...digests.filenames]),
+      ];
+    if (catalogId.disc_serials.length)
+      digests.disc_serials = [
+        ...new Set([...catalogId.disc_serials, ...digests.disc_serials]),
+      ];
+    digests.sources = [...new Set([...digests.sources, "catalog_identity.json"])];
+  }
+
+  // Drop doc/source paths that leaked into digest filename scrapes.
+  digests.filenames = (digests.filenames || []).filter(isLikelyRomFilename);
+
+  const track_counts = [
+    ...new Set([
+      ...(catalogId.track_counts || []),
+      ...(tomlDisc.track_counts || []),
+    ]),
+  ];
+  const require_cue =
+    !!catalogId.require_cue ||
+    !!tomlDisc.require_cue ||
+    track_counts.some((n) => n > 1);
 
   const blob = `${repo.name} ${repo.description || ""} ${readme.slice(0, 2000)}`;
   const platform = guessPlatform(blob) || (gameToml ? "psx" : "");
   const asset_glob = inferAssetGlobs(assets);
   const install_dir_name = repo.name;
+  const inferred = await inferLaunch(install_dir_name, asset_glob, {
+    cmakeText,
+    packageScript,
+    readmeSetup,
+    releaseAssets,
+    env,
+  });
+
+  // Description: setup-wizard marketing blurb beats GitHub repo description.
+  let description = "";
+  let descriptionSrc = "missing";
+  if (catalogId.description) {
+    description = catalogId.description;
+    descriptionSrc = "catalog_identity.marketing";
+  } else if (repo.description) {
+    description = repo.description;
+    descriptionSrc = "repo";
+  }
+
+  const displayName = displayNameFromRepo(repo.name);
+  const players =
+    catalogId.players != null
+      ? catalogId.players
+      : tomlDisc.players != null
+        ? tomlDisc.players
+        : null;
+
   const draft = {
     id: slugifyId(repo.name, platform || "game"),
-    name: displayNameFromRepo(repo.name),
+    name: displayName,
     kind: /decomp/i.test(repo.name + (repo.description || "")) ? "decomp" : "recomp",
     platform: platform || "",
-    description: repo.description || "",
+    description,
     homepage: repo.html_url,
     rom_identity: {
       crc32: digests.crc32,
@@ -863,20 +1337,18 @@ async function probe(request, env) {
       disc_serials: digests.disc_serials,
       sizes: digests.sizes,
       filenames: digests.filenames,
-      track_counts: tomlDisc.track_counts,
-      require_cue: !!tomlDisc.require_cue,
+      track_counts,
+      require_cue,
     },
     rom_extensions:
-      platform === "psx" || tomlDisc.track_counts.length
-        ? [".cue", ".bin"]
-        : [],
+      platform === "psx" || track_counts.length ? [".cue", ".bin"] : [],
     release: {
       github: slug,
       allow_prerelease: allowPrerelease,
       asset_glob,
     },
     install_dir_name,
-    launch: inferLaunch(install_dir_name, asset_glob),
+    launch: inferred.launch,
     romm: { platforms: [] },
     notes: digests.sources.length
       ? `Digests auto-extracted from ${digests.sources.join(", ")}.`
@@ -885,6 +1357,77 @@ async function probe(request, env) {
 
   // Drop allow_prerelease if false to match most catalog entries
   if (!allowPrerelease) delete draft.release.allow_prerelease;
+
+  const field_sources = {
+    "release.github": "repo",
+    homepage: "repo",
+    description: descriptionSrc,
+    name: "guessed",
+    id: "guessed",
+    platform: platform ? "guessed" : "missing",
+    rom_identity: digests.sources.length ? digests.sources.join("+") : "missing",
+    "release.asset_glob": assets.length ? "release assets" : "default",
+    launch: inferred.source,
+  };
+
+  // Netplay: CMake opt-in / game.toml [netplay] + lobby identity strings.
+  const netplayOn = detectNetplaySupported(cmakeText, tomlDisc);
+  let netplaySrc = "missing";
+  if (netplayOn) {
+    const fromTitle = netplayNameFromWindowTitle(tomlDisc.window_title);
+    const game_name =
+      fromTitle ||
+      catalogId.game_name ||
+      tomlDisc.game_name ||
+      displayName;
+    let game_version = "";
+    if (release?.tag_name) {
+      game_version = stripVersionV(release.tag_name);
+      netplaySrc = "release tag + game.toml/cmake";
+    } else if (versionText.trim()) {
+      game_version = stripVersionV(versionText.split(/\r?\n/)[0]);
+      netplaySrc = "VERSION + game.toml/cmake";
+    } else {
+      game_version = "0.1.0";
+      netplaySrc = "game.toml/cmake (version defaulted)";
+    }
+    let max_slots = players != null ? players : 2;
+    if (!Number.isFinite(max_slots) || max_slots < 2) max_slots = 2;
+    draft.netplay = {
+      supported: true,
+      stack: "recomp-net",
+      game_name,
+      game_version,
+      max_slots,
+      transports: ["lan", "ice"],
+      match_caps_schema: platform === "psx" || gameToml ? "psx-v1" : "",
+    };
+    if (!draft.netplay.match_caps_schema) delete draft.netplay.match_caps_schema;
+    field_sources.netplay = netplaySrc;
+    field_sources["netplay.game_name"] = fromTitle
+      ? "game.toml[runtime].window_title"
+      : catalogId.game_name
+        ? "catalog_identity.game.name"
+        : "guessed";
+    field_sources["netplay.max_slots"] =
+      catalogId.players != null
+        ? "catalog_identity.marketing.players"
+        : tomlDisc.players != null
+          ? "game.toml[game].players"
+          : "default";
+  }
+
+  // Local Build & Install recipe for one-zip psxrecomp titles.
+  if (
+    (platform === "psx" || !!gameToml) &&
+    gameToml &&
+    Object.values(asset_glob).some(Boolean)
+  ) {
+    const build = inferPsxBuildRecipe(slug, inferred.launch.linux);
+    delete build._launch_hint;
+    draft.build = build;
+    field_sources.build = "psxrecomp one-zip defaults";
+  }
 
   return json(
     {
@@ -895,17 +1438,7 @@ async function probe(request, env) {
         release_tag: release?.tag_name || null,
         assets,
         digest_sources: digests.sources,
-        field_sources: {
-          "release.github": "repo",
-          homepage: "repo",
-          description: "repo",
-          name: "guessed",
-          id: "guessed",
-          platform: platform ? "guessed" : "missing",
-          rom_identity: digests.sources.length ? digests.sources.join("+") : "missing",
-          "release.asset_glob": assets.length ? "release assets" : "default",
-          launch: "guessed",
-        },
+        field_sources,
       },
     },
     200,
@@ -1059,6 +1592,25 @@ function normalizeManifest(m) {
   if (m.bios_identity === null) out.bios_identity = null;
   else if (m.bios_identity && typeof m.bios_identity === "object") {
     out.bios_identity = m.bios_identity;
+  }
+  if (m.build && m.build.enabled) {
+    // Pass through probe-inferred RetComM local-build recipe (validated lightly).
+    const b = m.build;
+    out.build = {
+      enabled: true,
+      source: {
+        github: String(b.source?.github || out.release.github || "").trim(),
+        ref: String(b.source?.ref || "main").trim() || "main",
+      },
+      toolchain: b.toolchain && typeof b.toolchain === "object" ? b.toolchain : undefined,
+      generate: b.generate && typeof b.generate === "object" ? b.generate : undefined,
+      cmake: b.cmake && typeof b.cmake === "object" ? b.cmake : undefined,
+      sdk: b.sdk && typeof b.sdk === "object" ? b.sdk : undefined,
+    };
+    if (!out.build.toolchain) delete out.build.toolchain;
+    if (!out.build.generate) delete out.build.generate;
+    if (!out.build.cmake) delete out.build.cmake;
+    if (!out.build.sdk) delete out.build.sdk;
   }
   // Drop empty homepage
   if (!out.homepage) delete out.homepage;
