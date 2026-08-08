@@ -1,0 +1,101 @@
+{
+  "id": "bomberman-world-psx",
+  "name": "Bomberman World",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Bomber worlds. To complete the areas, you must control Bomberman and set bombs to destroy enemies and obstacles that will lead to the exit. To be able to complete each level, the player must locate and pick up all of the Crystals on the map. Once this is complete, the door to the exit will open, and the player is allowed to move on to the next area. In the fourth area of each world, the player will have to defeat a Dark Force Bomber, and an extra boss that is themed after the type of world the setting is in. Once you defeat a Dark Force Bomber, the player is given a unique battle armor to wear for the next boss battle, which has a normal attack and a special attack. The battle armor is only used for the boss battles, meaning once the player advances to the next world, the battle armor will be lost. As such, it is recommended that players take full advantage of the armor.",
+  "homepage": "https://github.com/TechnicallyComputers/Bomberman-World-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "18ec8c9b"
+    ],
+    "md5": [
+      "c06e80c10474113c76e7d424566c3ddb",
+      "eed838e75e68516d01a3dab64e34d76b"
+    ],
+    "sha1": [
+      "18c5172fe0ab64bb80f983791cf735f3f0df918a"
+    ],
+    "sha256": [
+      "68879e0a8fb326576f7f3af0e09adf6a872670ffde2000335d87e3ee94be78c7"
+    ],
+    "disc_serials": [
+      "SLUS-00680"
+    ],
+    "sizes": [
+      657809712
+    ],
+    "filenames": [
+      "Bomberman World (USA).cue",
+      "Bomberman World (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Bomberman-World-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Bomberman-World-Recomp",
+  "launch": {
+    "linux": "Bomberman_World__Recompiled",
+    "windows": "Bomberman_World__Recompiled.exe",
+    "macos": "Bomberman_World__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Bomberman World",
+    "game_version": "0.1.0",
+    "max_slots": 5,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Bomberman-World-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
