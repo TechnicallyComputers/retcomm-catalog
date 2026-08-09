@@ -1,0 +1,100 @@
+{
+  "id": "metal-slug-x-psx",
+  "name": "Metal Slug X",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Metal Slug X is a run and gun video game in the Metal Slug series. The PlayStation version was released in North America and PAL regions by Agetec and features the same \"Combat School\" mode featured in the console versions of the first two games.",
+  "homepage": "https://github.com/TechnicallyComputers/Metal-Slug-X-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "34100b04"
+    ],
+    "md5": [
+      "37d9e1179a32661800e74858009a4f8b"
+    ],
+    "sha1": [
+      "f1ea9a0ae2115f476bd4767b1ac0ba9d0b5ac972"
+    ],
+    "sha256": [
+      "45cde149878fe945d0219fd0f61ca09856aee66bdcc9119de21c0583f1d0667d"
+    ],
+    "disc_serials": [
+      "SLUS-01212"
+    ],
+    "sizes": [
+      104315904
+    ],
+    "filenames": [
+      "Metal Slug X (USA).cue",
+      "Metal Slug X (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Metal-Slug-X-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Metal-Slug-X-Recomp",
+  "launch": {
+    "linux": "Metal_Slug_X__Recompiled",
+    "windows": "Metal_Slug_X__Recompiled.exe",
+    "macos": "Metal_Slug_X__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Metal Slug X",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Metal-Slug-X-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
