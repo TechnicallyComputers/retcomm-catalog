@@ -1,0 +1,100 @@
+{
+  "id": "rampage-through-time-psx",
+  "name": "Rampage Through Time",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Rampage is a series of video games released by Midway for various consoles. The basic premise of the series is that the player controls a human transformed into a giant monster by a lab accident. The gameplay revolves around using your monster to destroy cities around the world while attacking or avoiding military forces. Rampage Through Time is the fourth game in the Rampage series. It was released on June 9, 2000. Its predecessor is Rampage 2: Universal Tour and it is followed by Rampage: Total Destruction. In the game, 7 previous Scumlabs monsters, plus a new one, use a time machine to rampage through time. The world is again rebuilding after the events of Universal Tour. To clean up the mess quicker, Scumlabs invent a time machine to send people back in time to fix the mess without having to do it in the present. Unfortunately, the monsters, who have somehow made it back to Earth, appear and run into the machine. They begin terrorizing the past, present, and future, messing up the time stream.",
+  "homepage": "https://github.com/TechnicallyComputers/Rampage---Through-Time-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "920eb348"
+    ],
+    "md5": [
+      "5a892b92599694bf9e16408b8faef3bc"
+    ],
+    "sha1": [
+      "42ea00198aaed858413bb1b7ae7a2902f17a59b6"
+    ],
+    "sha256": [
+      "c8e6dc4e5e48dd186dc46f829cc554541e83a42ec3913de0147ebb674e99bea2"
+    ],
+    "disc_serials": [
+      "SLUS-01065"
+    ],
+    "sizes": [
+      482637456
+    ],
+    "filenames": [
+      "Rampage - Through Time (USA).cue",
+      "Rampage - Through Time (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Rampage---Through-Time-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Rampage---Through-Time-Recomp",
+  "launch": {
+    "linux": "Rampage___Through_Time__Recompiled",
+    "windows": "Rampage___Through_Time__Recompiled.exe",
+    "macos": "Rampage___Through_Time__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Rampage - Through Time",
+    "game_version": "0.1.0",
+    "max_slots": 3,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Rampage---Through-Time-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
