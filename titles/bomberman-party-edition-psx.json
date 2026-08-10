@@ -3,8 +3,9 @@
   "name": "Bomberman Party Edition",
   "kind": "recomp",
   "platform": "psx",
-  "description": "Bomberman Party Edition (SLUS-01189) static recompilation — game host on psxrecomp",
+  "description": "Bomberman Party Edition (SLUS-01189) static recompilation \u2014 game host on psxrecomp",
   "homepage": "https://github.com/TechnicallyComputers/BombermanPartyEditionRecomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "98275a08"
@@ -84,5 +85,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
+  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc\u2192C (not the in-game wizard)."
 }

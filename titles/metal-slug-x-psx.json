@@ -5,6 +5,7 @@
   "platform": "psx",
   "description": "Metal Slug X is a run and gun video game in the Metal Slug series. The PlayStation version was released in North America and PAL regions by Agetec and features the same \"Combat School\" mode featured in the console versions of the first two games.",
   "homepage": "https://github.com/TechnicallyComputers/Metal-Slug-X-Recomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "34100b04"

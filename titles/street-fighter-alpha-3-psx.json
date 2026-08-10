@@ -5,6 +5,7 @@
   "platform": "psx",
   "description": "The PlayStation port of Street Fighter Alpha 3 has added new characters to the roster, including Juli, Juni, Balrog, Dee Jay, Fei Long and T. Hawk. They come with new portraits and their own scenarios. Guile, Evil Ryu and Shin Akuma have also been added as secret characters that can be unlocked through World Tour mode, a mode that allows players to strengthen and customize the fighting style of their chosen character while traveling the world.",
   "homepage": "https://github.com/TechnicallyComputers/Street-Fighter-Alpha-3-Recomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "d5e20d47"

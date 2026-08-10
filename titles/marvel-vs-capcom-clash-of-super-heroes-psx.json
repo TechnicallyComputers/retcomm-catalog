@@ -5,6 +5,7 @@
   "platform": "psx",
   "description": "This PlayStation port differs from the arcade version, in that players are unable to switch characters on-the-fly, reducing the secondary character to an assist role only. Significantly, this removes the tag team aspect of the original. It instead offers a \"Cross over\" mode where each player chooses one character, and the second character for each team is a mirror of the opponent's pick. In this mode, the players may switch characters at will, but the teams must always be identical. This compromise is most likely necessitated by the console's small memory size, as the use of identical teams alleviates the memory requirements.",
   "homepage": "https://github.com/TechnicallyComputers/Marvel-vs.-Capcom-Clash-of-Super-Heroes-Recomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "b40eca01"
@@ -84,5 +85,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README / catalog_identity. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
+  "notes": "Digests auto-extracted from README / catalog_identity. RetComM Build & Install / Update / Generate & Rebuild own disc\u2192C (not the in-game wizard)."
 }

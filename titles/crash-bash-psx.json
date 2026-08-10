@@ -5,6 +5,7 @@
   "platform": "psx",
   "description": "Crash Bash is a party game in which four people can play several mini-games as characters from the Crash Bandicoot series. The gameplay consists of 28 different mini-games and three distinct modes of play: Adventure, Battle, and Tournament. Crash Bash includes multiplayer compatibility for up to four human players with the use of the PlayStation Multitap. The games are organized from a central hub world from which spokes lead to different levels.",
   "homepage": "https://github.com/TechnicallyComputers/Crash-Bash-Recomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "69a6cd83"

@@ -5,6 +5,7 @@
   "platform": "psx",
   "description": "Twisted Metal 4",
   "homepage": "https://github.com/TechnicallyComputers/TwistedMetal4Recomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "020e8ae1"
@@ -85,5 +86,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
+  "notes": "Digests auto-extracted from README. RetComM Build & Install / Update / Generate & Rebuild own disc\u2192C (not the in-game wizard)."
 }

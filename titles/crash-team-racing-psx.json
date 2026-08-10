@@ -5,6 +5,7 @@
   "platform": "psx",
   "description": "Crash Team Racing is a kart racing game featuring popular characters from the Crash Bandicoot series. The gameplay is very similar to other kart racing video games like Mario Kart: players have to choose a character and compete against the other racers on various racetracks. The story mode allows you to choose any one of the characters to complete all the main races and beat the ultimate boss Nitrous Oxide. Each of the main races are against 7 other AI competitors with 5 boss races. There are also a few arcade modes up to 4 players.",
   "homepage": "https://github.com/TechnicallyComputers/Crash-Team-Racing-Recomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "9a742438"

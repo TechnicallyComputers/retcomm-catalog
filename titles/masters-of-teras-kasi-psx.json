@@ -3,8 +3,9 @@
   "name": "Masters Of Teras Kasi",
   "kind": "recomp",
   "platform": "psx",
-  "description": "Masters of Teras Kasi (SLUS-00562) static recompilation — game host on psxrecomp",
+  "description": "Masters of Teras Kasi (SLUS-00562) static recompilation \u2014 game host on psxrecomp",
   "homepage": "https://github.com/TechnicallyComputers/MastersOfTerasKasiRecomp",
+  "author_notes": "Use USA Redump image",
   "rom_identity": {
     "crc32": [
       "8159551a"
@@ -86,5 +87,5 @@
       "ps1"
     ]
   },
-  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc→C (not the in-game wizard)."
+  "notes": "Digests auto-extracted from README, DISC.md. RetComM Build & Install / Update / Generate & Rebuild own disc\u2192C (not the in-game wizard)."
 }
