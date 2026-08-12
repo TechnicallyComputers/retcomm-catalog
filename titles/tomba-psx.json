@@ -1,0 +1,102 @@
+{
+  "id": "tomba-psx",
+  "name": "Tomba!",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Tomba! (USA) recompiled for the Sony PlayStation using psxrecomp.",
+  "homepage": "https://github.com/mstan/TombaRecomp",
+  "rom_identity": {
+    "crc32": [
+      "b00ecb0d"
+    ],
+    "md5": [
+      "c80636a28de4abcfa34f9e57fb3b043d"
+    ],
+    "sha1": [
+      "c259ec7ff6ef4163913991f4e4db2eff71702818"
+    ],
+    "sha256": [
+      "25ada3dd51e70eb9f9218cd83fb02d73139750229fb44b012d62d183ab32eb13"
+    ],
+    "disc_serials": [
+      "SCUS-94236"
+    ],
+    "sizes": [
+      280193760
+    ],
+    "filenames": [
+      "Tomba! (USA).cue",
+      "tomba.cue",
+      "Tomba! (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin",
+    ".car"
+  ],
+  "release": {
+    "github": "mstan/TombaRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "TombaRecomp",
+  "launch": {
+    "linux": "Tomba__Recompiled",
+    "windows": "Tomba__Recompiled.exe",
+    "macos": "Tomba__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "TombaRecomp",
+    "game_version": "0.12.0-alpha",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc].",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "mstan/TombaRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
