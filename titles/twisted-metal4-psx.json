@@ -5,39 +5,26 @@
   "platform": "psx",
   "description": "Twisted Metal 4",
   "homepage": "https://github.com/TechnicallyComputers/TwistedMetal4Recomp",
-  "author_notes": "Use USA Redump image",
+  "author_notes": "Use USA Redump image (Rev 1)",
   "rom_identity": {
-    "crc32": [
-      "020e8ae1"
-    ],
-    "md5": [
-      "0e5d822f108fcef31057645721d3d710"
-    ],
-    "sha1": [
-      "64e226413b27ea12639589b3ca2806976c795c8b"
-    ],
+    "crc32": ["020e8ae1"],
+    "md5": ["0e5d822f108fcef31057645721d3d710"],
+    "sha1": ["64e226413b27ea12639589b3ca2806976c795c8b"],
     "sha256": [
       "1be99e1d98c5b5e2d7572f3b46aa63c43ddd6f19f1b5cf179ffd853261a139f1"
     ],
     "disc_serials": [],
-    "sizes": [
-      384615504
-    ],
+    "sizes": [384615504],
     "filenames": [
       "Twisted Metal 4 (USA) (Rev 1).cue",
       "Twisted Metal 4 (USA) (Rev 1) (Track 01).bin",
       "Twisted Metal 4 (USA) (Rev 1) (Track 02).bin",
       "Twisted Metal 4 (USA) (Rev 1) (Track 03).bin"
     ],
-    "track_counts": [
-      23
-    ],
+    "track_counts": [23],
     "require_cue": true
   },
-  "rom_extensions": [
-    ".cue",
-    ".bin"
-  ],
+  "rom_extensions": [".cue", ".bin"],
   "release": {
     "github": "TechnicallyComputers/TwistedMetal4Recomp",
     "asset_glob": {
@@ -80,11 +67,7 @@
     }
   },
   "romm": {
-    "platforms": [
-      "ps",
-      "psx",
-      "ps1"
-    ]
+    "platforms": ["ps", "psx", "ps1"]
   },
   "notes": "Digests auto-extracted from README. RetComM Build & Install / Update / Generate & Rebuild own disc\u2192C (not the in-game wizard)."
 }
