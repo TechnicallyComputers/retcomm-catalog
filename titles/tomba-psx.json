@@ -6,39 +6,19 @@
   "description": "Tomba! (USA) recompiled for the Sony PlayStation using psxrecomp.",
   "homepage": "https://github.com/mstan/TombaRecomp",
   "rom_identity": {
-    "crc32": [
-      "b00ecb0d"
-    ],
-    "md5": [
-      "c80636a28de4abcfa34f9e57fb3b043d"
-    ],
-    "sha1": [
-      "c259ec7ff6ef4163913991f4e4db2eff71702818"
-    ],
+    "crc32": ["b00ecb0d"],
+    "md5": ["c80636a28de4abcfa34f9e57fb3b043d"],
+    "sha1": ["c259ec7ff6ef4163913991f4e4db2eff71702818"],
     "sha256": [
       "25ada3dd51e70eb9f9218cd83fb02d73139750229fb44b012d62d183ab32eb13"
     ],
-    "disc_serials": [
-      "SCUS-94236"
-    ],
-    "sizes": [
-      280193760
-    ],
-    "filenames": [
-      "Tomba! (USA).cue",
-      "tomba.cue",
-      "Tomba! (USA).bin"
-    ],
-    "track_counts": [
-      1
-    ],
+    "disc_serials": ["SCUS-94236"],
+    "sizes": [280193760],
+    "filenames": ["Tomba! (USA).cue", "tomba.cue", "Tomba! (USA).bin"],
+    "track_counts": [1],
     "require_cue": true
   },
-  "rom_extensions": [
-    ".cue",
-    ".bin",
-    ".car"
-  ],
+  "rom_extensions": [".cue", ".bin", ".car"],
   "release": {
     "github": "mstan/TombaRecomp",
     "asset_glob": {
@@ -54,11 +34,7 @@
     "macos": "Tomba__Recompiled"
   },
   "romm": {
-    "platforms": [
-      "ps",
-      "psx",
-      "ps1"
-    ]
+    "platforms": ["ps", "psx", "ps1"]
   },
   "netplay": {
     "supported": true,
@@ -66,13 +42,10 @@
     "game_name": "TombaRecomp",
     "game_version": "0.12.0-alpha",
     "max_slots": 2,
-    "transports": [
-      "lan",
-      "ice"
-    ],
+    "transports": ["lan", "ice"],
     "match_caps_schema": "psx-v1"
   },
-  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc].",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc]. RetComM Install / Update / Generate & Rebuild own disc→C (release zip is source, not a Play shortcut).",
   "build": {
     "enabled": true,
     "source": {
