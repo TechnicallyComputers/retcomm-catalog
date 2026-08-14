@@ -1,0 +1,112 @@
+{
+  "id": "wipeout-3-special-edition-psx",
+  "name": "Wipeout 3 Special Edition",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Wipeout 3 is a racing game that retains the same basic elements of its predecessors, and introduces players to the F7200 Anti-Gravity Race League. Set in 2116, players control futuristic anti-gravity ships owned by racing corporations and pilot them on eight circuits (plus four hidden prototype tracks).",
+  "homepage": "https://github.com/TechnicallyComputers/Wipeout-3-Special-Edition-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "a0e9e5c2"
+    ],
+    "md5": [
+      "b9d48f139544051893f45eed62780e42"
+    ],
+    "sha1": [
+      "a7bb5cdafdf97ba1cd99cc832439f57ce0c39a8a"
+    ],
+    "sha256": [
+      "003bdc41068252e791ea7dd99ba1b94814dc48b967e57a7cdc4bf6e1cf4cb1e9"
+    ],
+    "disc_serials": [
+      "SCES-02845"
+    ],
+    "sizes": [
+      94660944
+    ],
+    "filenames": [
+      "WipEout 3 - Special Edition (Europe) (En",
+      "Fr",
+      "De",
+      "Es",
+      "It).cue",
+      "It) (Track 01).bin",
+      "It) (Track 02).bin",
+      "It) (Track 03).bin",
+      "WipEout 3 - Special Edition (Europe) (En",
+      "Fr",
+      "De",
+      "Es",
+      "It) (Track 01).bin"
+    ],
+    "track_counts": [
+      14
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Wipeout-3-Special-Edition-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Wipeout-3-Special-Edition-Recomp",
+  "launch": {
+    "linux": "Wipeout_3_Special_Edition__Recompiled",
+    "windows": "Wipeout_3_Special_Edition__Recompiled.exe",
+    "macos": "Wipeout_3_Special_Edition__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Wipeout 3 Special Edition",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "Project is based on a REDUMP image of PAL EUROPE disc (European exclusive)",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Wipeout-3-Special-Edition-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
