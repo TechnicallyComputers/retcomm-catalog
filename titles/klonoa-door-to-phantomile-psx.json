@@ -1,0 +1,101 @@
+{
+  "id": "klonoa-door-to-phantomile-psx",
+  "name": "Klonoa Door to Phantomile",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Klonoa: Door to Phantomile is a side-scrolling platform game viewed from a \"2.5D\" perspective. The player moves the protagonist, Klonoa, along a path in a two-dimensional fashion, but the game is rendered in three dimensions. This allows the path followed to curve and for the player to interact with objects outside of the path.",
+  "homepage": "https://github.com/TechnicallyComputers/Klonoa-Door-to-Phantomile",
+  "rom_identity": {
+    "crc32": [
+      "77e279e8"
+    ],
+    "md5": [
+      "ecb502ce253246899d23db80847c56dc",
+      "df39ae83f971c10b76c63ef34ec42198"
+    ],
+    "sha1": [
+      "cb2dc62789092d8b480971427f9c85815e815dce"
+    ],
+    "sha256": [
+      "495109be2445a71929266e15e9d237791b19ce72b9063e2bf0315b7d6cdba911"
+    ],
+    "disc_serials": [
+      "SLUS-00585"
+    ],
+    "sizes": [
+      736197168
+    ],
+    "filenames": [
+      "Klonoa - Door to Phantomile (USA).cue",
+      "Klonoa - Door to Phantomile (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Klonoa-Door-to-Phantomile",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Klonoa-Door-to-Phantomile",
+  "launch": {
+    "linux": "Klonoa___Door_to_Phantomile",
+    "windows": "Klonoa___Door_to_Phantomile.exe",
+    "macos": "Klonoa___Door_to_Phantomile"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Klonoa - Door to Phantomile",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Klonoa-Door-to-Phantomile",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
