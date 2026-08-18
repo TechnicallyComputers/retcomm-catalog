@@ -1,0 +1,101 @@
+{
+  "id": "bomberman-fantasy-race-psx",
+  "name": "Bomberman Fantasy Race",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Made with PSXrecomp, a Sony PlayStation game static recompiler ecosystem · Part of the R.A.I.D. community",
+  "homepage": "https://github.com/TechnicallyComputers/Bomberman-Fantasy-Race-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "09f56d01"
+    ],
+    "md5": [
+      "6c39e1333f90405b8b3bab30cfa53aa3"
+    ],
+    "sha1": [
+      "7ce0a61c9617118976e4b47090790b342cd38045"
+    ],
+    "sha256": [
+      "4f09a816a5c68e7ec0234ceff75b3dd01fcc65084448cf8d27c175844f173564"
+    ],
+    "disc_serials": [
+      "SLUS-00823"
+    ],
+    "sizes": [
+      260768592
+    ],
+    "filenames": [
+      "Bomberman Fantasy Race (USA).cue",
+      "Bomberman Fantasy Race (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Bomberman-Fantasy-Race-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Bomberman-Fantasy-Race-Recomp",
+  "launch": {
+    "linux": "Bomberman_Fantasy_Race__Recompiled",
+    "windows": "Bomberman_Fantasy_Race__Recompiled.exe",
+    "macos": "Bomberman_Fantasy_Race__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Bomberman Fantasy Race",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "USA REDUMP Disc version/format",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Bomberman-Fantasy-Race-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
