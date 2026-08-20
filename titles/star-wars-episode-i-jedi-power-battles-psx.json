@@ -1,0 +1,100 @@
+{
+  "id": "star-wars-episode-i-jedi-power-battles-psx",
+  "name": "Star wars Episode I Jedi Power Battles",
+  "kind": "recomp",
+  "platform": "psx",
+  "homepage": "https://github.com/TechnicallyComputers/Star-wars---Episode-I---Jedi-Power-Battles-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "f930539b"
+    ],
+    "md5": [
+      "f8c47818a643c36c9dfbc2c19f0b14a7"
+    ],
+    "sha1": [
+      "f66b701f1226cc59d031b1db5ef6fb1e54231481"
+    ],
+    "sha256": [
+      "d4e9f013b2d521864b72934c7f540f51de50c33abc36fc17384c708e0a85e8e8"
+    ],
+    "disc_serials": [
+      "SLUS-01046"
+    ],
+    "sizes": [
+      444361008
+    ],
+    "filenames": [
+      "Star Wars - Episode I - Jedi Power Battles (USA).cue",
+      "Star Wars - Episode I - Jedi Power Battles (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Star-wars---Episode-I---Jedi-Power-Battles-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Star-wars---Episode-I---Jedi-Power-Battles-Recomp",
+  "launch": {
+    "linux": "Star_wars___Episode_I___Jedi_Power_Battles__Recompiled",
+    "windows": "Star_wars___Episode_I___Jedi_Power_Battles__Recompiled.exe",
+    "macos": "Star_wars___Episode_I___Jedi_Power_Battles__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Star wars - Episode I - Jedi Power Battles",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "USA Redump, multitrack",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Star-wars---Episode-I---Jedi-Power-Battles-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
