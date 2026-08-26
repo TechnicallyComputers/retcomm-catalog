@@ -1,0 +1,102 @@
+{
+  "id": "legend-of-mana-psx",
+  "name": "Legend of Mana",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Made with PSXrecomp, a Sony PlayStation game static recompiler ecosystem · Part of the R.A.I.D. community",
+  "homepage": "https://github.com/TechnicallyComputers/Legend-of-Mana-Recomp",
+  "rom_identity": {
+    "crc32": [
+      "5028946f"
+    ],
+    "md5": [
+      "5907187b16be1c656e029e79f3a67274",
+      "1d276368cbd31e0be4473c9e44778548"
+    ],
+    "sha1": [
+      "c1b536c99f0d390584eb30462a7e37f2bbef3902"
+    ],
+    "sha256": [
+      "92806cf96d718415ccb614738071fb37bb99438d5037863c4c9f2997fb54048d"
+    ],
+    "disc_serials": [
+      "SLUS-01013"
+    ],
+    "sizes": [
+      677406576
+    ],
+    "filenames": [
+      "Legend of Mana (USA).cue",
+      "Legend of Mana (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Legend-of-Mana-Recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Legend-of-Mana-Recomp",
+  "launch": {
+    "linux": "Legend_of_Mana__Recompiled",
+    "windows": "Legend_of_Mana__Recompiled.exe",
+    "macos": "Legend_of_Mana__Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Legend of Mana",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "USA Redump disc image.",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Legend-of-Mana-Recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
