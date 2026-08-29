@@ -874,16 +874,33 @@ async function inferLaunch(repoName, assetGlobs, opts = {}) {
 }
 
 async function ghApi(path, env, opts = {}) {
+  const { anon = false, ...init } = opts;
   const headers = {
     Accept: "application/vnd.github+json",
     "User-Agent": "retcomm-catalog-submit",
     ...(opts.headers || {}),
   };
-  if (env.GITHUB_TOKEN) {
+  if (env.GITHUB_TOKEN && !anon) {
     headers.Authorization = `Bearer ${env.GITHUB_TOKEN}`;
   }
-  const res = await fetch(`https://api.github.com${path}`, { ...opts, headers });
+  const res = await fetch(`https://api.github.com${path}`, { ...init, headers });
   return res;
+}
+
+/**
+ * Read a repo we do not control (a submitter's game repo).
+ *
+ * GITHUB_TOKEN is a fine-grained PAT scoped to the catalog repo, and such a
+ * token returns 404 for every repo outside its selection — public repos
+ * included. An expired token (401) and a rate-limited one (403) look the same
+ * from here. So a failure under the token is not evidence about the repo; retry
+ * anonymously, which is all a public repo ever needed.
+ */
+async function ghApiForeign(path, env, opts = {}) {
+  const res = await ghApi(path, env, opts);
+  if (res.ok || !env.GITHUB_TOKEN) return res;
+  if (res.status !== 401 && res.status !== 403 && res.status !== 404) return res;
+  return ghApi(path, env, { ...opts, anon: true });
 }
 
 /** Create catalog submission labels if missing (idempotent; ignores 422 exists). */
@@ -934,7 +951,7 @@ async function addIssueLabel(env, catalogRepo, issueNumber, labelName) {
 }
 
 async function fetchRepoText(slug, path, env) {
-  const res = await ghApi(
+  const res = await ghApiForeign(
     `/repos/${slug}/contents/${encodeURIComponent(path).replace(/%2F/g, "/")}`,
     env
   );
@@ -1181,11 +1198,19 @@ async function probe(request, env) {
     return json({ error: "Invalid GitHub repo (use owner/repo or URL)" }, 400, request, env);
   }
 
-  const repoRes = await ghApi(`/repos/${slug}`, env);
+  const repoRes = await ghApiForeign(`/repos/${slug}`, env);
   if (!repoRes.ok) {
+    // Report the status we actually got. The old message asserted "not found",
+    // which sent people hunting for a permissions problem on public repos.
+    const why =
+      repoRes.status === 404
+        ? "no such repo, or it is private"
+        : repoRes.status === 403
+          ? "GitHub rate limit or access blocked"
+          : `GitHub returned HTTP ${repoRes.status}`;
     return json(
-      { error: `GitHub repo not found or inaccessible: ${slug}` },
-      404,
+      { error: `Cannot read GitHub repo ${slug} — ${why}.` },
+      repoRes.status === 404 ? 404 : 502,
       request,
       env
     );
@@ -1196,11 +1221,11 @@ async function probe(request, env) {
   let allowPrerelease = false;
   let assets = [];
 
-  const latestRes = await ghApi(`/repos/${slug}/releases/latest`, env);
+  const latestRes = await ghApiForeign(`/repos/${slug}/releases/latest`, env);
   if (latestRes.ok) {
     release = await latestRes.json();
   } else {
-    const listRes = await ghApi(`/repos/${slug}/releases?per_page=5`, env);
+    const listRes = await ghApiForeign(`/repos/${slug}/releases?per_page=5`, env);
     if (listRes.ok) {
       const list = await listRes.json();
       const pre = list.find((r) => !r.draft);
@@ -1219,7 +1244,7 @@ async function probe(request, env) {
     }));
   }
 
-  const readmeRes = await ghApi(`/repos/${slug}/readme`, env);
+  const readmeRes = await ghApiForeign(`/repos/${slug}/readme`, env);
   let readme = "";
   if (readmeRes.ok) {
     const rd = await readmeRes.json();
