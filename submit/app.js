@@ -362,7 +362,9 @@ function fillForm(draft, meta = {}) {
   setChecksumUi(
     "pending",
     isDiscPlatform(draft.platform)
-      ? "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
+      ? state.discCount > 1
+        ? `${state.discCount}-disc set detected — add the .cue and Track 01 .bin for each of the ${state.discCount} discs below. Submit stays blocked until every disc is hashed.`
+        : "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
       : "No ROM hashed yet — submit stays blocked until this step succeeds."
   );
 
@@ -586,6 +588,8 @@ function readDiscsForManifest() {
 function applyDraftDiscs(discs) {
   const list = Array.isArray(discs) ? discs : [];
   const sel = $("f_disc_count");
+  // A new probe is a different title — never carry a previous repo's hashes.
+  state.discs = [];
   if (list.length < 2) {
     setDiscCount(1);
     if (sel) sel.value = "1";

@@ -52,6 +52,13 @@ Title manifests may still set `bios_identity` to override the default, or
 | `rom_identity.filenames` | string[] | Suggested basenames for the hub when unmatched (No-Intro / Redump); search hints, not hard matching |
 | `rom_identity.track_counts` | number[] | Optional exact cue `TRACK` counts (e.g. MotK Redump = `[17]`). Digests prove the data track; this proves full multi-track TOC. Empty / omit = no TOC gate |
 | `rom_identity.require_cue` | bool | When `true`, RetComM requires a `.cue` bind (auto-true when any `track_counts` entry is `> 1`). PSX titles use `.cue` + `.bin` — not `.iso`/`.chd`. A self-contained `.car` image (official re-releases, e.g. Steam Tomba!'s `t_data_u.car`) also satisfies the cue requirement for single-track titles: it is the whole disc in one file |
+| `rom_identity.discs` | object[] | **Multi-disc sets only** (2+ entries). One entry per disc, each with its own digests. Every disc listed is required to own the title. Omit for single-disc titles |
+| `rom_identity.discs[].index` | number | 1-based disc number; unique within the array |
+| `rom_identity.discs[].serial` | string | That disc's own serial (each disc of a set differs, e.g. `SCUS-94163` / `-64` / `-65`) |
+| `rom_identity.discs[].cue_name` / `.bin_name` | string | Redump basenames for that disc (hints, like `filenames`) |
+| `rom_identity.discs[].crc32` / `md5` / `sha1` / `sha256` | string[] | Track 01 digests **for that disc**. At least one must be non-empty |
+| `rom_identity.discs[].sizes` | number[] | That disc's Track 01 byte length |
+| `rom_identity.discs[].track_counts` | number[] | That disc's cue TRACK count |
 | `rom_extensions` | string[] | Scan filter, e.g. `[".sfc",".smc"]` |
 | `bios_identity` | object | Optional host BIOS / firmware the title needs |
 | `bios_identity.required` | bool | Default `true` when object present |
@@ -90,6 +97,32 @@ A title is considered to have a ROM identity when **any** of `crc32`, `md5`,
 `sha1`, `sha256`, or `disc_serials` is non-empty. Matching succeeds if **any**
 configured digest matches the scanned file (authors may publish only the
 algorithm their gate uses).
+
+### Multi-disc titles
+
+A PS1 set like Final Fantasy VII is three separate dumps, each with its own
+serial and Track 01 digests. `rom_identity.discs[]` records them one per entry.
+
+The flat `crc32` / `md5` / `sha1` / `sha256` / `disc_serials` / `sizes` /
+`filenames` / `track_counts` lists stay populated as the **union** of every
+disc, with disc 1 first. That is deliberate: launchers predating `discs[]`
+match on any single digest, so the union keeps them able to bind and launch the
+set, and disc-1-first makes their first-match land on the boot disc.
+
+Consequently the flat fields alone cannot express "you need all three" — under
+union semantics owning one disc matches. `discs[]` is the authoritative form:
+
+- every entry is **required** — a set is owned only when each disc matches;
+- each entry must carry at least one digest (submissions are rejected
+  otherwise), so a half-filled set cannot masquerade as complete;
+- one entry is not a set — `discs` with fewer than 2 entries is folded back
+  into the flat fields on submit.
+
+The submit form auto-detects the set from the repo when it publishes
+`disc_set.json` (disc count, per-disc serial / cue name / track count) and
+`disc_probe.json` / `disc_probe.<N>.json` (per-disc Track 01 digests). Detected
+metadata only pre-fills the form — the submitter still hashes every disc
+locally, since repo metadata is not proof of ownership.
 
 Identity should mirror what each game passes into `recomp-ui`
 (`known_sha1_hex` / `expected_crc` / MD5 tables / disc verify) so RetComM and

@@ -1091,8 +1091,10 @@ function parseCatalogIdentity(text) {
     region: "",
     players: null,
     game_name: "",
+    crc32: [],
     md5: [],
     sha1: [],
+    sha256: [],
     sizes: [],
     filenames: [],
     track_counts: [],
@@ -1128,8 +1130,12 @@ function parseCatalogIdentity(text) {
   }
   out.require_cue = !!ri.require_cue || out.track_counts.some((n) => n > 1);
   const dt = ri.data_track || {};
+  // Read every digest the probe tool writes. crc32 was previously dropped here,
+  // so titles that publish it still showed an empty crc32 on the form.
+  if (dt.crc32) out.crc32.push(String(dt.crc32).toLowerCase());
   if (dt.md5) out.md5.push(String(dt.md5).toLowerCase());
   if (dt.sha1) out.sha1.push(String(dt.sha1).toLowerCase());
+  if (dt.sha256) out.sha256.push(String(dt.sha256).toLowerCase());
   if (Number.isFinite(Number(dt.size)) && Number(dt.size) > 0)
     out.sizes.push(Number(dt.size));
   return out;
@@ -1440,6 +1446,10 @@ async function probe(request, env) {
   if (tomlDisc.sources.length)
     digests.sources = [...new Set([...digests.sources, ...tomlDisc.sources])];
   if (catalogId.ok) {
+    if (catalogId.crc32.length)
+      digests.crc32 = [...new Set([...catalogId.crc32, ...digests.crc32])];
+    if (catalogId.sha256.length)
+      digests.sha256 = [...new Set([...catalogId.sha256, ...digests.sha256])];
     if (catalogId.md5.length)
       digests.md5 = [...new Set([...catalogId.md5, ...digests.md5])];
     if (catalogId.sha1.length)
