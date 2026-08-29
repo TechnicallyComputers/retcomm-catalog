@@ -116,12 +116,44 @@ async function api(path, opts = {}) {
       data.error ||
       (data.errors && data.errors.join("; ")) ||
       `HTTP ${res.status}`;
-    const err = new Error(msg);
+    // The worker returns GitHub's own reply in detail/first/labeled. Showing
+    // only `error` hid the actual cause ("Bad credentials", "Resource not
+    // accessible", …) and made every failure look the same.
+    const err = new Error(msg + apiErrorDetail(data));
     err.data = data;
     err.status = res.status;
     throw err;
   }
   return data;
+}
+
+/**
+ * Pull GitHub's message out of an error payload. The worker forwards raw
+ * response bodies, which are JSON strings like {"message":"Bad credentials"}.
+ */
+function apiErrorDetail(data) {
+  const seen = [];
+  for (const key of ["detail", "first", "labeled"]) {
+    const raw = data?.[key];
+    if (!raw || typeof raw !== "string") continue;
+    let text = raw;
+    try {
+      const parsed = JSON.parse(raw);
+      text = parsed?.message || raw;
+      if (Array.isArray(parsed?.errors) && parsed.errors.length) {
+        const extra = parsed.errors
+          .map((e) => e.message || e.code || e.field)
+          .filter(Boolean)
+          .join(", ");
+        if (extra) text += ` (${extra})`;
+      }
+    } catch {
+      /* not JSON — show as-is */
+    }
+    text = String(text).trim().slice(0, 300);
+    if (text && !seen.includes(text)) seen.push(text);
+  }
+  return seen.length ? ` — GitHub said: ${seen.join(" / ")}` : "";
 }
 
 function showBanner(kind, html) {
