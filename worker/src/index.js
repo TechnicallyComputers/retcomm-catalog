@@ -521,7 +521,7 @@ function extractDigests(text) {
   }
 
   for (const m of text.matchAll(
-    /[`'"]([A-Za-z0-9][^`'"]+\.(?:sfc|smc|gba|z64|n64|md|gen|bin|cue|iso|chd))[`'"]/gi
+    /[`'"]([A-Za-z0-9][^`'"]+\.(?:sfc|smc|gba|z64|n64|md|gen|bin|cue|car|iso|chd))[`'"]/gi
   )) {
     out.filenames.add(m[1]);
   }
@@ -643,7 +643,7 @@ function isLikelyRomFilename(name) {
   if (lower.endsWith(".md")) {
     return /\(|usa|eur|jpn|japan|europe|sonic|genesis/i.test(base);
   }
-  return /\.(sfc|smc|gba|z64|n64|v64|gen|bin|cue|iso|chd|nds)$/i.test(base);
+  return /\.(sfc|smc|gba|z64|n64|v64|gen|bin|cue|car|iso|chd|nds)$/i.test(base);
 }
 
 function scoreLaunchCandidate(name, { wantExe = false } = {}) {

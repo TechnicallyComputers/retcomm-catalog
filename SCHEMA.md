@@ -51,7 +51,7 @@ Title manifests may still set `bios_identity` to override the default, or
 | `rom_identity.sizes` | number[] | Optional byte lengths; when set, scan only hashes files of those sizes (disc dumps) |
 | `rom_identity.filenames` | string[] | Suggested basenames for the hub when unmatched (No-Intro / Redump); search hints, not hard matching |
 | `rom_identity.track_counts` | number[] | Optional exact cue `TRACK` counts (e.g. MotK Redump = `[17]`). Digests prove the data track; this proves full multi-track TOC. Empty / omit = no TOC gate |
-| `rom_identity.require_cue` | bool | When `true`, RetComM requires a `.cue` bind (auto-true when any `track_counts` entry is `> 1`). PSX titles use `.cue` + `.bin` only — not `.iso`/`.chd` |
+| `rom_identity.require_cue` | bool | When `true`, RetComM requires a `.cue` bind (auto-true when any `track_counts` entry is `> 1`). PSX titles use `.cue` + `.bin` — not `.iso`/`.chd`. A self-contained `.car` image (official re-releases, e.g. Steam Tomba!'s `t_data_u.car`) also satisfies the cue requirement for single-track titles: it is the whole disc in one file |
 | `rom_extensions` | string[] | Scan filter, e.g. `[".sfc",".smc"]` |
 | `bios_identity` | object | Optional host BIOS / firmware the title needs |
 | `bios_identity.required` | bool | Default `true` when object present |

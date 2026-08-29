@@ -14,7 +14,12 @@
     ],
     "disc_serials": ["SCUS-94236"],
     "sizes": [280193760],
-    "filenames": ["Tomba! (USA).cue", "tomba.cue", "Tomba! (USA).bin"],
+    "filenames": [
+      "Tomba! (USA).cue",
+      "tomba.cue",
+      "Tomba! (USA).bin",
+      "t_data_u.car"
+    ],
     "track_counts": [1],
     "require_cue": true
   },

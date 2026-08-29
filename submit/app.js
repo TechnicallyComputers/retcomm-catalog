@@ -306,7 +306,7 @@ function fillForm(draft, meta = {}) {
   setChecksumUi(
     "pending",
     isDiscPlatform(draft.platform)
-      ? "PSX: add the .cue sheet, then hash Track 01 .bin — submit stays blocked until both succeed."
+      ? "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
       : "No ROM hashed yet — submit stays blocked until this step succeeds."
   );
 
@@ -372,15 +372,20 @@ function validateManifest(m) {
   if (m?.platform === "psx") {
     if (!state.psxCueOk) {
       errors.push(
-        "PSX: drop the .cue sheet first (track count), then hash Track 01 .bin"
+        "PSX: drop the .cue sheet first (track count), then hash Track 01 .bin — " +
+          "or drop a self-contained .car image (does both)"
       );
     }
     if (!id.track_counts?.length) {
-      errors.push("PSX: rom_identity.track_counts is required (from the .cue)");
+      errors.push(
+        "PSX: rom_identity.track_counts is required (from the .cue, or 1 for a .car)"
+      );
     }
     const exts = m.rom_extensions || [];
     if (exts.some((e) => /\.(iso|chd)$/i.test(String(e)))) {
-      errors.push("PSX rom_extensions must be .cue / .bin only (no .iso / .chd)");
+      errors.push(
+        "PSX rom_extensions must not include .iso / .chd (.cue/.bin, plus .car for official single-file images)"
+      );
     }
   }
   if (m?.netplay?.supported) {
@@ -589,15 +594,34 @@ async function onRomFile(file) {
     return;
   }
 
-  if (isPsx) {
+  /* Self-contained official re-release image (.car — e.g. Steam Tomba!
+     Special Edition's t_data_u.car): a complete single-track raw disc image
+     with no cue sheet. It stands in for the cue (one track) AND is the
+     hashed payload — one drop satisfies both PSX slots. */
+  if (isPsx && lower.endsWith(".car")) {
+    state.psxCueOk = true;
+    state.psxCueName = file.name;
+    state.psxFirstBin = file.name;
+    state.psxTrackCount = 1;
+    mergeUnique("f_track_counts", ["1"]);
+    const exts = csvGet("f_rom_extensions").filter(
+      (e) => !/\.(iso|chd)$/i.test(e)
+    );
+    if (!exts.includes(".cue")) exts.push(".cue");
+    if (!exts.includes(".bin")) exts.push(".bin");
+    if (!exts.includes(".car")) exts.push(".car");
+    csvSet("f_rom_extensions", exts);
+    /* fall through to the generic hashing below */
+  } else if (isPsx) {
     if (!state.psxCueOk || !state.psxFirstBin) {
       setChecksumUi(
         "err",
-        "PSX: drop the .cue sheet first, then the Track 01 .bin named in that cue."
+        "PSX: drop the .cue sheet first (or a self-contained .car image), " +
+          "then the Track 01 .bin named in that cue."
       );
       return;
     }
-    if (!lower.endsWith(".bin")) {
+    if (!/\.(bin|car)$/.test(lower)) {
       setChecksumUi(
         "err",
         `PSX digests must come from “${state.psxFirstBin}” (.bin), not ${file.name}.`
@@ -754,7 +778,7 @@ async function init() {
     setChecksumUi(
       "pending",
       isDiscPlatform(plat)
-        ? "PSX: add the .cue sheet, then hash Track 01 .bin — submit stays blocked until both succeed."
+        ? "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
         : "No ROM hashed yet — submit stays blocked until this step succeeds."
     );
     refreshPreview();
@@ -874,14 +898,14 @@ async function init() {
   }
 
   bindDropZone($("romDrop"), $("romFile"));
-  bindDropZone($("cueDrop"), $("cueFile"), { acceptExt: [".cue"] });
-  bindDropZone($("binDrop"), $("binFile"), { acceptExt: [".bin"] });
+  bindDropZone($("cueDrop"), $("cueFile"), { acceptExt: [".cue", ".car"] });
+  bindDropZone($("binDrop"), $("binFile"), { acceptExt: [".bin", ".car"] });
 
   syncChecksumSlots();
   setChecksumUi(
     "pending",
     isDiscPlatform()
-      ? "PSX: add the .cue sheet, then hash Track 01 .bin — submit stays blocked until both succeed."
+      ? "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
       : "No ROM hashed yet — submit stays blocked until this step succeeds."
   );
 

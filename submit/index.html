@@ -224,7 +224,8 @@
             <strong>must</strong> hash a local dump below before submitting —
             auto-fill from the repo is not enough. The file never leaves your
             browser. PSX: <code>.cue</code> then Track&nbsp;01
-            <code>.bin</code> only — <code>.iso</code> /
+            <code>.bin</code>, or a self-contained <code>.car</code> image
+            (official re-releases) — <code>.iso</code> /
             <code>.chd</code> are rejected.
           </p>
 
@@ -253,20 +254,22 @@
             <div class="checksum-slots disc-slots hidden" id="discChecksumSlots">
               <div class="disc-slot" id="cueSlot">
                 <h4 class="disc-slot-title">
-                  1. Cue sheet <code>.cue</code>
+                  1. Cue sheet <code>.cue</code> (or <code>.car</code>)
                 </h4>
                 <p class="hint disc-slot-hint">
                   Redump cue sheet — fills <code>track_counts</code> and the
-                  expected Track&nbsp;01 filename.
+                  expected Track&nbsp;01 filename. A self-contained
+                  <code>.car</code> image (official re-releases, single-track)
+                  fills both slots at once.
                 </p>
                 <div class="drop drop-required" id="cueDrop">
-                  Drop the <code>.cue</code> here, or
+                  Drop the <code>.cue</code> (or <code>.car</code>) here, or
                   <label class="file-pick">
                     <strong>choose .cue</strong>
                     <input
                       id="cueFile"
                       type="file"
-                      accept=".cue,text/plain"
+                      accept=".cue,.car,text/plain"
                       hidden
                     />
                   </label>
@@ -288,7 +291,7 @@
                     <input
                       id="binFile"
                       type="file"
-                      accept=".bin,application/octet-stream"
+                      accept=".bin,.car,application/octet-stream"
                       hidden
                       disabled
                     />
@@ -361,7 +364,8 @@
           </div>
           <p class="hint">
             PSX: use the two checksum slots above (<code>.cue</code> then
-            Track&nbsp;01 <code>.bin</code>). Align
+            Track&nbsp;01 <code>.bin</code>, or one self-contained
+            <code>.car</code> image). Align
             <code>track_counts</code> with
             <code>game.toml [netplay] required_tracks</code>. No
             <code>.iso</code>.
