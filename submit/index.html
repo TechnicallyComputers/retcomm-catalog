@@ -250,55 +250,32 @@
               </div>
             </div>
 
-            <!-- PSX / disc: separate .cue then Track 01 .bin -->
+            <!-- PSX / disc: one .cue + Track 01 .bin per disc.
+                 Slots are rendered by renderDiscSlots() so a multi-disc set
+                 gets a pair per disc. -->
             <div class="checksum-slots disc-slots hidden" id="discChecksumSlots">
-              <div class="disc-slot" id="cueSlot">
-                <h4 class="disc-slot-title">
-                  1. Cue sheet <code>.cue</code> (or <code>.car</code>)
-                </h4>
-                <p class="hint disc-slot-hint">
-                  Redump cue sheet — fills <code>track_counts</code> and the
-                  expected Track&nbsp;01 filename. A self-contained
-                  <code>.car</code> image (official re-releases, single-track)
-                  fills both slots at once.
+              <div class="disc-count-row">
+                <label class="disc-count">
+                  <strong>Discs in this set</strong>
+                  <select id="f_disc_count">
+                    <option value="1">1 (single disc)</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                  </select>
+                </label>
+                <p class="hint" id="discCountHint">
+                  Auto-detected from the repo's <code>disc_set.json</code> when
+                  present. Every disc needs its own Track&nbsp;01 hash — a
+                  multi-disc title is only owned when you have all of them.
                 </p>
-                <div class="drop drop-required" id="cueDrop">
-                  Drop the <code>.cue</code> (or <code>.car</code>) here, or
-                  <label class="file-pick">
-                    <strong>choose .cue</strong>
-                    <input
-                      id="cueFile"
-                      type="file"
-                      accept=".cue,.car,text/plain"
-                      hidden
-                    />
-                  </label>
-                  <div id="cueHashStatus" class="hint checksum-status"></div>
-                </div>
               </div>
-              <div class="disc-slot" id="binSlot">
-                <h4 class="disc-slot-title">
-                  2. Track&nbsp;01 binary <code>.bin</code>
-                </h4>
-                <p class="hint disc-slot-hint" id="binSlotHint">
-                  Hash the first BINARY track named in the cue (usually
-                  Track&nbsp;01). Digests come from this file, not the cue.
-                </p>
-                <div class="drop drop-required drop-disabled" id="binDrop">
-                  Drop Track&nbsp;01 <code>.bin</code> here, or
-                  <label class="file-pick">
-                    <strong>choose .bin</strong>
-                    <input
-                      id="binFile"
-                      type="file"
-                      accept=".bin,.car,application/octet-stream"
-                      hidden
-                      disabled
-                    />
-                  </label>
-                  <div id="binHashStatus" class="hint checksum-status"></div>
-                </div>
-              </div>
+              <div id="discSlotList"></div>
             </div>
 
             <div id="romHashStatus" class="hint checksum-status checksum-status-main">

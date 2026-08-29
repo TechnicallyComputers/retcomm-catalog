@@ -1135,6 +1135,158 @@ function parseCatalogIdentity(text) {
   return out;
 }
 
+/**
+ * Per-disc identity for a multi-disc title.
+ *
+ * `disc_set.json` (written by verify_disc_set.py) names the discs and their
+ * serials; `disc_probe.json` / `disc_probe.<N>.json` carry each disc's
+ * data-track digests. Disc 1 lives in `disc_probe.json` — there is no
+ * `disc_probe.1.json`.
+ */
+function discProbeFileName(index) {
+  return index <= 1 ? "disc_probe.json" : `disc_probe.${index}.json`;
+}
+
+/** Shape of one entry in rom_identity.discs[]. */
+function emptyDisc(index) {
+  return {
+    index,
+    serial: "",
+    cue_name: "",
+    bin_name: "",
+    crc32: [],
+    md5: [],
+    sha1: [],
+    sha256: [],
+    sizes: [],
+    track_counts: [],
+  };
+}
+
+/** disc_set.json → ordered disc stubs (no digests yet). */
+function parseDiscSet(text) {
+  const out = { ok: false, disc_count: 0, discs: [], warnings: [] };
+  if (!text || typeof text !== "string") return out;
+  let j;
+  try {
+    j = JSON.parse(text);
+  } catch {
+    return out;
+  }
+  if (!j || typeof j !== "object" || !Array.isArray(j.discs)) return out;
+  out.ok = true;
+  if (Array.isArray(j.warnings)) out.warnings = j.warnings.map(String);
+
+  j.discs.forEach((d, i) => {
+    const index = Number.isInteger(Number(d?.index)) ? Number(d.index) : i + 1;
+    const disc = emptyDisc(index);
+    if (d?.serial) disc.serial = String(d.serial).trim();
+    if (d?.cue_name) disc.cue_name = String(d.cue_name).trim();
+    const tc = Number(d?.track_count);
+    if (Number.isInteger(tc) && tc >= 1) disc.track_counts.push(tc);
+    out.discs.push(disc);
+  });
+  out.discs.sort((a, b) => a.index - b.index);
+  // Trust the disc list, not a disc_count that disagrees with it.
+  out.disc_count = out.discs.length;
+  const declared = Number(j.disc_count);
+  if (Number.isInteger(declared) && declared !== out.discs.length) {
+    out.warnings.push(
+      `disc_set.json declares disc_count=${declared} but lists ${out.discs.length} discs`
+    );
+  }
+  return out;
+}
+
+/** Fold one disc_probe.json into its disc entry (digests are the point). */
+function mergeDiscProbe(disc, text) {
+  if (!text || typeof text !== "string") return disc;
+  let j;
+  try {
+    j = JSON.parse(text);
+  } catch {
+    return disc;
+  }
+  if (!j || typeof j !== "object") return disc;
+  const push = (arr, v) => {
+    const s = String(v || "").trim().toLowerCase();
+    if (s && !arr.includes(s)) arr.push(s);
+  };
+  if (j.data_track_crc32) push(disc.crc32, j.data_track_crc32);
+  if (j.data_track_md5) push(disc.md5, j.data_track_md5);
+  if (j.data_track_sha1) push(disc.sha1, j.data_track_sha1);
+  if (j.data_track_sha256) push(disc.sha256, j.data_track_sha256);
+  const size = Number(j.data_track_size);
+  if (Number.isFinite(size) && size > 0 && !disc.sizes.includes(size))
+    disc.sizes.push(size);
+  if (j.cue_name && !disc.cue_name) disc.cue_name = String(j.cue_name).trim();
+  if (j.bin_name && !disc.bin_name) disc.bin_name = String(j.bin_name).trim();
+  if (j.serial && !disc.serial) disc.serial = String(j.serial).trim();
+  const tc = Number(j.track_count);
+  if (Number.isInteger(tc) && tc >= 1 && !disc.track_counts.includes(tc))
+    disc.track_counts.push(tc);
+  return disc;
+}
+
+/**
+ * Read the whole disc set for a repo: disc_set.json plus one disc_probe per
+ * disc. Returns [] when the repo is single-disc or publishes neither file —
+ * callers then fall back to the flat single-disc identity.
+ */
+async function fetchDiscSet(slug, env) {
+  const setText = await fetchRepoText(slug, "disc_set.json", env);
+  const set = parseDiscSet(setText || "");
+  if (!set.ok || set.discs.length < 2) return { discs: [], warnings: set.warnings };
+
+  // Bounded: a PS1 set is at most a handful of discs, and each probe is a
+  // separate API read.
+  const discs = set.discs.slice(0, 9);
+  await Promise.all(
+    discs.map(async (disc) => {
+      const text = await fetchRepoText(slug, discProbeFileName(disc.index), env);
+      mergeDiscProbe(disc, text || "");
+    })
+  );
+  return { discs, warnings: set.warnings };
+}
+
+/**
+ * Flatten discs[] into the legacy rom_identity arrays.
+ *
+ * Launchers that predate discs[] match on any single digest, so the flat lists
+ * stay a union of every disc — that keeps an old launcher able to bind and
+ * launch the set. Disc 1 is emitted first so first-match preference lands on
+ * the boot disc rather than mid-game.
+ */
+function unionDiscIdentity(discs, base) {
+  const out = {
+    crc32: [...(base?.crc32 || [])],
+    md5: [...(base?.md5 || [])],
+    sha1: [...(base?.sha1 || [])],
+    sha256: [...(base?.sha256 || [])],
+    disc_serials: [...(base?.disc_serials || [])],
+    sizes: [...(base?.sizes || [])],
+    filenames: [...(base?.filenames || [])],
+    track_counts: [...(base?.track_counts || [])],
+  };
+  const add = (arr, v) => {
+    if (v == null || v === "") return;
+    if (!arr.includes(v)) arr.push(v);
+  };
+  for (const d of [...discs].sort((a, b) => a.index - b.index)) {
+    for (const v of d.crc32) add(out.crc32, v);
+    for (const v of d.md5) add(out.md5, v);
+    for (const v of d.sha1) add(out.sha1, v);
+    for (const v of d.sha256) add(out.sha256, v);
+    for (const v of d.sizes) add(out.sizes, v);
+    for (const v of d.track_counts) add(out.track_counts, v);
+    add(out.disc_serials, d.serial);
+    add(out.filenames, d.cue_name);
+    add(out.filenames, d.bin_name);
+  }
+  return out;
+}
+
 function detectNetplaySupported(cmakeText, tomlDisc) {
   if (cmakeText) {
     if (/\bENABLE_NETPLAY_IF_PRESENT\b/i.test(cmakeText)) return true;
@@ -1264,6 +1416,9 @@ async function probe(request, env) {
   const readmeSetup = (await fetchRepoText(slug, "README-SETUP.txt", env)) || "";
   const catalogIdentityText =
     (await fetchRepoText(slug, "catalog_identity.json", env)) || "";
+  // Multi-disc sets publish disc_set.json + one disc_probe per disc; empty for
+  // single-disc titles, which keep using the flat identity below.
+  const discSet = await fetchDiscSet(slug, env);
   const versionText = (await fetchRepoText(slug, "VERSION", env)) || "";
   const catalogId = parseCatalogIdentity(catalogIdentityText);
   const tomlDisc = extractGameTomlDisc(gameToml);
@@ -1354,17 +1509,27 @@ async function probe(request, env) {
     platform: platform || "",
     description,
     homepage: repo.html_url,
-    rom_identity: {
-      crc32: digests.crc32,
-      md5: digests.md5,
-      sha1: digests.sha1,
-      sha256: digests.sha256,
-      disc_serials: digests.disc_serials,
-      sizes: digests.sizes,
-      filenames: digests.filenames,
-      track_counts,
-      require_cue,
-    },
+    rom_identity: (() => {
+      const flat = {
+        crc32: digests.crc32,
+        md5: digests.md5,
+        sha1: digests.sha1,
+        sha256: digests.sha256,
+        disc_serials: digests.disc_serials,
+        sizes: digests.sizes,
+        filenames: digests.filenames,
+        track_counts,
+      };
+      if (!discSet.discs.length) return { ...flat, require_cue };
+      // Per-disc truth wins; the flat lists become the union so launchers that
+      // predate discs[] still resolve the set.
+      const merged = unionDiscIdentity(discSet.discs, flat);
+      return {
+        ...merged,
+        require_cue: require_cue || merged.track_counts.some((n) => n > 1),
+        discs: discSet.discs,
+      };
+    })(),
     rom_extensions:
       platform === "psx" || track_counts.length ? [".cue", ".bin"] : [],
     release: {
@@ -1519,6 +1684,41 @@ function validateManifest(m) {
       errors.push("rom_identity.track_counts must be integers >= 1");
     }
   }
+  // Multi-disc: every disc listed is required to own the title, so every disc
+  // must carry its own digest. A half-filled discs[] would silently let one
+  // disc stand in for the set.
+  if (id.discs != null) {
+    if (!Array.isArray(id.discs)) {
+      errors.push("rom_identity.discs must be an array");
+    } else if (id.discs.length === 1) {
+      errors.push(
+        "rom_identity.discs needs 2+ entries — use the flat fields for a single-disc title"
+      );
+    } else {
+      const seen = new Set();
+      id.discs.forEach((d, i) => {
+        const label = `rom_identity.discs[${i}]`;
+        const n = Number(d?.index);
+        if (!Number.isInteger(n) || n < 1) {
+          errors.push(`${label}.index must be an integer >= 1`);
+        } else if (seen.has(n)) {
+          errors.push(`${label}.index ${n} is duplicated`);
+        } else {
+          seen.add(n);
+        }
+        const has =
+          (d?.crc32 || []).length ||
+          (d?.md5 || []).length ||
+          (d?.sha1 || []).length ||
+          (d?.sha256 || []).length;
+        if (!has) {
+          errors.push(
+            `${label} (disc ${d?.index ?? i + 1}) needs at least one digest — hash that disc's Track 01`
+          );
+        }
+      });
+    }
+  }
   if (m.platform === "psx") {
     const exts = m.rom_extensions || [];
     if (exts.some((e) => /\.(iso|chd)$/i.test(String(e)))) {
@@ -1549,21 +1749,62 @@ function normalizeManifest(m) {
     platform: String(m.platform || "").trim(),
     description: String(m.description || "").trim(),
     homepage: String(m.homepage || "").trim(),
-    rom_identity: {
-      crc32: emptyArr(ri.crc32).map((s) => String(s).toLowerCase()),
-      md5: emptyArr(ri.md5).map((s) => String(s).toLowerCase()),
-      sha1: emptyArr(ri.sha1).map((s) => String(s).toLowerCase()),
-      sha256: emptyArr(ri.sha256).map((s) => String(s).toLowerCase()),
-      disc_serials: emptyArr(ri.disc_serials).map(String),
-      sizes: emptyArr(ri.sizes).map(Number).filter((n) => n > 0),
-      filenames: emptyArr(ri.filenames).map(String),
-      track_counts: emptyArr(ri.track_counts)
-        .map(Number)
-        .filter((n) => Number.isInteger(n) && n >= 1),
-      require_cue:
-        !!ri.require_cue ||
-        emptyArr(ri.track_counts).some((n) => Number(n) > 1),
-    },
+    rom_identity: (() => {
+      const hex = (v) => emptyArr(v).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
+      const nums = (v) =>
+        emptyArr(v).map(Number).filter((n) => Number.isFinite(n) && n > 0);
+      const ints = (v) =>
+        emptyArr(v).map(Number).filter((n) => Number.isInteger(n) && n >= 1);
+
+      // discs[] is the per-disc truth for multi-disc sets. Every disc listed is
+      // required to own the title; a single-disc entry is meaningless here, so
+      // drop it and let the flat fields stand alone.
+      const discs = emptyArr(ri.discs)
+        .map((d, i) => ({
+          index: Number.isInteger(Number(d?.index)) ? Number(d.index) : i + 1,
+          serial: String(d?.serial || "").trim(),
+          cue_name: String(d?.cue_name || "").trim(),
+          bin_name: String(d?.bin_name || "").trim(),
+          crc32: hex(d?.crc32),
+          md5: hex(d?.md5),
+          sha1: hex(d?.sha1),
+          sha256: hex(d?.sha256),
+          sizes: nums(d?.sizes),
+          track_counts: ints(d?.track_counts),
+        }))
+        .sort((a, b) => a.index - b.index);
+
+      const flat = {
+        crc32: hex(ri.crc32),
+        md5: hex(ri.md5),
+        sha1: hex(ri.sha1),
+        sha256: hex(ri.sha256),
+        disc_serials: emptyArr(ri.disc_serials).map(String),
+        sizes: nums(ri.sizes),
+        filenames: emptyArr(ri.filenames).map(String),
+        track_counts: ints(ri.track_counts),
+      };
+
+      if (discs.length < 2) {
+        // A lone discs[] entry is just a single-disc title described the long
+        // way — fold its digests into the flat fields rather than dropping them.
+        const merged = discs.length ? unionDiscIdentity(discs, flat) : flat;
+        return {
+          ...merged,
+          require_cue: !!ri.require_cue || merged.track_counts.some((n) => n > 1),
+        };
+      }
+      // Re-derive the flat union from discs[] so the two can never drift.
+      const merged = unionDiscIdentity(discs, {
+        filenames: flat.filenames,
+        disc_serials: [],
+      });
+      return {
+        ...merged,
+        require_cue: !!ri.require_cue || merged.track_counts.some((n) => n > 1),
+        discs,
+      };
+    })(),
     rom_extensions: (() => {
       let exts = emptyArr(m.rom_extensions).map(String);
       if (String(m.platform || "").trim() === "psx") {

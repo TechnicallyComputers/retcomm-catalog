@@ -13,14 +13,65 @@ const state = {
   /** True after the user successfully hashed a local ROM/disc dump. */
   romChecksumDone: false,
   romChecksumFile: "",
-  /** PSX two-step: cue parsed before Track 01 .bin hash. */
+  /** PSX two-step: cue parsed before Track 01 .bin hash. Disc 1 of the set. */
   psxCueOk: false,
   psxCueName: "",
   psxFirstBin: "", // basename expected for digests
   psxTrackCount: 0,
   /** Basename while digests are computing (disc bin slot status). */
   romHashingFile: "",
+  /**
+   * Multi-disc sets: one entry per disc, index 0 = disc 1. Each disc carries
+   * its own cue parse and Track 01 digests — a 3-disc game is only owned when
+   * all three match, so they can never share a slot.
+   */
+  discCount: 1,
+  discs: [],
 };
+
+/** Blank per-disc slot state. */
+function newDiscState(index) {
+  return {
+    index,
+    cueOk: false,
+    cueName: "",
+    firstBin: "",
+    trackCount: 0,
+    hashing: "",
+    done: false,
+    file: "",
+    serial: "",
+    crc32: "",
+    md5: "",
+    sha1: "",
+    sha256: "",
+    size: 0,
+    filenames: [],
+    /** Prefilled from repo metadata (disc_probe.json) rather than a local hash. */
+    fromRepo: false,
+  };
+}
+
+/** Grow/shrink state.discs to n, preserving what the user already hashed. */
+function setDiscCount(n) {
+  const want = Math.max(1, Math.min(9, Number(n) || 1));
+  state.discCount = want;
+  while (state.discs.length < want) state.discs.push(newDiscState(state.discs.length + 1));
+  if (state.discs.length > want) state.discs.length = want;
+  state.discs.forEach((d, i) => (d.index = i + 1));
+  return want;
+}
+
+function discState(i) {
+  if (!state.discs[i]) setDiscCount(i + 1);
+  return state.discs[i];
+}
+
+/** True when every disc in the set has been hashed locally. */
+function allDiscsHashed() {
+  if (!state.discs.length) return false;
+  return state.discs.every((d) => d.done);
+}
 
 function getSessionToken() {
   return sessionStorage.getItem(TOKEN_KEY) || "";
@@ -177,6 +228,7 @@ function readManifest() {
       require_cue:
         $("f_require_cue").checked ||
         numCsvGet("f_track_counts").some((n) => n > 1),
+      ...(readDiscsForManifest() ? { discs: readDiscsForManifest() } : {}),
     },
     rom_extensions: csvGet("f_rom_extensions"),
     release: {
@@ -254,6 +306,10 @@ function fillForm(draft, meta = {}) {
   $("f_launch_macos").value = draft.launch?.macos || "";
 
   const ri = draft.rom_identity || {};
+  // Multi-disc: adopt the detected count and per-disc metadata. Digests that
+  // came from the repo are shown but do NOT count as hashed — the submitter
+  // still proves ownership of every disc locally.
+  applyDraftDiscs(ri.discs);
   csvSet("f_crc32", ri.crc32);
   csvSet("f_md5", ri.md5);
   csvSet("f_sha1", ri.sha1);
@@ -357,8 +413,14 @@ function validateManifest(m) {
     errors.push("launch needs at least one OS binary name");
   }
   if (!state.romChecksumDone) {
+    const missing =
+      state.discCount > 1
+        ? state.discs.filter((d) => !d.done).map((d) => `disc ${d.index}`)
+        : [];
     errors.push(
-      "Rom Checksum Submission is required — hash your local ROM/disc dump with the file picker before submitting"
+      missing.length
+        ? `Hash every disc before submitting — still missing: ${missing.join(", ")}`
+        : "Rom Checksum Submission is required — hash your local ROM/disc dump with the file picker before submitting"
     );
   }
   const id = m?.rom_identity || {};
@@ -420,56 +482,271 @@ function setSlotStatus(id, kind, message) {
   el.textContent = message || "";
 }
 
+/**
+ * Wire a drop zone + file input. `disc` is the 0-based index of the disc this
+ * slot belongs to (undefined for the cart/single-file zone), so a drop lands on
+ * the right disc of a multi-disc set.
+ */
+function bindDropZone(dropEl, fileInput, { acceptExt, disc } = {}) {
+  if (!dropEl || !fileInput) return;
+  fileInput.addEventListener("change", () => {
+    onRomFile(fileInput.files?.[0], disc);
+    fileInput.value = "";
+  });
+  dropEl.addEventListener("dragover", (e) => {
+    e.preventDefault();
+    if (!dropEl.classList.contains("drop-disabled")) dropEl.classList.add("drag");
+  });
+  dropEl.addEventListener("dragleave", () => dropEl.classList.remove("drag"));
+  dropEl.addEventListener("drop", (e) => {
+    e.preventDefault();
+    dropEl.classList.remove("drag");
+    if (dropEl.classList.contains("drop-disabled")) return;
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    if (acceptExt) {
+      const lower = (file.name || "").toLowerCase();
+      const ok = acceptExt.some((ext) => lower.endsWith(ext));
+      if (!ok) {
+        setChecksumUi(
+          "err",
+          `${file.name} rejected — this slot accepts ${acceptExt.join(" / ")} only.`
+        );
+        return;
+      }
+    }
+    onRomFile(file, disc);
+  });
+}
+
+/**
+ * Rebuild the flat rom_identity fields from state.discs.
+ *
+ * discs[] is the truth for a multi-disc set; the flat lists exist so launchers
+ * that predate discs[] still resolve the title. Disc 1 is emitted first so
+ * first-match preference lands on the boot disc rather than mid-game.
+ */
+function syncFlatIdentityFromDiscs() {
+  if (!state.discs.length) return;
+  const ordered = [...state.discs].sort((a, b) => a.index - b.index);
+  const crc = [], md5 = [], sha1 = [], sha256 = [], sizes = [], names = [], serials = [], tracks = [];
+  const add = (arr, v) => {
+    if (v == null || v === "" || arr.includes(v)) return;
+    arr.push(v);
+  };
+  for (const d of ordered) {
+    add(crc, d.crc32);
+    add(md5, d.md5);
+    add(sha1, d.sha1);
+    add(sha256, d.sha256);
+    if (d.size) add(sizes, String(d.size));
+    if (d.trackCount) add(tracks, String(d.trackCount));
+    add(serials, d.serial);
+    for (const n of d.filenames || []) add(names, n);
+  }
+  csvSet("f_crc32", crc);
+  csvSet("f_md5", md5);
+  csvSet("f_sha1", sha1);
+  csvSet("f_sha256", sha256);
+  csvSet("f_sizes", sizes);
+  csvSet("f_track_counts", tracks);
+  // Serials and filenames may also come from repo metadata — merge, don't clobber.
+  for (const v of serials) mergeUnique("f_disc_serials", [v]);
+  for (const v of names) mergeUnique("f_filenames", [v]);
+  if (tracks.some((n) => Number(n) > 1)) $("f_require_cue").checked = true;
+  refreshPreview();
+}
+
+/** discs[] for the manifest — only meaningful for a real multi-disc set. */
+function readDiscsForManifest() {
+  if (state.discCount < 2) return null;
+  return state.discs
+    .slice(0, state.discCount)
+    .map((d) => ({
+      index: d.index,
+      serial: d.serial || "",
+      cue_name: d.cueName || "",
+      bin_name: d.firstBin || "",
+      crc32: d.crc32 ? [d.crc32] : [],
+      md5: d.md5 ? [d.md5] : [],
+      sha1: d.sha1 ? [d.sha1] : [],
+      sha256: d.sha256 ? [d.sha256] : [],
+      sizes: d.size ? [d.size] : [],
+      track_counts: d.trackCount ? [d.trackCount] : [],
+    }));
+}
+
+/**
+ * Seed per-disc slots from a probed rom_identity.discs[].
+ *
+ * Repo metadata gives the shape of the set (count, serials, cue names) and
+ * sometimes disc 1's digests. It is never accepted as proof of ownership:
+ * every disc still has to be hashed locally, so `done` stays false.
+ */
+function applyDraftDiscs(discs) {
+  const list = Array.isArray(discs) ? discs : [];
+  const sel = $("f_disc_count");
+  if (list.length < 2) {
+    setDiscCount(1);
+    if (sel) sel.value = "1";
+    if (isDiscPlatform()) renderDiscSlots();
+    return;
+  }
+  setDiscCount(list.length);
+  if (sel) sel.value = String(list.length);
+  list
+    .slice()
+    .sort((a, b) => Number(a.index || 0) - Number(b.index || 0))
+    .forEach((src, i) => {
+      const d = discState(i);
+      d.serial = String(src.serial || "");
+      d.cueName = String(src.cue_name || "");
+      d.firstBin = String(src.bin_name || "");
+      const tc = Number((src.track_counts || [])[0]);
+      if (Number.isInteger(tc) && tc >= 1) d.trackCount = tc;
+      d.filenames = [src.cue_name, src.bin_name].filter(Boolean);
+      d.fromRepo = true;
+      // Structure only — a local hash is what unlocks submit.
+      d.cueOk = false;
+      d.done = false;
+    });
+  const hint = $("discCountHint");
+  if (hint) {
+    hint.innerHTML =
+      `Detected <strong>${list.length} discs</strong> from the repo's <code>disc_set.json</code>. ` +
+      "Each still needs its own local Track&nbsp;01 hash below.";
+  }
+  if (isDiscPlatform()) renderDiscSlots();
+}
+
+/** Escape for injection into slot markup (cue/bin names come from files). */
+function esc(v) {
+  return String(v == null ? "" : v).replace(
+    /[&<>"']/g,
+    (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]
+  );
+}
+
+/**
+ * Build one cue+bin pair per disc. Ids are suffixed with the 1-based disc
+ * number (cueDrop1, binDrop1, …) so every disc gets its own drop zones and
+ * status lines.
+ */
+function renderDiscSlots() {
+  const host = $("discSlotList");
+  if (!host) return;
+  const n = state.discCount;
+  const multi = n > 1;
+
+  host.innerHTML = state.discs
+    .map((d, i) => {
+      const k = i + 1;
+      const title = multi ? `Disc ${k}` : "";
+      const serial = d.serial ? ` <span class="disc-serial">${esc(d.serial)}</span>` : "";
+      return `
+      <div class="disc-group${multi ? " disc-group-multi" : ""}" id="discGroup${k}">
+        ${multi ? `<h3 class="disc-group-title">${title}${serial}</h3>` : ""}
+        <div class="disc-slot" id="cueSlot${k}">
+          <h4 class="disc-slot-title">
+            1. Cue sheet <code>.cue</code> (or <code>.car</code>)
+          </h4>
+          <p class="hint disc-slot-hint">
+            Redump cue sheet — fills <code>track_counts</code> and the expected
+            Track&nbsp;01 filename.${
+              d.cueName && d.fromRepo
+                ? ` Repo expects <strong>${esc(d.cueName)}</strong>.`
+                : ""
+            }
+          </p>
+          <div class="drop drop-required" id="cueDrop${k}">
+            Drop the <code>.cue</code> (or <code>.car</code>) here, or
+            <label class="file-pick">
+              <strong>choose .cue</strong>
+              <input id="cueFile${k}" type="file" accept=".cue,.car,text/plain" hidden />
+            </label>
+            <div id="cueHashStatus${k}" class="hint checksum-status"></div>
+          </div>
+        </div>
+        <div class="disc-slot" id="binSlot${k}">
+          <h4 class="disc-slot-title">2. Track&nbsp;01 binary <code>.bin</code></h4>
+          <p class="hint disc-slot-hint" id="binSlotHint${k}"></p>
+          <div class="drop drop-required drop-disabled" id="binDrop${k}">
+            Drop Track&nbsp;01 <code>.bin</code> here, or
+            <label class="file-pick">
+              <strong>choose .bin</strong>
+              <input id="binFile${k}" type="file" accept=".bin,.car,application/octet-stream" hidden disabled />
+            </label>
+            <div id="binHashStatus${k}" class="hint checksum-status"></div>
+          </div>
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  // Freshly created nodes need their own listeners.
+  state.discs.forEach((d, i) => {
+    const k = i + 1;
+    bindDropZone($(`cueDrop${k}`), $(`cueFile${k}`), {
+      acceptExt: [".cue", ".car"],
+      disc: i,
+    });
+    bindDropZone($(`binDrop${k}`), $(`binFile${k}`), {
+      acceptExt: [".bin", ".car"],
+      disc: i,
+    });
+  });
+
+  refreshDiscSlotUi();
+}
+
 function refreshDiscSlotUi() {
-  const cueDrop = $("cueDrop");
-  const binDrop = $("binDrop");
-  const binFile = $("binFile");
-  const binHint = $("binSlotHint");
-  if (!cueDrop || !binDrop) return;
+  state.discs.forEach((d, i) => {
+    const k = i + 1;
+    const cueDrop = $(`cueDrop${k}`);
+    const binDrop = $(`binDrop${k}`);
+    const binFile = $(`binFile${k}`);
+    const binHint = $(`binSlotHint${k}`);
+    if (!cueDrop || !binDrop) return;
 
-  cueDrop.classList.toggle("hashed", !!state.psxCueOk);
-  binDrop.classList.toggle("drop-disabled", !state.psxCueOk);
-  binDrop.classList.toggle("hashed", !!state.romChecksumDone && !!state.psxCueOk);
-  if (binFile) binFile.disabled = !state.psxCueOk;
+    cueDrop.classList.toggle("hashed", !!d.cueOk);
+    binDrop.classList.toggle("drop-disabled", !d.cueOk);
+    binDrop.classList.toggle("hashed", !!d.done && !!d.cueOk);
+    if (binFile) binFile.disabled = !d.cueOk;
 
-  if (binHint) {
-    binHint.innerHTML = state.psxFirstBin
-      ? `Hash <strong>${state.psxFirstBin}</strong> (first BINARY / Track&nbsp;01 from the cue). Digests come from this file, not the cue.`
-      : "Hash the first BINARY track named in the cue (usually Track&nbsp;01). Digests come from this file, not the cue.";
-  }
+    if (binHint) {
+      binHint.innerHTML = d.firstBin
+        ? `Hash <strong>${esc(d.firstBin)}</strong> (first BINARY / Track&nbsp;01 from the cue). Digests come from this file, not the cue.`
+        : "Hash the first BINARY track named in the cue (usually Track&nbsp;01). Digests come from this file, not the cue.";
+    }
 
-  if (state.psxCueOk) {
     setSlotStatus(
-      "cueHashStatus",
-      "ok",
-      `${state.psxCueName}: ${state.psxTrackCount} track(s)`
+      `cueHashStatus${k}`,
+      d.cueOk ? "ok" : "",
+      d.cueOk ? `${d.cueName}: ${d.trackCount} track(s)` : ""
     );
-  } else {
-    setSlotStatus("cueHashStatus", "", "");
-  }
 
-  if (state.romChecksumDone && state.psxCueOk) {
-    setSlotStatus(
-      "binHashStatus",
-      "ok",
-      `Hashed ${state.romChecksumFile}`
-    );
-  } else if (state.romHashingFile && state.psxCueOk) {
-    setSlotStatus(
-      "binHashStatus",
-      "pending",
-      `Hashing ${state.romHashingFile}…`
-    );
-  } else if (state.psxCueOk) {
-    setSlotStatus(
-      "binHashStatus",
-      "pending",
-      state.psxFirstBin
-        ? `Waiting for “${state.psxFirstBin}”`
-        : "Waiting for Track 01 .bin"
-    );
-  } else {
-    setSlotStatus("binHashStatus", "", "");
+    if (d.done && d.cueOk) {
+      setSlotStatus(`binHashStatus${k}`, "ok", `Hashed ${d.file}`);
+    } else if (d.hashing && d.cueOk) {
+      setSlotStatus(`binHashStatus${k}`, "pending", `Hashing ${d.hashing}…`);
+    } else if (d.cueOk) {
+      setSlotStatus(
+        `binHashStatus${k}`,
+        "pending",
+        d.firstBin ? `Waiting for “${d.firstBin}”` : "Waiting for Track 01 .bin"
+      );
+    } else {
+      setSlotStatus(`binHashStatus${k}`, "", "");
+    }
+  });
+
+  const hint = $("discCountHint");
+  if (hint && state.discCount > 1) {
+    const done = state.discs.filter((d) => d.done).length;
+    hint.innerHTML =
+      `<strong>${done} of ${state.discCount}</strong> discs hashed. ` +
+      "All of them are required — the catalog entry records one identity per disc.";
   }
 }
 
@@ -487,12 +764,15 @@ function syncChecksumSlots() {
 
   if (lede) {
     lede.innerHTML = disc
-      ? "PSX / disc titles need two local files: the Redump <code>.cue</code>, then Track&nbsp;01 <code>.bin</code>. Nothing is uploaded — only digests are filled."
+      ? state.discCount > 1
+        ? `This is a ${state.discCount}-disc set — each disc needs its own <code>.cue</code> and Track&nbsp;01 <code>.bin</code>. Nothing is uploaded, only digests.`
+        : "PSX / disc titles need two local files: the Redump <code>.cue</code>, then Track&nbsp;01 <code>.bin</code>. Nothing is uploaded — only digests are filled."
       : "Drop your ROM below. The file never leaves your browser — only digests are filled into the form.";
   }
 
   if (disc) {
-    refreshDiscSlotUi();
+    if (!state.discs.length) setDiscCount(state.discCount || 1);
+    renderDiscSlots();
   } else {
     $("romDrop")?.classList.toggle("hashed", !!state.romChecksumDone);
   }
@@ -528,11 +808,14 @@ function basenameLower(name) {
     .toLowerCase();
 }
 
-async function onRomFile(file) {
+async function onRomFile(file, discIdx) {
   if (!file) return;
   const lower = (file.name || "").toLowerCase();
   const platform = $("f_platform").value;
   const isPsx = platform === "psx";
+  // Cart platforms have no disc slots; disc platforms default to disc 1.
+  const di = Number.isInteger(discIdx) ? discIdx : 0;
+  const d = isDiscPlatform() ? discState(di) : null;
 
   if (/\.(iso|chd)$/i.test(lower)) {
     setChecksumUi(
@@ -562,16 +845,29 @@ async function onRomFile(file) {
         );
         return;
       }
+      if (d) {
+        d.cueOk = true;
+        d.cueName = file.name;
+        d.firstBin = bins[0];
+        d.trackCount = tracks;
+        d.fromRepo = false;
+        /* Re-dropping a cue invalidates that disc's digests — the bin must be
+           re-hashed against the new TOC. */
+        d.done = false;
+        d.file = "";
+        d.crc32 = d.md5 = d.sha1 = d.sha256 = "";
+        d.size = 0;
+        d.filenames = [file.name, ...bins.slice(0, 3)];
+      }
       state.psxCueOk = true;
       state.psxCueName = file.name;
       state.psxFirstBin = bins[0];
       state.psxTrackCount = tracks;
-      /* Re-drop cue invalidates prior digests for PSX (must re-hash matching bin). */
       if (isPsx) {
-        state.romChecksumDone = false;
-        state.romChecksumFile = "";
+        state.romChecksumDone = allDiscsHashed();
+        if (!state.romChecksumDone) state.romChecksumFile = "";
       }
-      csvSet("f_track_counts", [String(tracks)]);
+      mergeUnique("f_track_counts", [String(tracks)]);
       mergeUnique("f_filenames", [file.name, ...bins.slice(0, 3)]);
       if (tracks > 1) $("f_require_cue").checked = true;
       if (isPsx) {
@@ -599,6 +895,14 @@ async function onRomFile(file) {
      with no cue sheet. It stands in for the cue (one track) AND is the
      hashed payload — one drop satisfies both PSX slots. */
   if (isPsx && lower.endsWith(".car")) {
+    if (d) {
+      d.cueOk = true;
+      d.cueName = file.name;
+      d.firstBin = file.name;
+      d.trackCount = 1;
+      d.fromRepo = false;
+      d.filenames = [file.name];
+    }
     state.psxCueOk = true;
     state.psxCueName = file.name;
     state.psxFirstBin = file.name;
@@ -640,16 +944,36 @@ async function onRomFile(file) {
   state.romChecksumDone = false;
   state.romChecksumFile = "";
   state.romHashingFile = file.name;
+  if (d) {
+    d.hashing = file.name;
+    d.done = false;
+  }
   setChecksumUi("pending", `Hashing ${file.name}…`);
   try {
     const h = await hashRomFile(file);
-    mergeUnique("f_crc32", [h.crc32]);
-    mergeUnique("f_md5", [h.md5]);
-    mergeUnique("f_sha1", [h.sha1]);
-    mergeUnique("f_sha256", [h.sha256]);
-    mergeUnique("f_sizes", [String(h.hashed_size)]);
-    mergeUnique("f_filenames", [h.filename]);
-    state.romChecksumDone = true;
+    if (d) {
+      // Per-disc identity. The flat form fields are rebuilt from these so the
+      // two can never disagree.
+      d.crc32 = h.crc32 || "";
+      d.md5 = h.md5 || "";
+      d.sha1 = h.sha1 || "";
+      d.sha256 = h.sha256 || "";
+      d.size = Number(h.hashed_size) || 0;
+      d.filenames = [...new Set([...(d.filenames || []), h.filename])];
+      d.done = true;
+      d.file = file.name;
+      d.hashing = "";
+      d.fromRepo = false;
+      syncFlatIdentityFromDiscs();
+    } else {
+      mergeUnique("f_crc32", [h.crc32]);
+      mergeUnique("f_md5", [h.md5]);
+      mergeUnique("f_sha1", [h.sha1]);
+      mergeUnique("f_sha256", [h.sha256]);
+      mergeUnique("f_sizes", [String(h.hashed_size)]);
+      mergeUnique("f_filenames", [h.filename]);
+    }
+    state.romChecksumDone = d ? allDiscsHashed() : true;
     state.romChecksumFile = file.name;
     state.romHashingFile = "";
     const tracksHint = isPsx
@@ -657,15 +981,28 @@ async function onRomFile(file) {
       : numCsvGet("f_track_counts").length
         ? ` track_counts=${numCsvGet("f_track_counts").join(",")}.`
         : "";
+    const remaining = d ? state.discs.filter((x) => !x.done).length : 0;
+    const setHint =
+      state.discCount > 1
+        ? remaining === 0
+          ? ` All ${state.discCount} discs hashed.`
+          : ` ${state.discCount - remaining} of ${state.discCount} discs hashed — ${remaining} to go.`
+        : "";
+    const canSubmit = state.romChecksumDone ? " You can submit." : "";
     setChecksumUi(
-      "ok",
+      remaining === 0 ? "ok" : "pending",
       h.header_stripped
-        ? `Hashed ${file.name} (stripped 512-byte SMC header). Digests filled.${tracksHint} You can submit.`
-        : `Hashed ${file.name}. Digests filled.${tracksHint} File was not uploaded. You can submit.`
+        ? `Hashed ${file.name} (stripped 512-byte SMC header). Digests filled.${tracksHint}${setHint}${canSubmit}`
+        : `Hashed ${file.name}. Digests filled.${tracksHint}${setHint} File was not uploaded.${canSubmit}`
     );
     refreshPreview();
   } catch (err) {
-    state.romChecksumDone = false;
+    if (d) {
+      d.done = false;
+      d.hashing = "";
+      d.file = "";
+    }
+    state.romChecksumDone = d ? allDiscsHashed() : false;
     state.romChecksumFile = "";
     state.romHashingFile = "";
     setChecksumUi("err", `Hash failed: ${err.message}`);
@@ -865,41 +1202,15 @@ async function init() {
     showBanner("ok", "JSON copied to clipboard.");
   };
 
-  function bindDropZone(dropEl, fileInput, { acceptExt } = {}) {
-    if (!dropEl || !fileInput) return;
-    fileInput.addEventListener("change", () => {
-      onRomFile(fileInput.files?.[0]);
-      fileInput.value = "";
-    });
-    dropEl.addEventListener("dragover", (e) => {
-      e.preventDefault();
-      if (!dropEl.classList.contains("drop-disabled")) dropEl.classList.add("drag");
-    });
-    dropEl.addEventListener("dragleave", () => dropEl.classList.remove("drag"));
-    dropEl.addEventListener("drop", (e) => {
-      e.preventDefault();
-      dropEl.classList.remove("drag");
-      if (dropEl.classList.contains("drop-disabled")) return;
-      const file = e.dataTransfer.files?.[0];
-      if (!file) return;
-      if (acceptExt) {
-        const lower = (file.name || "").toLowerCase();
-        const ok = acceptExt.some((ext) => lower.endsWith(ext));
-        if (!ok) {
-          setChecksumUi(
-            "err",
-            `${file.name} rejected — this slot accepts ${acceptExt.join(" / ")} only.`
-          );
-          return;
-        }
-      }
-      onRomFile(file);
-    });
-  }
+    bindDropZone($("romDrop"), $("romFile"));
 
-  bindDropZone($("romDrop"), $("romFile"));
-  bindDropZone($("cueDrop"), $("cueFile"), { acceptExt: [".cue", ".car"] });
-  bindDropZone($("binDrop"), $("binFile"), { acceptExt: [".bin", ".car"] });
+  $("f_disc_count")?.addEventListener("change", (e) => {
+    setDiscCount(e.target.value);
+    state.romChecksumDone = isDiscPlatform() ? allDiscsHashed() : state.romChecksumDone;
+    syncChecksumSlots();
+    syncFlatIdentityFromDiscs();
+    refreshPreview();
+  });
 
   syncChecksumSlots();
   setChecksumUi(
