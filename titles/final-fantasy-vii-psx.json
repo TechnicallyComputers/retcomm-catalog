@@ -1,0 +1,191 @@
+{
+  "id": "final-fantasy-vii-psx",
+  "name": "Final Fantasy VII",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "The Western release of Final Fantasy VII (released as Final Fantasy VII International in Japan) included additional elements and alterations, such as streamlining of the menu and Materia system, reducing the health of enemies, new visual cues to help with navigation across the world map, and additional cutscenes relating to Cloud's past.",
+  "homepage": "https://github.com/TechnicallyComputers/Final-Fantasy-VII",
+  "rom_identity": {
+    "crc32": [
+      "1459cbef",
+      "a997a8cc",
+      "1c27b277"
+    ],
+    "md5": [
+      "0e2acef664e50d6d06211be50f5ede25",
+      "d6159f8be38460491457b10afb147e4f",
+      "13199d24cc1722c74cbf2b9d6e85f0a5"
+    ],
+    "sha1": [
+      "1f890164ac4daeba07def64bb5b636bfaa1d3ab9",
+      "9b8456c661722b032e24f2596840b06ea5cbdd46",
+      "0d9614fcd1288bbff2c53e690c6f626d3ac28fd0"
+    ],
+    "sha256": [
+      "385d416b651f8ab2a9dee78718e6dd7ae5d83af37507395b990c4d7923d9e5bd",
+      "1b9c745af8f68bf58dcbb464c3bb0c16bfa87b72d99bfa6b39615fa052ce681a",
+      "9afd82845c2b0388335c4bee04d78e946ae683c473a5f5c567cd944e11190414"
+    ],
+    "disc_serials": [
+      "SCUS-94163",
+      "SCUS-94164",
+      "SCUS-94165"
+    ],
+    "sizes": [
+      747435024,
+      732657408,
+      659561952
+    ],
+    "filenames": [
+      "Final Fantasy VII (USA) (Disc 1).cue",
+      "Final Fantasy VII (USA) (Disc 1).bin",
+      "Final Fantasy VII (USA) (Disc 2).cue",
+      "Final Fantasy VII (USA) (Disc 2).bin",
+      "Final Fantasy VII (USA) (Disc 3).cue",
+      "Final Fantasy VII (USA) (Disc 3).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "SCUS-94163",
+        "cue_name": "Final Fantasy VII (USA) (Disc 1).cue",
+        "bin_name": "Final Fantasy VII (USA) (Disc 1).bin",
+        "crc32": [
+          "1459cbef"
+        ],
+        "md5": [
+          "0e2acef664e50d6d06211be50f5ede25"
+        ],
+        "sha1": [
+          "1f890164ac4daeba07def64bb5b636bfaa1d3ab9"
+        ],
+        "sha256": [
+          "385d416b651f8ab2a9dee78718e6dd7ae5d83af37507395b990c4d7923d9e5bd"
+        ],
+        "sizes": [
+          747435024
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "SCUS-94164",
+        "cue_name": "Final Fantasy VII (USA) (Disc 2).cue",
+        "bin_name": "Final Fantasy VII (USA) (Disc 2).bin",
+        "crc32": [
+          "a997a8cc"
+        ],
+        "md5": [
+          "d6159f8be38460491457b10afb147e4f"
+        ],
+        "sha1": [
+          "9b8456c661722b032e24f2596840b06ea5cbdd46"
+        ],
+        "sha256": [
+          "1b9c745af8f68bf58dcbb464c3bb0c16bfa87b72d99bfa6b39615fa052ce681a"
+        ],
+        "sizes": [
+          732657408
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 3,
+        "serial": "SCUS-94165",
+        "cue_name": "Final Fantasy VII (USA) (Disc 3).cue",
+        "bin_name": "Final Fantasy VII (USA) (Disc 3).bin",
+        "crc32": [
+          "1c27b277"
+        ],
+        "md5": [
+          "13199d24cc1722c74cbf2b9d6e85f0a5"
+        ],
+        "sha1": [
+          "0d9614fcd1288bbff2c53e690c6f626d3ac28fd0"
+        ],
+        "sha256": [
+          "9afd82845c2b0388335c4bee04d78e946ae683c473a5f5c567cd944e11190414"
+        ],
+        "sizes": [
+          659561952
+        ],
+        "track_counts": [
+          1
+        ]
+      }
+    ]
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/Final-Fantasy-VII",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "Final-Fantasy-VII",
+  "launch": {
+    "linux": "Final_Fantasy_7",
+    "windows": "Final_Fantasy_7.exe",
+    "macos": "Final_Fantasy_7"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Final Fantasy 7",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "FF7 USA Redump disc format",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/Final-Fantasy-VII",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
