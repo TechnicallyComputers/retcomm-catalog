@@ -426,6 +426,26 @@ function refreshPreview() {
 }
 
 /** Mirror worker validateManifest so required fields fail before the API call. */
+/**
+ * True when a ROM basename carries no identifying information.
+ *
+ * filenames are the hub's search hints when a title has no local match, and
+ * they seed the Libretro boxart lookup, which is named No-Intro/Redump style.
+ * mortal-kombat-4-psx shipped ["disc1.cue","disc1.bin"] — the submitter's own
+ * file names — so the hub told users to look for "disc1.cue" and the cover
+ * never resolved. Digests still matched, which is why nothing caught it.
+ */
+function looksLikePlaceholderRomName(name) {
+  const stem = String(name || "")
+    .split(/[/\\]/).pop()
+    .replace(/\.[^.]+$/, "")
+    .trim()
+    .toLowerCase();
+  if (!stem) return false;
+  // A real dump name is the game's title, usually with a region in parens.
+  return /^(disc|cd|track|game|rom|image|dump|output|data|title|iso|bin|cue)[\s._-]*\d*$/.test(stem);
+}
+
 function validateManifest(m) {
   const errors = [];
   if (!m?.id || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(m.id)) {
@@ -458,6 +478,16 @@ function validateManifest(m) {
     );
   }
   const id = m?.rom_identity || {};
+  const fnames = id.filenames || [];
+  if (fnames.length && fnames.every(looksLikePlaceholderRomName)) {
+    errors.push(
+      "rom_identity.filenames looks like placeholder names (" +
+        fnames.join(", ") +
+        "). These are the search hints the hub shows when a user has no match, " +
+        "and they drive the Libretro cover lookup — use the real dump names, " +
+        'e.g. "' + (m?.name || "Game") + ' (USA).cue".'
+    );
+  }
   const hasDigest =
     id.crc32?.length || id.md5?.length || id.sha1?.length || id.sha256?.length;
   if (!hasDigest) {

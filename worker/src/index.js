@@ -1649,6 +1649,24 @@ async function probe(request, env) {
 
 /* ── Submit ──────────────────────────────────────────────────── */
 
+/**
+ * A ROM basename with no identifying information ("disc1", "track01", "game").
+ *
+ * rom_identity.filenames are the hub's search hints for an unmatched title and
+ * seed the Libretro cover lookup, which uses No-Intro/Redump names. A
+ * placeholder passes every digest check and still leaves users hunting for
+ * "disc1.cue" with no box art.
+ */
+function looksLikePlaceholderRomName(name) {
+  const stem = String(name || "")
+    .split(/[/\\]/).pop()
+    .replace(/\.[^.]+$/, "")
+    .trim()
+    .toLowerCase();
+  if (!stem) return false;
+  return /^(disc|cd|track|game|rom|image|dump|output|data|title|iso|bin|cue)[\s._-]*\d*$/.test(stem);
+}
+
 function validateManifest(m) {
   const errors = [];
   if (!m || typeof m !== "object") return ["Manifest required"];
@@ -1683,6 +1701,16 @@ function validateManifest(m) {
   if (!hasDigest) {
     errors.push(
       "rom_identity needs at least one digest (crc32 / md5 / sha1 / sha256) from a local ROM hash"
+    );
+  }
+  const fnames = id.filenames || [];
+  if (fnames.length && fnames.every(looksLikePlaceholderRomName)) {
+    errors.push(
+      "rom_identity.filenames are placeholders (" +
+        fnames.join(", ") +
+        ") — use the real dump basenames (No-Intro / Redump), e.g. \"" +
+        (m.name || "Game") +
+        " (USA).cue\". They are the hub's search hints and drive cover lookup."
     );
   }
   const tc = id.track_counts;
