@@ -1,0 +1,101 @@
+{
+  "id": "mortal-kombat-4-psx",
+  "name": "Mortal Kombat 4",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Mortal Kombat 4 recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/mortal-kombat-4-recomp",
+  "rom_identity": {
+    "crc32": [
+      "8f6b19f1"
+    ],
+    "md5": [
+      "3c3ddcb5d2fe38070fc53f556769dd4a"
+    ],
+    "sha1": [
+      "21515cdd9829521a2db76a83300b77e83855fa88"
+    ],
+    "sha256": [
+      "c43311155c03f7f9c23e7228bbf8874a5fdaa0984dbbefa356e5899eb40038a3"
+    ],
+    "disc_serials": [
+      "SLUS-00605"
+    ],
+    "sizes": [
+      718112640
+    ],
+    "filenames": [
+      "disc1.cue",
+      "disc1.bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "Alexbeav/mortal-kombat-4-recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "mortal-kombat-4-recomp",
+  "launch": {
+    "linux": "Mortal_Kombat_4",
+    "windows": "Mortal_Kombat_4.exe",
+    "macos": "Mortal_Kombat_4"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Mortal Kombat 4",
+    "game_version": "0.3.5",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "Use the verified USA SLUS-00605 single-track CUE/BIN dump and a legal SCPH-1001 BIOS dump.",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "Alexbeav/mortal-kombat-4-recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
