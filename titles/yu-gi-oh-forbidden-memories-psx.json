@@ -1,0 +1,89 @@
+{
+  "id": "yu-gi-oh-forbidden-memories-psx",
+  "name": "Yu Gi Oh Forbidden Memories",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Static recompilation of Yu-Gi-Oh! Forbidden Memories (PS1) into a native executable - with a live duel-rank meter, a fusion assistant, adjustable card drops and a cheat menu.",
+  "homepage": "https://github.com/Unchiga/YuGiOhForbiddenMemoriesRecomp",
+  "rom_identity": {
+    "crc32": [
+      "73e4c771"
+    ],
+    "md5": [
+      "c20bcde742e15c82d09bda1d6c6d62f2"
+    ],
+    "sha1": [
+      "d5785a41900a10968d4a28a390666c4b9879b796"
+    ],
+    "sha256": [
+      "6e22494a45bf50fa2d239cd3819a57163a5f9b91e0365babc3e101509b5c3a7c"
+    ],
+    "disc_serials": [
+      "SLUS-01411"
+    ],
+    "sizes": [
+      517872768
+    ],
+    "filenames": [
+      "Yu-Gi-Oh! Forbidden Memories (USA).cue",
+      "Yu-Gi-Oh! Forbidden Memories (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "Unchiga/YuGiOhForbiddenMemoriesRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*win*x64*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "YuGiOhForbiddenMemoriesRecomp",
+  "launch": {
+    "linux": "Yu_Gi_Oh_Forbidden_Memories_Recompiled",
+    "windows": "Yu_Gi_Oh_Forbidden_Memories_Recompiled.exe",
+    "macos": "Yu_Gi_Oh_Forbidden_Memories_Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "author_notes": ".bin .cue recommended",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "Unchiga/YuGiOhForbiddenMemoriesRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
