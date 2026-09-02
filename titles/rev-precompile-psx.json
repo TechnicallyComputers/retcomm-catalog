@@ -1,0 +1,100 @@
+{
+  "id": "rev-precompile-psx",
+  "name": "Revelations: Persona Recompile",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "A private PSXRecomp build of Revelations: Persona (USA).",
+  "homepage": "https://github.com/NJH-1001/RevPRecompile",
+  "rom_identity": {
+    "crc32": [
+      "ee1f1f62"
+    ],
+    "md5": [
+      "7d08a05f402c7c671b25d6a5af3a69d9"
+    ],
+    "sha1": [
+      "3e7d8019a3191a29a48bb9d574cf05b1bc998c06"
+    ],
+    "sha256": [
+      "05aaa2c1bd264c1a7e739d0746a1d774e063c9ba1eb8394350f929f57a521680"
+    ],
+    "disc_serials": [
+      "SLUS-00339"
+    ],
+    "sizes": [
+      707025312
+    ],
+    "filenames": [
+      "Persona (USA).cue",
+      "Persona (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "NJH-1001/RevPRecompile",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "RevPRecompile",
+  "launch": {
+    "linux": "Revelations__Persona_Recompiled",
+    "windows": "Revelations__Persona_Recompiled.exe",
+    "macos": "Revelations__Persona_Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Revelations: Persona",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "NJH-1001/RevPRecompile",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
