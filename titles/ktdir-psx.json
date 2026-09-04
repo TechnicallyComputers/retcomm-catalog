@@ -1,0 +1,101 @@
+{
+  "id": "ktdir-psx",
+  "name": "Kileak: The DNA Imperative Recompile",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Native recompilation project for the USA release.",
+  "homepage": "https://github.com/NJH-1001/KTDIR",
+  "rom_identity": {
+    "crc32": [
+      "9da50f2b"
+    ],
+    "md5": [
+      "8488685c25b95208debd8478cca35bf9"
+    ],
+    "sha1": [
+      "738ea49947e6a9862ac3b8e3f6b34f7ad1b43348"
+    ],
+    "sha256": [
+      "05645e353b04d8616c7d8a2f18b3f5542cd586986295103753d975566dfe2bc0"
+    ],
+    "disc_serials": [
+      "SCUS-94102"
+    ],
+    "sizes": [
+      545504064
+    ],
+    "filenames": [
+      "Kileak - The DNA Imperative (USA).cue",
+      "Kileak - The DNA Imperative (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "NJH-1001/KTDIR",
+    "asset_glob": {
+      "linux": "",
+      "windows": "*windows*",
+      "macos": ""
+    }
+  },
+  "install_dir_name": "KTDIR",
+  "launch": {
+    "linux": "",
+    "windows": "Kileak__The_DNA_Imperative_Recompiled.exe",
+    "macos": ""
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Kileak: The DNA Imperative",
+    "game_version": "0.1.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "Be sure to set PSX controller to 'digital'.\n16:9 mode and modern controller layout options available in the MODS menu.",
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "NJH-1001/KTDIR",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
