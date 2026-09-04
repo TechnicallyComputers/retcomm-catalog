@@ -1,6 +1,6 @@
 {
   "id": "fin-fan-tac-psx",
-  "name": "Fin Fan Tac",
+  "name": "Final Fantasy Tactics",
   "kind": "recomp",
   "platform": "psx",
   "description": "Final Fantasy Tactics USA (SCUS-94221) PSXRecomp setup project for Windows x86-64, with OpenBIOS, modern controllers and optional 16:9.",
