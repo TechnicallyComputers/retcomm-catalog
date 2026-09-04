@@ -1,0 +1,100 @@
+{
+  "id": "sexy-paro-psx",
+  "name": "Sexy Parodius",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "A native PC recompilation project for Konami's Sexy Parodius (Japan).",
+  "homepage": "https://github.com/NJH-1001/SexyParoRecomp",
+  "rom_identity": {
+    "crc32": [
+      "b459c1ce"
+    ],
+    "md5": [
+      "44260730724a19e1889a06bd06fc3bdb"
+    ],
+    "sha1": [
+      "3031ef173540a625ae132e627afbd7209dd53f3c"
+    ],
+    "sha256": [
+      "f569da76a547482b73a8dec3d7d6518de1d4ee0d7b9d9d241819cb2f5fd71a97"
+    ],
+    "disc_serials": [
+      "SLPM-86009"
+    ],
+    "sizes": [
+      502890528
+    ],
+    "filenames": [
+      "Sexy Parodius (Japan).cue",
+      "Sexy Parodius (Japan).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "NJH-1001/SexyParoRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "SexyParoRecomp",
+  "launch": {
+    "linux": "Sexy_Parodius_Recompiled",
+    "windows": "Sexy_Parodius_Recompiled.exe",
+    "macos": "Sexy_Parodius_Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Sexy Parodius",
+    "game_version": "0.2.0",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "NJH-1001/SexyParoRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
