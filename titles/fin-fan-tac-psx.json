@@ -1,0 +1,100 @@
+{
+  "id": "fin-fan-tac-psx",
+  "name": "Fin Fan Tac",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Final Fantasy Tactics USA (SCUS-94221) PSXRecomp setup project for Windows x86-64, with OpenBIOS, modern controllers and optional 16:9.",
+  "homepage": "https://github.com/NJH-1001/FinFanTacRecomp",
+  "rom_identity": {
+    "crc32": [
+      "377f6510"
+    ],
+    "md5": [
+      "9dcb538305e6cfe52ce4da9d762612b4"
+    ],
+    "sha1": [
+      "2b5d4db3229cdc7bbd0358b95fcba33dddae8bba"
+    ],
+    "sha256": [
+      "29e63bb6d2e7b842fe87f7c0ee03b7076681c34bcc47095cca27ec53236bf4f9"
+    ],
+    "disc_serials": [
+      "SCUS-94221"
+    ],
+    "sizes": [
+      541315152
+    ],
+    "filenames": [
+      "Final Fantasy Tactics (USA).cue",
+      "Final Fantasy Tactics (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "NJH-1001/FinFanTacRecomp",
+    "asset_glob": {
+      "linux": "",
+      "windows": "*windows*",
+      "macos": ""
+    }
+  },
+  "install_dir_name": "FinFanTacRecomp",
+  "launch": {
+    "linux": "",
+    "windows": "Final_Fantasy_Tactics_Recompiled.exe",
+    "macos": ""
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Final Fantasy Tactics",
+    "game_version": "0.1.0",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "NJH-1001/FinFanTacRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
