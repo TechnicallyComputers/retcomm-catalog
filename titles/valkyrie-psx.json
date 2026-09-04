@@ -1,0 +1,156 @@
+{
+  "id": "valkyrie-psx",
+  "name": "Valkyrie",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Native PC recompilation of Valkyrie Profile (PS1) powered by PSXRecomp.",
+  "homepage": "https://github.com/Ed1z19/ValkyrieRecomp",
+  "rom_identity": {
+    "crc32": [
+      "dd0422d5",
+      "c2132829"
+    ],
+    "md5": [
+      "06e13321cfb3d262b76ec58aa0cc3d38",
+      "5551e892629056a4bbca555d70325c00"
+    ],
+    "sha1": [
+      "fa13cbde448a47fa87b6c7829df1c5e6215f5f66",
+      "7cc65766b46273b4ee166269170ecbaa433908fd"
+    ],
+    "sha256": [
+      "4c988bac4dcdbfafdf2ae710c6fea7b19c004f50ffd675b9c664ab4dda3d2a78",
+      "7a85baf95064ceedc90cb886fdaffaabfe0c146f2a97f0cb46ee022ff800cd35"
+    ],
+    "disc_serials": [],
+    "sizes": [
+      730448880,
+      747352704
+    ],
+    "filenames": [
+      "Valkyrie Profile (USA) (Disc 1).cue",
+      "Valkyrie Profile (USA) (Disc 1).bin",
+      "Valkyrie Profile (USA) (Disc 2).cue",
+      "Valkyrie Profile (USA) (Disc 2).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": false,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "",
+        "cue_name": "Valkyrie Profile (USA) (Disc 1).cue",
+        "bin_name": "Valkyrie Profile (USA) (Disc 1).bin",
+        "crc32": [
+          "dd0422d5"
+        ],
+        "md5": [
+          "06e13321cfb3d262b76ec58aa0cc3d38"
+        ],
+        "sha1": [
+          "fa13cbde448a47fa87b6c7829df1c5e6215f5f66"
+        ],
+        "sha256": [
+          "4c988bac4dcdbfafdf2ae710c6fea7b19c004f50ffd675b9c664ab4dda3d2a78"
+        ],
+        "sizes": [
+          730448880
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "",
+        "cue_name": "Valkyrie Profile (USA) (Disc 2).cue",
+        "bin_name": "Valkyrie Profile (USA) (Disc 2).bin",
+        "crc32": [
+          "c2132829"
+        ],
+        "md5": [
+          "5551e892629056a4bbca555d70325c00"
+        ],
+        "sha1": [
+          "7cc65766b46273b4ee166269170ecbaa433908fd"
+        ],
+        "sha256": [
+          "7a85baf95064ceedc90cb886fdaffaabfe0c146f2a97f0cb46ee022ff800cd35"
+        ],
+        "sizes": [
+          747352704
+        ],
+        "track_counts": [
+          1
+        ]
+      }
+    ]
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "Ed1z19/ValkyrieRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "ValkyrieRecomp",
+  "launch": {
+    "linux": "ValkyrieRecomp",
+    "windows": "ValkyrieRecomp.exe",
+    "macos": "ValkyrieRecomp"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "ValkyrieRecomp",
+    "game_version": "1.0.1",
+    "max_slots": 2,
+    "transports": [
+      "lan",
+      "ice"
+    ],
+    "match_caps_schema": "psx-v1"
+  },
+  "author_notes": "Uses Valkyrie Profile USA Redump disc format.",
+  "notes": "Digests auto-extracted from README, game.toml[prepare_disc].",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "Ed1z19/ValkyrieRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
