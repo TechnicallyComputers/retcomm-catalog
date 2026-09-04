@@ -1,6 +1,6 @@
 {
   "id": "valkyrie-psx",
-  "name": "Valkyrie",
+  "name": "Valkyrie Profile",
   "kind": "recomp",
   "platform": "psx",
   "description": "Native PC recompilation of Valkyrie Profile (PS1) powered by PSXRecomp.",
