@@ -1295,6 +1295,9 @@ function unionDiscIdentity(discs, base) {
 
 function detectNetplaySupported(cmakeText, tomlDisc) {
   if (cmakeText) {
+    // An explicit opt-out wins over the weak game.toml [netplay] heuristic
+    // below: single-player psxrecomp scaffolds still ship a [netplay] disc gate.
+    if (/set\s*\(\s*PSX_NETPLAY\s+OFF\b/i.test(cmakeText)) return false;
     if (/\bENABLE_NETPLAY_IF_PRESENT\b/i.test(cmakeText)) return true;
     if (/set\s*\(\s*PSX_NETPLAY\s+ON\b/i.test(cmakeText)) return true;
     if (/PSX_NETPLAY\s+ON\s+CACHE/i.test(cmakeText)) return true;

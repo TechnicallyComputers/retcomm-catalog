@@ -3,7 +3,7 @@
   "name": "Final Fantasy Tactics",
   "kind": "recomp",
   "platform": "psx",
-  "description": "Final Fantasy Tactics USA (SCUS-94221) PSXRecomp setup project for Windows x86-64, with OpenBIOS, modern controllers and optional 16:9.",
+  "description": "Final Fantasy Tactics USA (SCUS-94221) PSXRecomp setup project for Windows, Linux and macOS, with OpenBIOS, modern controllers and optional 16:9.",
   "homepage": "https://github.com/NJH-1001/FinFanTacRecomp",
   "rom_identity": {
     "crc32": [
@@ -15,9 +15,7 @@
     "sha1": [
       "2b5d4db3229cdc7bbd0358b95fcba33dddae8bba"
     ],
-    "sha256": [
-      "29e63bb6d2e7b842fe87f7c0ee03b7076681c34bcc47095cca27ec53236bf4f9"
-    ],
+    "sha256": ["29e63bb6d2e7b842fe87f7c0ee03b7076681c34bcc47095cca27ec53236bf4f9"],
     "disc_serials": [
       "SCUS-94221"
     ],
@@ -40,16 +38,16 @@
   "release": {
     "github": "NJH-1001/FinFanTacRecomp",
     "asset_glob": {
-      "linux": "",
+      "linux": "*linux*",
       "windows": "*windows*",
-      "macos": ""
+      "macos": "*macos*"
     }
   },
   "install_dir_name": "FinFanTacRecomp",
   "launch": {
-    "linux": "",
+    "linux": "Final_Fantasy_Tactics_Recompiled",
     "windows": "Final_Fantasy_Tactics_Recompiled.exe",
-    "macos": ""
+    "macos": "Final_Fantasy_Tactics_Recompiled"
   },
   "romm": {
     "platforms": [
@@ -58,19 +56,7 @@
       "ps1"
     ]
   },
-  "netplay": {
-    "supported": true,
-    "stack": "recomp-net",
-    "game_name": "Final Fantasy Tactics",
-    "game_version": "0.1.0",
-    "max_slots": 2,
-    "transports": [
-      "lan",
-      "ice"
-    ],
-    "match_caps_schema": "psx-v1"
-  },
-  "notes": "Digests auto-extracted from README, game.toml[netplay], game.toml[prepare_disc], catalog_identity.json.",
+  "notes": "Digests from the author's probe_disc output (catalog_identity.json / game.toml[prepare_disc] / README); an unsourced md5/sha256 pair from the 2026-09-03 submission was dropped. Linux/macOS assets were added to v0.1.0 after the submission probe ran. CMake sets PSX_NETPLAY OFF (single-player), so no netplay block.",
   "build": {
     "enabled": true,
     "source": {
