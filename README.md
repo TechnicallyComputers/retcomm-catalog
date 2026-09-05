@@ -9,18 +9,28 @@ of app updates.
 ## Layout
 
 ```
-index.json          # title id list + platform BIOS defaults
-titles/<id>.json    # one manifest per title
-SCHEMA.md           # field documentation
-submit/             # GitHub Pages submission form
-worker/             # Cloudflare Worker (OAuth, probe, email, issues)
+index.json                    # platform registry, title id lists, platform BIOS defaults
+titles/<platform>/<id>.json   # one manifest per title, one folder per platform
+titles/psx/                   #   Sony PlayStation (psxrecomp)
+titles/snes/                  #   Super Nintendo (snesrecomp)
+SCHEMA.md                     # field documentation
+submit/                       # GitHub Pages submission form
+submit/platform-defaults.json # platform registry shared by the form and the Worker
+worker/                       # Cloudflare Worker (OAuth, probe, email, issues)
 docs/SUBMIT_SETUP.md
 ```
+
+Titles are grouped by platform on disk so anything that consumes a catalog
+release can list one system at a time: read `index.json` → `platforms.<p>.dir`
++ `platforms.<p>.titles` and resolve `<dir>/<id>.json`. The flat
+`index.json` → `titles` list is still published (every id, platform order) for
+readers that only want ids.
 
 ## Propose a title
 
 Use the [submission form](https://technicallycomputers.github.io/retcomm-catalog/submit/)
-(GitHub login required). It probes the source repo for digests/release assets,
+(GitHub login required). It asks for the platform first (PSX, SNES, …), probes
+the source repo for digests/release assets,
 lets you complete or override fields, then opens an approval issue and emails
 human contributors listed in [`submit/contributors.json`](submit/contributors.json)
 (plus repo collaborators). Maintainers add the **`approved`** label to merge the
@@ -44,6 +54,11 @@ stamp on startup and downloads the zip only when the remote catalog is newer:
 ## Local check
 
 ```sh
-python3 -c "import json; json.load(open('index.json'))"
-for f in titles/*.json; do python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"; done
+python3 .github/scripts/validate_catalog.py
 ```
+
+Checks `index.json` against `titles/<platform>/<id>.json`: every listed id
+exists in its platform folder, its `platform` field matches the folder, ids are
+unique, the flat `titles` list matches the per-platform lists, and nothing is
+left at the legacy flat `titles/<id>.json` location. CI runs the same script
+before every publish.

@@ -24,8 +24,9 @@
         <h1 class="brand">RetComM Catalog</h1>
         <p class="lede">
           Propose a GitHub recomp/decomp source for the official catalog. Sign
-          in with GitHub, paste the repo URL, review auto-filled digests and
-          release globs, then submit for maintainer approval.
+          in with GitHub, pick the platform, paste the repo URL, review
+          auto-filled digests and release globs, then submit for maintainer
+          approval.
         </p>
       </header>
 
@@ -40,7 +41,26 @@
 
       <div class="grid" id="appRoot">
         <section class="panel needs-auth">
-          <h2>1. Source repository</h2>
+          <h2>1. Platform</h2>
+          <p class="hint" style="margin-top: 0">
+            Which system is this recomp/decomp for? The choice decides where
+            the title lives in the catalog (<code>titles/&lt;platform&gt;/</code>),
+            which ROM you will hash, and the defaults filled in below.
+          </p>
+          <div
+            class="platform-picker"
+            id="platformPicker"
+            role="radiogroup"
+            aria-label="Platform"
+          ></div>
+          <input id="f_platform" type="hidden" />
+          <p class="hint" id="platformHint">
+            No platform chosen yet — the rest of the form unlocks once you pick
+            one.
+          </p>
+
+          <div id="formBody" class="needs-platform">
+          <h2>2. Source repository</h2>
           <div class="row one">
             <label>
               <strong>GitHub repo</strong>
@@ -95,14 +115,12 @@
                 >platform<span class="req" aria-hidden="true">*</span></strong
               >
               <span class="src" data-src="platform"></span>
-              <select id="f_platform" required>
-                <option value="">— select —</option>
-                <option value="snes">snes</option>
-                <option value="gba">gba</option>
-                <option value="psx">psx</option>
-                <option value="n64">n64</option>
-                <option value="genesis">genesis</option>
-              </select>
+              <input
+                id="f_platform_display"
+                readonly
+                placeholder="choose in step 1"
+                title="Change it with the platform picker at the top of the form"
+              />
             </label>
             <label>
               <strong
@@ -223,10 +241,8 @@
             Digests prove ownership for RetComM’s library scan. You
             <strong>must</strong> hash a local dump below before submitting —
             auto-fill from the repo is not enough. The file never leaves your
-            browser. PSX: <code>.cue</code> then Track&nbsp;01
-            <code>.bin</code>, or a self-contained <code>.car</code> image
-            (official re-releases) — <code>.iso</code> /
-            <code>.chd</code> are rejected.
+            browser.
+            <span id="romIdentityHint"></span>
           </p>
 
           <section class="checksum-block" id="checksumBlock" aria-labelledby="checksumHeading">
@@ -242,7 +258,7 @@
             <!-- Cart / single-file platforms -->
             <div class="checksum-slots cart-slots" id="cartChecksumSlots">
               <div class="drop drop-required" id="romDrop">
-                Drop a ROM here, or
+                <span id="romDropLabel">Drop a ROM here</span>, or
                 <label class="file-pick">
                   <strong>choose a file</strong>
                   <input id="romFile" type="file" hidden />
@@ -339,13 +355,13 @@
               <span class="hint">Prefer .cue bind (multi-track)</span>
             </label>
           </div>
-          <p class="hint">
+          <p class="hint" id="trackCountsHint">
             PSX: use the two checksum slots above (<code>.cue</code> then
             Track&nbsp;01 <code>.bin</code>, or one self-contained
             <code>.car</code> image). Align
             <code>track_counts</code> with
             <code>game.toml [netplay] required_tracks</code>. No
-            <code>.iso</code>.
+            <code>.iso</code>. Cart platforms leave these empty.
           </p>
           <div class="row one">
             <label>
@@ -365,7 +381,9 @@
             <strong>Update</strong> / <strong>Generate &amp; Rebuild</strong>
             (generate + cmake) instead of relying on the in-game setup wizard.
             Probe fills a psxrecomp one-zip recipe when
-            <code>game.toml</code> + release assets are present.
+            <code>game.toml</code> + release assets are present, or a
+            snesrecomp recipe from <code>tools/regen.sh</code> +
+            <code>CMakeLists.txt</code>.
             <span class="src" data-src="build"></span>
           </p>
           <div class="row one">
@@ -429,7 +447,7 @@
             </label>
             <label>
               <strong>match_caps_schema</strong>
-              <input id="f_netplay_match_caps" placeholder="psx-v1" />
+              <input id="f_netplay_match_caps" placeholder="psx-v1 / snes-v1" />
             </label>
           </div>
           <div class="row one">
@@ -482,11 +500,13 @@
             required so abusive accounts can be banned in
             <code>submit/banned-users.json</code>.
           </p>
+          </div>
         </section>
 
         <aside class="panel">
           <h2>Preview</h2>
-          <p class="hint" id="metaLine">Probe a repo to begin.</p>
+          <p class="hint" id="metaLine">Pick a platform, then probe a repo to begin.</p>
+          <p class="hint" id="pathLine"></p>
           <pre class="preview" id="preview">{}</pre>
         </aside>
       </div>
@@ -496,8 +516,8 @@
         <a href="https://github.com/TechnicallyComputers/retcomm-catalog/blob/main/SCHEMA.md"
           >SCHEMA.md</a
         >
-        · Existing titles stay under
-        <code>titles/</code>. Submissions are not published until approved.
+        · Titles live under <code>titles/&lt;platform&gt;/</code> (one folder per
+        system). Submissions are not published until approved.
       </footer>
     </div>
     <script type="module" src="./app.js"></script>

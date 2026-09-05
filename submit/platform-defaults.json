@@ -1,27 +1,58 @@
 {
-  "snes": {
-    "rom_extensions": [".sfc", ".smc", ".fig", ".swc"],
-    "romm_platforms": ["snes"],
-    "saves": { "sram_glob": ["*.srm", "saves/*.srm"] }
-  },
-  "gba": {
-    "rom_extensions": [".gba"],
-    "romm_platforms": ["gba"],
-    "saves": { "sram_glob": ["*.sav", "saves/*.sav"] },
-    "bios_inherited": true
-  },
+  "_notes": "Platform registry shared by the submission form and the submit Worker (bundled at deploy). Order here is the order the form's platform picker shows. `media`: cart = one ROM file to hash; disc = .cue + Track 01 .bin per disc. `catalog_dir` is where an approved title lands.",
   "psx": {
+    "label": "PlayStation",
+    "short": "PSX",
+    "blurb": "psxrecomp titles. You will hash the Redump .cue and Track 01 .bin (or a self-contained .car image) for every disc.",
+    "media": "disc",
+    "catalog_dir": "titles/psx",
     "rom_extensions": [".cue", ".bin"],
     "romm_platforms": ["ps", "psx", "ps1"],
     "saves": { "memcard_glob": ["saves/*.mcd", "saves/*.mcr", "*.mcd", "*.mcr"] },
-    "bios_inherited": true
+    "bios_inherited": true,
+    "match_caps_schema": "psx-v1",
+    "engine": "psxrecomp"
+  },
+  "snes": {
+    "label": "Super Nintendo",
+    "short": "SNES",
+    "blurb": "snesrecomp titles. You will hash one .sfc / .smc dump; a 512-byte copier header is stripped first, matching the game's own gate.",
+    "media": "cart",
+    "catalog_dir": "titles/snes",
+    "rom_extensions": [".sfc", ".smc", ".fig", ".swc"],
+    "romm_platforms": ["snes"],
+    "saves": { "sram_glob": ["*.srm", "saves/*.srm"] },
+    "match_caps_schema": "snes-v1",
+    "engine": "snesrecomp"
+  },
+  "gba": {
+    "label": "Game Boy Advance",
+    "short": "GBA",
+    "blurb": "gbarecomp titles. You will hash one .gba dump.",
+    "media": "cart",
+    "catalog_dir": "titles/gba",
+    "rom_extensions": [".gba"],
+    "romm_platforms": ["gba"],
+    "saves": { "sram_glob": ["*.sav", "saves/*.sav"] },
+    "bios_inherited": true,
+    "engine": "gbarecomp"
   },
   "n64": {
+    "label": "Nintendo 64",
+    "short": "N64",
+    "blurb": "You will hash one .z64 / .n64 / .v64 dump.",
+    "media": "cart",
+    "catalog_dir": "titles/n64",
     "rom_extensions": [".z64", ".n64", ".v64"],
     "romm_platforms": ["n64"],
     "saves": { "sram_glob": ["*.srm", "saves/*.srm"] }
   },
   "genesis": {
+    "label": "Sega Genesis / Mega Drive",
+    "short": "Genesis",
+    "blurb": "You will hash one .bin / .md / .gen / .smd dump.",
+    "media": "cart",
+    "catalog_dir": "titles/genesis",
     "rom_extensions": [".bin", ".md", ".gen", ".smd"],
     "romm_platforms": ["genesis", "smd", "megadrive"],
     "saves": { "sram_glob": ["*.srm", "saves/*.srm"] }

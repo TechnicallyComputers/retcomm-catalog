@@ -41,27 +41,8 @@ jobs:
               --tag "${{ steps.meta.outputs.tag }}"
           fi
 
-      - name: Validate JSON
-        run: |
-          python3 -c "import json; json.load(open('index.json'))"
-          shopt -s nullglob
-          for f in titles/*.json; do
-            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
-            echo "ok $f"
-          done
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          idx = json.load(open("index.json"))
-          ids = idx.get("titles", [])
-          missing = [i for i in ids if not Path(f"titles/{i}.json").is_file()]
-          extras = sorted({p.stem for p in Path("titles").glob("*.json")} - set(ids))
-          if missing:
-              raise SystemExit(f"index lists missing files: {missing}")
-          if extras:
-              print(f"warning: titles not in index: {extras}")
-          print(f"{len(ids)} titles ok; catalog_date={idx.get('catalog_date')} release_tag={idx.get('release_tag')}")
-          PY
+      - name: Validate catalog tree
+        run: python3 .github/scripts/validate_catalog.py
 
       - name: Pack catalog.zip
         run: |

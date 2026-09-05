@@ -1,7 +1,7 @@
 name: Approve catalog submission
 
 # Apply label `approved` (or `approved-update`) on a submission issue to merge
-# the proposed titles/<id>.json, update index.json, and publish catalog.zip.
+# the proposed titles/<platform>/<id>.json, update index.json, and publish catalog.zip.
 # Ensures submission labels exist and auto-applies `catalog-submission` if missing.
 
 on:
@@ -104,31 +104,14 @@ jobs:
             gh api --method DELETE "repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/labels/${{ github.event.label.name }}" || true
             exit 1
           fi
-          # Last stdout line is action:id
+          # Last stdout line is action:id:path (path = titles/<platform>/<id>.json)
           result="$(echo "$out" | tail -n1)"
           echo "result=$result" >> "$GITHUB_OUTPUT"
-          echo "tid=${result#*:}" >> "$GITHUB_OUTPUT"
+          echo "tid=$(echo "$result" | cut -d: -f2)" >> "$GITHUB_OUTPUT"
+          echo "path=$(echo "$result" | cut -d: -f3)" >> "$GITHUB_OUTPUT"
 
       - name: Validate catalog tree
-        run: |
-          python3 -c "import json; json.load(open('index.json'))"
-          shopt -s nullglob
-          for f in titles/*.json; do
-            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
-          done
-          python3 - <<'PY'
-          import json
-          from pathlib import Path
-          idx = json.load(open("index.json"))
-          ids = idx.get("titles", [])
-          missing = [i for i in ids if not Path(f"titles/{i}.json").is_file()]
-          extras = sorted({p.stem for p in Path("titles").glob("*.json")} - set(ids))
-          if missing:
-              raise SystemExit(f"index lists missing files: {missing}")
-          if extras:
-              raise SystemExit(f"titles not in index: {extras}")
-          print(f"{len(ids)} titles ok")
-          PY
+        run: python3 .github/scripts/validate_catalog.py
 
       - name: Choose dated release tag
         id: meta
@@ -155,7 +138,9 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add index.json "titles/${{ steps.apply.outputs.tid }}.json"
+          # titles/ as a whole: an approved-update may also delete the old copy
+          # when a title moved between platform folders.
+          git add index.json titles
           if git diff --staged --quiet; then
             echo "No file changes to commit (already on main?)."
           else
@@ -197,7 +182,7 @@ jobs:
           {
             echo "✅ Approved by @${{ github.actor }}"
             echo
-            echo "- Wrote \`titles/${{ steps.apply.outputs.tid }}.json\` and updated \`index.json\`"
+            echo "- Wrote \`${{ steps.apply.outputs.path }}\` and updated \`index.json\`"
             echo "- Published catalog release: ${{ steps.release.outputs.url }}"
             echo "- Launchers will pick this up on the next catalog sync / auto-update"
             echo

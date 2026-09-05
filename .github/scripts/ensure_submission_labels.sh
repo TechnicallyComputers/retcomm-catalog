@@ -18,4 +18,4 @@ ensure_label() {
 
 ensure_label "catalog-submission" "5319E7" "New title submission from the catalog form"
 ensure_label "approved" "0E8A16" "Approve submission: merge title and publish catalog.zip"
-ensure_label "approved-update" "1D76DB" "Approve and overwrite an existing titles/<id>.json"
+ensure_label "approved-update" "1D76DB" "Approve and overwrite an existing titles/<platform>/<id>.json"

@@ -11,8 +11,40 @@
  *   POST /api/submit
  */
 
+import PLATFORM_DEFAULTS from "../../submit/platform-defaults.json";
+
 const SESSION_COOKIE = "retcomm_submit_session";
 const SESSION_TTL_SEC = 60 * 60 * 24 * 7;
+
+/* ── Platform registry ───────────────────────────────────────── */
+
+/**
+ * One registry for form and API: submit/platform-defaults.json is bundled
+ * into the Worker at deploy, so the picker, the validator, and the probe
+ * cannot disagree about which platforms exist or where their titles live.
+ */
+function platformRegistry() {
+  const out = {};
+  for (const [k, v] of Object.entries(PLATFORM_DEFAULTS || {})) {
+    if (k.startsWith("_") || !v || typeof v !== "object") continue;
+    out[k] = v;
+  }
+  return out;
+}
+
+function platformInfo(platform) {
+  return platformRegistry()[String(platform || "").trim()] || null;
+}
+
+function knownPlatforms() {
+  return Object.keys(platformRegistry());
+}
+
+/** titles/<platform>/<id>.json — the folder is the platform slug. */
+function catalogTitlePath(platform, id) {
+  const dir = platformInfo(platform)?.catalog_dir || `titles/${platform}`;
+  return `${dir}/${id}.json`;
+}
 
 export default {
   async fetch(request, env) {
@@ -447,7 +479,10 @@ function slugifyId(name, platform) {
   let s = String(name || "")
     .replace(/Recomp$/i, "")
     .replace(/Decomp$/i, "")
+    // MegaManXSNESRecomp → mega-man-x-snes, not mega-man-xsnes-snes.
+    .replace(/(SNES|PSX|PS1|GBA|N64|Genesis)$/i, "")
     .replace(/([a-z])([A-Z])/g, "$1-$2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1-$2")
     .replace(/[^a-zA-Z0-9]+/g, "-")
     .replace(/-+/g, "-")
     .replace(/^-|-$/g, "")
@@ -460,7 +495,10 @@ function displayNameFromRepo(repoName) {
   return String(repoName || "")
     .replace(/Recomp$/i, "")
     .replace(/Decomp$/i, "")
+    // MetalWarriorsSNESRecomp → "Metal Warriors", not "Metal Warriors SNES".
+    .replace(/(SNES|PSX|PS1|GBA|N64|Genesis)$/i, "")
     .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/([A-Z]+)([A-Z][a-z])/g, "$1 $2")
     .replace(/[_-]+/g, " ")
     .trim();
 }
@@ -480,12 +518,13 @@ function extractDigests(text) {
 
   const lower = text;
 
-  // Labeled digests
+  // Labeled digests. `|` covers README tables ("| CRC32 | `0xf2ab92d4` |"),
+  // which SNES ports use for their Expected ROM block.
   const labeled = [
-    [/sha-?256\s*[:=]\s*`?([a-f0-9]{64})`?/gi, "sha256"],
-    [/sha-?1\s*[:=]\s*`?([a-f0-9]{40})`?/gi, "sha1"],
-    [/md5\s*[:=]\s*`?([a-f0-9]{32})`?/gi, "md5"],
-    [/crc-?32\s*[:=]\s*`?(0x)?([a-f0-9]{8})`?/gi, "crc32"],
+    [/sha-?256\s*[:=|]\s*`?([a-f0-9]{64})`?/gi, "sha256"],
+    [/sha-?1\s*[:=|]\s*`?([a-f0-9]{40})`?/gi, "sha1"],
+    [/md5\s*[:=|]\s*`?([a-f0-9]{32})`?/gi, "md5"],
+    [/crc-?32\s*[:=|]\s*`?(0x)?([a-f0-9]{8})`?/gi, "crc32"],
   ];
   for (const [re, key] of labeled) {
     let m;
@@ -676,19 +715,126 @@ function pickBestLaunchName(names, { wantExe = false } = {}) {
   return bestScore >= 40 ? best : bestScore >= 10 && (names || []).length === 1 ? best : "";
 }
 
+/**
+ * The game executable target from a snesrecomp-style CMakeLists.txt:
+ * `add_executable(MetalWarriorsSNESRecomp …)`. Test helpers and `${VAR}`
+ * targets are skipped; `project(Name …)` is the fallback.
+ */
+function inferCmakeExecutableTarget(cmakeText) {
+  if (!cmakeText) return "";
+  for (const m of cmakeText.matchAll(/\badd_executable\s*\(\s*([^\s)]+)/gi)) {
+    const name = m[1];
+    if (name.startsWith("$")) continue;
+    if (/test|bench|tool|helper/i.test(name)) continue;
+    return name;
+  }
+  const proj = cmakeText.match(/\bproject\s*\(\s*([A-Za-z0-9_.-]+)/i);
+  return proj?.[1] || "";
+}
+
 function inferLaunchFromCmake(cmakeText) {
   if (!cmakeText) return "";
   const exe = cmakeText.match(/\bEXE_NAME\s+"([^"]+)"/i);
   if (exe?.[1]) return cmakeMakeCIdentifier(exe[1]);
   const win = cmakeText.match(/\bWINDOW_TITLE\s+"([^"]+)"/i);
   if (win?.[1]) return cmakeMakeCIdentifier(win[1]);
+  // psxrecomp declares the runtime via psxrecomp_add_game_runtime(); a bare
+  // add_executable is the snesrecomp convention, where the target IS the binary.
+  const target = inferCmakeExecutableTarget(cmakeText);
+  if (target && !/^psx-runtime$/i.test(target)) return target;
   return "";
 }
 
 function inferLaunchFromPackageScript(text) {
   if (!text) return "";
   const m = text.match(/--exe-name\s+(\S+)/i);
-  return m?.[1] ? m[1].replace(/^["']|["']$/g, "") : "";
+  if (m?.[1]) return m[1].replace(/^["']|["']$/g, "");
+  // snesrecomp ports: scripts/package_release.sh sets EXE_NAME="…".
+  const exe = text.match(/^\s*EXE_NAME\s*=\s*["']?([A-Za-z0-9._-]+)["']?/im);
+  return exe?.[1] || "";
+}
+
+/**
+ * rom_identity.txt — the StarFox-style `key = value` file some SNES ports
+ * treat as their single source of truth (CMake, regen.sh, and CI read it).
+ */
+function parseRomIdentityTxt(text) {
+  const out = {
+    ok: false,
+    crc32: [],
+    md5: [],
+    sha1: [],
+    sha256: [],
+    filenames: [],
+    display_name: "",
+  };
+  if (!text || typeof text !== "string") return out;
+  const kv = {};
+  for (const line of text.split(/\r?\n/)) {
+    const m = line.match(/^\s*([A-Za-z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (!m || line.trim().startsWith("#")) continue;
+    kv[m[1].toLowerCase()] = m[2].replace(/^["']|["']$/g, "").trim();
+  }
+  if (!Object.keys(kv).length) return out;
+  out.ok = true;
+  const hex = (v, len) => {
+    const s = String(v || "").toLowerCase().replace(/^0x/, "");
+    return new RegExp(`^[a-f0-9]{${len}}$`).test(s) ? s : "";
+  };
+  const crc = hex(kv.expected_crc32 || kv.crc32, 8);
+  const md5 = hex(kv.expected_md5 || kv.md5, 32);
+  const sha1 = hex(kv.expected_sha1 || kv.sha1, 40);
+  const sha256 = hex(kv.expected_sha256 || kv.sha256, 64);
+  if (crc) out.crc32.push(crc);
+  if (md5) out.md5.push(md5);
+  if (sha1) out.sha1.push(sha1);
+  if (sha256) out.sha256.push(sha256);
+  if (kv.rom_file) out.filenames.push(kv.rom_file);
+  if (kv.display_name) out.display_name = kv.display_name;
+  return out;
+}
+
+/**
+ * tools/regen.sh — snesrecomp ports pin the expected digests and the
+ * generate arguments here. `EXPECTED_CRC32="${SNESRECOMP_EXPECTED_CRC32:-f2ab92d4}"`,
+ * `for cand in "Metal Warriors (USA).sfc" …`, `--cfg-dir recomp --out-dir src/gen`.
+ */
+function parseRegenScript(text) {
+  const out = {
+    ok: false,
+    crc32: [],
+    sha256: [],
+    filenames: [],
+    cfg_dir: "",
+    out_dir: "",
+    funcs_h: "",
+    cfg_roots: false,
+  };
+  if (!text || typeof text !== "string") return out;
+  out.ok = /snesrecomp_cli|generate/i.test(text);
+  const grab = (key, len) => {
+    const m = text.match(
+      new RegExp(`${key}\\s*=\\s*["']?(?:\\$\\{[A-Z0-9_]+:-)?([a-fA-F0-9]{${len}})["'}]?`, "i")
+    );
+    return m ? m[1].toLowerCase() : "";
+  };
+  const crc = grab("EXPECTED_CRC32", 8);
+  const sha = grab("EXPECTED_SHA256", 64);
+  if (crc) out.crc32.push(crc);
+  if (sha) out.sha256.push(sha);
+  for (const m of text.matchAll(/"([^"]+\.(?:sfc|smc|fig|swc))"/gi)) {
+    if (!out.filenames.includes(m[1])) out.filenames.push(m[1]);
+  }
+  const arg = (flag) => {
+    const m = text.match(new RegExp(`${flag}\\s+["']?([^\\s"']+)`, "i"));
+    // A shell variable ("$cfg_dir") is not a path we can put in the catalog.
+    return m && !m[1].startsWith("$") ? m[1] : "";
+  };
+  out.cfg_dir = arg("--cfg-dir");
+  out.out_dir = arg("--out-dir");
+  out.funcs_h = arg("--funcs-h");
+  out.cfg_roots = /--cfg-roots/.test(text);
+  return out;
 }
 
 function inferLaunchFromReadmeSetup(text) {
@@ -919,7 +1065,7 @@ async function ensureSubmissionLabels(env, catalogRepo) {
     {
       name: "approved-update",
       color: "1D76DB",
-      description: "Approve and overwrite an existing titles/<id>.json",
+      description: "Approve and overwrite an existing titles/<platform>/<id>.json",
     },
   ];
   for (const label of labels) {
@@ -1293,7 +1439,12 @@ function unionDiscIdentity(discs, base) {
   return out;
 }
 
-function detectNetplaySupported(cmakeText, tomlDisc) {
+function detectNetplaySupported(cmakeText, tomlDisc, platform = "") {
+  if (cmakeText && platform === "snes") {
+    // snesrecomp ports bake SNES_GAME_VERSION for lobby matching; a port
+    // without it has no recomp-net wire identity to advertise.
+    return /\bSNES_GAME_VERSION\b/.test(cmakeText);
+  }
   if (cmakeText) {
     // An explicit opt-out wins over the weak game.toml [netplay] heuristic
     // below: single-player psxrecomp scaffolds still ship a [netplay] disc gate.
@@ -1347,6 +1498,41 @@ function inferPsxBuildRecipe(slug, launchLinux) {
   };
 }
 
+/** snesrecomp generate + cmake recipe (see SCHEMA.md `build`). */
+function inferSnesBuildRecipe(slug, target, regen) {
+  return {
+    enabled: true,
+    source: {
+      github: slug,
+      ref: "main",
+    },
+    // Emitters are harvested from the game release zip's vendored snesrecomp/.
+    sdk: { id: "snesrecomp-tools" },
+    toolchain: {
+      id: "cmake-clang-v1",
+      github: "TechnicallyComputers/retcomm-toolchains",
+      min_version: "1.0.3",
+      asset_glob: {
+        linux: "*cmake-clang-v1*linux*",
+        windows: "*cmake-clang-v1*windows*",
+        macos: "*cmake-clang-v1*macos*",
+      },
+    },
+    generate: {
+      engine: "snesrecomp",
+      cfg_dir: regen?.cfg_dir || "recomp",
+      out_dir: regen?.out_dir || "src/gen",
+      funcs_h: regen?.funcs_h || "recomp/funcs.h",
+      cfg_roots: regen?.cfg_roots ?? true,
+    },
+    cmake: {
+      build_dir: "build",
+      target,
+      config: "Release",
+    },
+  };
+}
+
 async function probe(request, env) {
   const session = await requireUser(request, env);
   if (await isBanned(session.login, env)) {
@@ -1357,6 +1543,19 @@ async function probe(request, env) {
   const slug = parseRepoSlug(body.repo);
   if (!slug) {
     return json({ error: "Invalid GitHub repo (use owner/repo or URL)" }, 400, request, env);
+  }
+  // The form asks for the platform first; it is authoritative over any guess
+  // from the README because it decides the catalog folder and the hash flow.
+  const chosenPlatform = String(body.platform || "").trim();
+  if (chosenPlatform && !platformInfo(chosenPlatform)) {
+    return json(
+      {
+        error: `Unknown platform "${chosenPlatform}" — catalog platforms are ${knownPlatforms().join(", ")}`,
+      },
+      400,
+      request,
+      env
+    );
   }
 
   const repoRes = await ghApiForeign(`/repos/${slug}`, env);
@@ -1420,20 +1619,55 @@ async function probe(request, env) {
   const discMd = (await fetchRepoText(slug, "DISC.md", env)) || "";
   const gameToml = (await fetchRepoText(slug, "game.toml", env)) || "";
   const cmakeText = (await fetchRepoText(slug, "CMakeLists.txt", env)) || "";
+  const versionText = (await fetchRepoText(slug, "VERSION", env)) || "";
+
+  // Platform: the submitter's choice wins; the README guess only fills in
+  // when nothing was chosen (Download JSON without the picker) and is
+  // reported back as a warning when the two disagree.
+  const blob = `${repo.name} ${repo.description || ""} ${readme.slice(0, 2000)}`;
+  const guessedPlatform = guessPlatform(blob) || (gameToml ? "psx" : "");
+  const platform = chosenPlatform || guessedPlatform;
+  const warnings = [];
+  if (chosenPlatform && guessedPlatform && guessedPlatform !== chosenPlatform) {
+    warnings.push(
+      `The repo reads like a ${guessedPlatform} port but you chose ${chosenPlatform} — double-check the platform before submitting.`
+    );
+  }
+  const isPsx = platform === "psx";
+  const isSnes = platform === "snes";
+
+  // psxrecomp: package_setup_release.sh / README-SETUP.txt / catalog_identity.
+  // snesrecomp: package_release.sh / rom_identity.txt / tools/regen.sh.
   const packageScript =
-    (await fetchRepoText(slug, "scripts/package_setup_release.sh", env)) || "";
+    (await fetchRepoText(slug, "scripts/package_setup_release.sh", env)) ||
+    (isPsx ? "" : (await fetchRepoText(slug, "scripts/package_release.sh", env)) || "");
   const readmeSetup = (await fetchRepoText(slug, "README-SETUP.txt", env)) || "";
   const catalogIdentityText =
     (await fetchRepoText(slug, "catalog_identity.json", env)) || "";
   // Multi-disc sets publish disc_set.json + one disc_probe per disc; empty for
-  // single-disc titles, which keep using the flat identity below.
-  const discSet = await fetchDiscSet(slug, env);
-  const versionText = (await fetchRepoText(slug, "VERSION", env)) || "";
+  // single-disc titles (and every cart platform), which keep using the flat
+  // identity below.
+  const discSet = isPsx || !platform
+    ? await fetchDiscSet(slug, env)
+    : { discs: [], warnings: [] };
+  const romIdentityTxt = isPsx
+    ? parseRomIdentityTxt("")
+    : parseRomIdentityTxt((await fetchRepoText(slug, "rom_identity.txt", env)) || "");
+  const regen = isPsx
+    ? parseRegenScript("")
+    : parseRegenScript((await fetchRepoText(slug, "tools/regen.sh", env)) || "");
+
   const catalogId = parseCatalogIdentity(catalogIdentityText);
   const tomlDisc = extractGameTomlDisc(gameToml);
   const digests = mergeDigestSets(
     { ...extractDigests(readme), sources: readme ? ["README"] : [] },
-    { ...extractDigests(discMd), sources: discMd ? ["DISC.md"] : [] }
+    { ...extractDigests(discMd), sources: discMd ? ["DISC.md"] : [] },
+    romIdentityTxt.ok
+      ? { ...romIdentityTxt, sources: ["rom_identity.txt"] }
+      : null,
+    regen.crc32.length || regen.sha256.length || regen.filenames.length
+      ? { ...regen, sources: ["tools/regen.sh"] }
+      : null
   );
   // prepare_disc / catalog_identity digests are authoritative for psxrecomp.
   if (tomlDisc.md5.length) digests.md5 = [...new Set([...tomlDisc.md5, ...digests.md5])];
@@ -1484,8 +1718,6 @@ async function probe(request, env) {
     !!tomlDisc.require_cue ||
     track_counts.some((n) => n > 1);
 
-  const blob = `${repo.name} ${repo.description || ""} ${readme.slice(0, 2000)}`;
-  const platform = guessPlatform(blob) || (gameToml ? "psx" : "");
   const asset_glob = inferAssetGlobs(assets);
   const install_dir_name = repo.name;
   const inferred = await inferLaunch(install_dir_name, asset_glob, {
@@ -1507,7 +1739,7 @@ async function probe(request, env) {
     descriptionSrc = "repo";
   }
 
-  const displayName = displayNameFromRepo(repo.name);
+  const displayName = romIdentityTxt.display_name || displayNameFromRepo(repo.name);
   const players =
     catalogId.players != null
       ? catalogId.players
@@ -1544,7 +1776,8 @@ async function probe(request, env) {
       };
     })(),
     rom_extensions:
-      platform === "psx" || track_counts.length ? [".cue", ".bin"] : [],
+      platformInfo(platform)?.rom_extensions ||
+      (isPsx || track_counts.length ? [".cue", ".bin"] : []),
     release: {
       github: slug,
       allow_prerelease: allowPrerelease,
@@ -1552,7 +1785,7 @@ async function probe(request, env) {
     },
     install_dir_name,
     launch: inferred.launch,
-    romm: { platforms: [] },
+    romm: { platforms: platformInfo(platform)?.romm_platforms || [] },
     notes: digests.sources.length
       ? `Digests auto-extracted from ${digests.sources.join(", ")}.`
       : "Fill rom_identity from the project's baserom / gate docs.",
@@ -1565,16 +1798,16 @@ async function probe(request, env) {
     "release.github": "repo",
     homepage: "repo",
     description: descriptionSrc,
-    name: "guessed",
+    name: romIdentityTxt.display_name ? "rom_identity.txt" : "guessed",
     id: "guessed",
-    platform: platform ? "guessed" : "missing",
+    platform: chosenPlatform ? "submitter" : platform ? "guessed" : "missing",
     rom_identity: digests.sources.length ? digests.sources.join("+") : "missing",
     "release.asset_glob": assets.length ? "release assets" : "default",
     launch: inferred.source,
   };
 
   // Netplay: CMake opt-in / game.toml [netplay] + lobby identity strings.
-  const netplayOn = detectNetplaySupported(cmakeText, tomlDisc);
+  const netplayOn = detectNetplaySupported(cmakeText, tomlDisc, platform);
   let netplaySrc = "missing";
   if (netplayOn) {
     const fromTitle = netplayNameFromWindowTitle(tomlDisc.window_title);
@@ -1603,7 +1836,8 @@ async function probe(request, env) {
       game_version,
       max_slots,
       transports: ["lan", "ice"],
-      match_caps_schema: platform === "psx" || gameToml ? "psx-v1" : "",
+      match_caps_schema:
+        platformInfo(platform)?.match_caps_schema || (gameToml ? "psx-v1" : ""),
     };
     if (!draft.netplay.match_caps_schema) delete draft.netplay.match_caps_schema;
     field_sources.netplay = netplaySrc;
@@ -1620,9 +1854,10 @@ async function probe(request, env) {
           : "default";
   }
 
-  // Local Build & Install recipe for one-zip psxrecomp titles.
+  // Local Build & Install recipe: one-zip psxrecomp titles, or snesrecomp
+  // ports whose tools/regen.sh + CMakeLists.txt name the generate inputs.
   if (
-    (platform === "psx" || !!gameToml) &&
+    (isPsx || (!platform && !!gameToml)) &&
     gameToml &&
     Object.values(asset_glob).some(Boolean)
   ) {
@@ -1630,6 +1865,15 @@ async function probe(request, env) {
     delete build._launch_hint;
     draft.build = build;
     field_sources.build = "psxrecomp one-zip defaults";
+  } else if (isSnes && Object.values(asset_glob).some(Boolean)) {
+    const target = inferCmakeExecutableTarget(cmakeText);
+    const usesSnesrecomp = regen.ok || /snesrecomp/i.test(cmakeText);
+    if (target && usesSnesrecomp) {
+      draft.build = inferSnesBuildRecipe(slug, target, regen.ok ? regen : null);
+      field_sources.build = regen.ok
+        ? "tools/regen.sh + CMakeLists.txt"
+        : "snesrecomp defaults + CMakeLists.txt";
+    }
   }
 
   return json(
@@ -1642,6 +1886,8 @@ async function probe(request, env) {
         assets,
         digest_sources: digests.sources,
         field_sources,
+        warnings: [...warnings, ...(discSet.warnings || [])],
+        catalog_path: platform ? catalogTitlePath(platform, draft.id) : "",
       },
     },
     200,
@@ -1681,6 +1927,11 @@ function validateManifest(m) {
     errors.push('kind must be "recomp" or "decomp"');
   }
   if (!m.platform) errors.push("platform is required");
+  else if (!platformInfo(m.platform)) {
+    errors.push(
+      `platform "${m.platform}" is not a catalog platform (${knownPlatforms().join(", ")})`
+    );
+  }
   if (!m.release?.github || !parseRepoSlug(m.release.github)) {
     errors.push("release.github must be owner/repo");
   }
@@ -1848,10 +2099,13 @@ function normalizeManifest(m) {
     })(),
     rom_extensions: (() => {
       let exts = emptyArr(m.rom_extensions).map(String);
-      if (String(m.platform || "").trim() === "psx") {
+      const plat = String(m.platform || "").trim();
+      if (plat === "psx") {
         exts = exts.filter((e) => !/\.(iso|chd)$/i.test(e));
-        if (!exts.length) exts = [".cue", ".bin"];
       }
+      // Empty means "whatever the platform scans" — pin it from the registry
+      // so the launcher never sees a title with no scan filter.
+      if (!exts.length) exts = [...(platformInfo(plat)?.rom_extensions || [])];
       return exts;
     })(),
     release: {
@@ -1953,7 +2207,8 @@ async function submit(request, env) {
   // GitHub allows at most 10 assignees per issue.
   const assignees = approvers.logins.slice(0, 10);
 
-  const title = `[catalog submission] ${manifest.id} from @${session.login}`;
+  const title = `[catalog submission] ${manifest.platform}/${manifest.id} from @${session.login}`;
+  const titlePath = catalogTitlePath(manifest.platform, manifest.id);
   const jsonBlock = JSON.stringify(manifest, null, 2);
   const notifyLine = approvers.logins.length
     ? approvers.logins.map((l) => `@${l}`).join(" ")
@@ -1966,11 +2221,12 @@ async function submit(request, env) {
     `| **Submitter** | @${session.login} |`,
     `| **Proposed id** | \`${manifest.id}\` |`,
     `| **Source** | https://github.com/${manifest.release.github} |`,
-    `| **Platform** | ${manifest.platform} |`,
+    `| **Platform** | ${manifest.platform} (${platformInfo(manifest.platform)?.label || manifest.platform}) |`,
+    `| **Path** | \`${titlePath}\` |`,
     `| **Notify** | ${notifyLine} |`,
     ``,
     submitter_note ? `### Note from submitter\n\n${submitter_note}\n` : "",
-    `### Proposed \`titles/${manifest.id}.json\``,
+    `### Proposed \`${titlePath}\``,
     ``,
     "```json",
     jsonBlock,
@@ -2215,6 +2471,7 @@ async function sendApproverEmail(
     `Title id: ${manifest.id}`,
     `Name: ${manifest.name}`,
     `Platform: ${manifest.platform}`,
+    `Path: ${catalogTitlePath(manifest.platform, manifest.id)}`,
     `Source: https://github.com/${manifest.release.github}`,
     `Issue: ${issueUrl}`,
     submitter_note ? `\nSubmitter note:\n${submitter_note}` : "",
@@ -2228,7 +2485,7 @@ async function sendApproverEmail(
     <ul>
       <li><strong>Title id:</strong> ${escapeHtml(manifest.id)}</li>
       <li><strong>Name:</strong> ${escapeHtml(manifest.name)}</li>
-      <li><strong>Platform:</strong> ${escapeHtml(manifest.platform)}</li>
+      <li><strong>Platform:</strong> ${escapeHtml(manifest.platform)} → <code>${escapeHtml(catalogTitlePath(manifest.platform, manifest.id))}</code></li>
       <li><strong>Source:</strong> <a href="https://github.com/${escapeHtml(manifest.release.github)}">${escapeHtml(manifest.release.github)}</a></li>
       <li><strong>Approval issue:</strong> <a href="${escapeHtml(issueUrl)}">${escapeHtml(issueUrl)}</a></li>
     </ul>

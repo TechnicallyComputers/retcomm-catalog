@@ -40,7 +40,7 @@ bash .github/scripts/ensure_submission_labels.sh
 |---|---|
 | `catalog-submission` | Applied by the form on new issues (auto-applied on approve if missing) |
 | `approved` | Maintainer adds this → merge title + publish `catalog.zip` |
-| `approved-update` | Same, but overwrites an existing `titles/<id>.json` |
+| `approved-update` | Same, but overwrites an existing `titles/<platform>/<id>.json` (also when a title moves between platform folders) |
 
 Only users with **write** (or higher) on the repo can successfully approve.
 Rejecting a submission is just closing the issue (no special label).
@@ -112,7 +112,9 @@ human contributors (GitHub notification email if watching/assigned).
 1. Review the issue’s JSON and checklist.
 2. Add label **`approved`** (or **`approved-update`** to replace an existing id).
 3. [`.github/workflows/approve-submission.yml`](../.github/workflows/approve-submission.yml)
-   writes `titles/<id>.json`, updates `index.json`, pushes to the default branch,
+   writes `titles/<platform>/<id>.json`, registers the id under
+   `index.json` → `platforms.<platform>.titles` (plus the flat `titles` list),
+   pushes to the default branch,
    creates a dated `vYYYY.MM.DD.HHMMSS.<issue>` release with `catalog.zip`, comments,
    and closes the issue.
 

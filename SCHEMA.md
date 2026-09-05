@@ -1,42 +1,77 @@
 # Catalog schema
 
-RetComM ships a directory of JSON manifests. `index.json` lists title ids;
-each `titles/<id>.json` describes one supported recomp/decomp.
+RetComM ships a directory of JSON manifests. `index.json` registers the
+platforms and lists title ids per platform; each
+`titles/<platform>/<id>.json` describes one supported recomp/decomp.
+
+## Layout
+
+```
+index.json
+titles/psx/tomba-psx.json
+titles/psx/final-fantasy-vii-psx.json
+titles/snes/metal-warriors-snes.json
+```
+
+One folder per platform, named by the catalog `platform` slug. A manifest's
+`platform` field must equal its folder name (CI rejects a mismatch), so a
+consumer can trust either. Consumers that want one system at a time read
+`platforms.<p>.dir` + `platforms.<p>.titles` from the index and resolve
+`<dir>/<id>.json`; consumers that only want ids still get the flat `titles`
+list. `schema_version` 1 (everything under `titles/<id>.json`, ids only)
+is retired — loaders should treat a missing `platforms` map as schema 1 and
+fall back to `titles/<id>.json`.
 
 ## `index.json`
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "name": "RetComM supported titles",
-  "catalog_date": "2026-07-29T18:41:00Z",
-  "release_tag": "v2026.07.29.184100.12",
   "platform_defaults": {
     "gba": { "bios_identity": { "required": true, "crc32": ["81977335"], "…": "…" } },
     "psx": { "bios_identity": { "required": true, "crc32": ["37157331"], "…": "…" } }
   },
-  "titles": ["metal-warriors-snes", "..."]
+  "platforms": {
+    "psx":  { "name": "Sony PlayStation", "dir": "titles/psx",  "titles": ["tomba-psx", "..."] },
+    "snes": { "name": "Super Nintendo Entertainment System", "dir": "titles/snes", "titles": ["metal-warriors-snes"] }
+  },
+  "titles": ["tomba-psx", "...", "metal-warriors-snes"],
+  "catalog_date": "2026-07-29T18:41:00Z",
+  "release_tag": "v2026.07.29.184100.12"
 }
 ```
 
 | Field | Type | Notes |
 |---|---|---|
+| `schema_version` | number | `2` = per-platform folders (this document). `1` = legacy flat `titles/<id>.json` |
 | `catalog_date` | string | UTC stamp from publish CI: `YYYY-MM-DDTHH:MM:SSZ` (preferred) or legacy `YYYY-MM-DD` |
 | `release_tag` | string | GitHub release tag (e.g. `v2026.07.29.184100.12` = date + `HHMMSS` + issue) |
+| `platforms` | object | Platform registry keyed by catalog `platform` slug (`psx`, `snes`, …). Iteration order is the catalog's platform order |
+| `platforms.<platform>.name` | string | Display name for the system |
+| `platforms.<platform>.dir` | string | Folder holding that platform's manifests, relative to the catalog root; always `titles/<platform>` |
+| `platforms.<platform>.titles` | string[] | Ids on that platform; each resolves to `<dir>/<id>.json` |
+| `titles` | string[] | Every id, platform lists concatenated in `platforms` order. Kept for id-only readers; must match the per-platform lists exactly |
 | `platform_defaults` | object | Optional per-platform defaults keyed by catalog `platform` |
 | `platform_defaults.<platform>.bios_identity` | object | Applied to titles on that platform that omit `bios_identity` |
+
+A platform appears in `platforms` once it has a folder; the approve workflow
+adds the entry the first time a title for a new platform is merged. The
+submission form's own platform list (label, media, extensions) lives in
+[`submit/platform-defaults.json`](submit/platform-defaults.json), which the
+submit Worker bundles so form and API agree.
 
 Title manifests may still set `bios_identity` to override the default, or
 `"bios_identity": null` to opt out of inheritance.
 
-## `titles/<id>.json`
+## `titles/<platform>/<id>.json`
 
 | Field | Type | Notes |
 |---|---|---|
-| `id` | string | Stable slug; matches filename |
+| `id` | string | Stable slug; matches filename. Convention: `<game>-<platform>` (`tomba-psx`, `metal-warriors-snes`) |
 | `name` | string | Display name |
 | `kind` | `"recomp"` \| `"decomp"` | |
-| `platform` | string | `snes`, `psx`, `n64`, `gba`, … (RomM + folder map) |
+| `platform` | string | `snes`, `psx`, `n64`, `gba`, … Must equal the folder the manifest lives in (`titles/<platform>/`) and a key of `index.json` → `platforms` |
 | `description` | string | Optional short blurb |
 | `homepage` | string | Optional URL (hub “GitHub Source”; defaults to `https://github.com/<release.github>`) |
 | `author_notes` | string | Optional message from the recomp/decomp author to users; shown in the hub as **Author's Notes** (any length) |
@@ -239,19 +274,23 @@ cannot pass the library / Install gate.
 ## Adding a title
 
 **Preferred:** use the [submission form](https://technicallycomputers.github.io/retcomm-catalog/submit/)
-(GitHub login). It auto-fills digests and release globs from the source repo and
-opens a review issue. A maintainer with write access adds the **`approved`**
-label to merge `titles/<id>.json`, update `index.json`, and publish a new
-`catalog.zip` release (use **`approved-update`** only to overwrite an existing
-id).
+(GitHub login). It asks for the platform first, auto-fills digests and release
+globs from the source repo, and opens a review issue. A maintainer with write
+access adds the **`approved`** label to merge `titles/<platform>/<id>.json`,
+register the id in `index.json`, and publish a new `catalog.zip` release (use
+**`approved-update`** only to overwrite an existing id).
 
 **Manual:**
 
-1. Create `titles/<id>.json`.
-2. Append `"<id>"` to `index.json` → `titles`.
-3. Fill `rom_identity` from the game's launcher gate / README baserom table
+1. Create `titles/<platform>/<id>.json` with `"platform": "<platform>"`.
+2. Append `"<id>"` to `index.json` → `platforms.<platform>.titles` **and** to
+   the flat `titles` list (same position relative to its platform). Add the
+   `platforms.<platform>` entry (`name`, `dir: "titles/<platform>"`) if this is
+   the first title on that platform.
+3. Run `python3 .github/scripts/validate_catalog.py`.
+4. Fill `rom_identity` from the game's launcher gate / README baserom table
    (prefer publishing every digest you know; leave unused keys as `[]`).
-4. Point `release.github` at the shipping repo once releases exist.
-5. For GBA/PSX, BIOS identity is inherited from `platform_defaults` unless
+5. Point `release.github` at the shipping repo once releases exist.
+6. For GBA/PSX, BIOS identity is inherited from `platform_defaults` unless
    the title sets its own `bios_identity` (or `null` to opt out).
-6. Tag `v*` or run **Publish catalog** so launchers get a new zip.
+7. Tag `v*` or run **Publish catalog** so launchers get a new zip.

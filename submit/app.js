@@ -7,6 +7,11 @@ const TOKEN_KEY = "retcomm_submit_session";
 const state = {
   user: null,
   fieldSources: {},
+  /**
+   * Platform registry from platform-defaults.json: label, media (cart | disc),
+   * catalog_dir, rom_extensions, … Keyed by catalog `platform` slug. The
+   * Worker bundles the same file, so form and API agree on what exists.
+   */
   platformDefaults: null,
   /** Probe-inferred RetComM build recipe (included when f_build_enabled). */
   probedBuild: null,
@@ -221,6 +226,169 @@ function numCsvGet(id) {
     .filter((n) => Number.isFinite(n) && n > 0);
 }
 
+/** Registry entry for a platform slug (null when unknown / not chosen). */
+function platformInfo(platform = $("f_platform").value) {
+  const d = state.platformDefaults?.[platform];
+  return d && typeof d === "object" ? d : null;
+}
+
+/** Ordered platform slugs for the picker (registry order, `_notes` skipped). */
+function platformSlugs() {
+  return Object.keys(state.platformDefaults || {}).filter(
+    (k) => !k.startsWith("_") && platformInfo(k)
+  );
+}
+
+/** Where an approved title lands: titles/<platform>/<id>.json. */
+function catalogPath(platform, id) {
+  const dir = platformInfo(platform)?.catalog_dir || `titles/${platform || "<platform>"}`;
+  return `${dir}/${id || "<id>"}.json`;
+}
+
+/** Status line shown before any local hash for the current platform. */
+function pendingChecksumMessage(platform = $("f_platform").value) {
+  if (!platform) return "Pick a platform first, then hash your local dump here.";
+  if (isDiscPlatform(platform)) {
+    return state.discCount > 1
+      ? `${state.discCount}-disc set detected — add the .cue and Track 01 .bin for each of the ${state.discCount} discs below. Submit stays blocked until every disc is hashed.`
+      : `${platformShort(platform)}: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed.`;
+  }
+  const exts = (platformInfo(platform)?.rom_extensions || []).join(" / ");
+  return `No ROM hashed yet — drop your ${exts || "ROM"} dump. Submit stays blocked until this step succeeds.`;
+}
+
+function platformShort(platform = $("f_platform").value) {
+  return platformInfo(platform)?.short || String(platform || "").toUpperCase();
+}
+
+/** Build the step-1 cards from the registry. */
+function renderPlatformPicker() {
+  const host = $("platformPicker");
+  if (!host) return;
+  host.innerHTML = platformSlugs()
+    .map((p) => {
+      const d = platformInfo(p);
+      return `
+      <label class="platform-card" data-platform="${esc(p)}">
+        <input type="radio" name="platform" value="${esc(p)}" />
+        <span class="platform-short">${esc(d.short || p)}</span>
+        <span class="platform-label">${esc(d.label || p)}</span>
+        <span class="platform-blurb">${esc(d.blurb || "")}</span>
+        <span class="platform-dir">${esc(d.catalog_dir || `titles/${p}`)}/</span>
+      </label>`;
+    })
+    .join("");
+  for (const input of host.querySelectorAll("input[name=platform]")) {
+    input.addEventListener("change", () => {
+      if (input.checked) setPlatform(input.value);
+    });
+  }
+  syncPlatformPicker();
+}
+
+function syncPlatformPicker() {
+  const cur = $("f_platform").value;
+  for (const card of document.querySelectorAll(".platform-card")) {
+    const p = card.getAttribute("data-platform");
+    const on = !!cur && p === cur;
+    card.classList.toggle("selected", on);
+    const input = card.querySelector("input");
+    if (input) input.checked = on;
+  }
+  $("appRoot")?.classList.toggle("no-platform", !cur);
+  const disp = $("f_platform_display");
+  if (disp) disp.value = cur;
+  const hint = $("platformHint");
+  if (hint) {
+    const d = platformInfo(cur);
+    hint.innerHTML = d
+      ? `<strong>${esc(d.label)}</strong> — approved titles land in <code>${esc(d.catalog_dir || `titles/${cur}`)}/</code>.`
+      : "No platform chosen yet — the rest of the form unlocks once you pick one.";
+  }
+}
+
+/**
+ * Re-suffix a probed/typed id when the platform changes (tomba-psx → tomba-snes).
+ * Any known platform suffix is stripped first — the id may have been typed or
+ * probed before a platform was chosen, so the previous choice alone is not
+ * enough to know what is already on the end.
+ */
+function resuffixId(oldPlatform, newPlatform) {
+  const el = $("f_id");
+  let v = el.value.trim();
+  if (!v || !newPlatform) return;
+  if (v === newPlatform || v.endsWith(`-${newPlatform}`)) return;
+  for (const p of [oldPlatform, ...platformSlugs()]) {
+    if (p && v.endsWith(`-${p}`)) {
+      v = v.slice(0, -(p.length + 1));
+      break;
+    }
+  }
+  el.value = v ? `${v}-${newPlatform}` : "";
+}
+
+/** Platform-specific copy around the checksum block and ROM identity fields. */
+function refreshPlatformCopy() {
+  const p = $("f_platform").value;
+  const d = platformInfo(p);
+  const ri = $("romIdentityHint");
+  const dropLabel = $("romDropLabel");
+  if (ri) {
+    if (!d) ri.textContent = "";
+    else if (d.media === "disc")
+      ri.innerHTML =
+        `${esc(d.short)}: <code>.cue</code> then Track&nbsp;01 <code>.bin</code>, or a self-contained <code>.car</code> image (official re-releases) — <code>.iso</code> / <code>.chd</code> are rejected.`;
+    else
+      ri.innerHTML =
+        `${esc(d.label)}: one ${(d.rom_extensions || []).map((e) => `<code>${esc(e)}</code>`).join(" / ")} dump (unzip archives first).` +
+        (p === "snes"
+          ? " A 512-byte copier header is stripped before hashing, so headered and headerless dumps yield the same digests."
+          : "");
+  }
+  if (dropLabel) {
+    dropLabel.textContent = d && d.media !== "disc"
+      ? `Drop your ${(d.rom_extensions || []).join(" / ")} dump here`
+      : "Drop a ROM here";
+  }
+}
+
+/**
+ * Step 1: the submitter chooses the platform. Everything platform-shaped
+ * (checksum slots, defaults, id suffix, catalog path) follows from it.
+ */
+function setPlatform(platform, { fromProbe = false } = {}) {
+  const prev = $("f_platform").value;
+  const next = platformInfo(platform) ? platform : "";
+  $("f_platform").value = next;
+  if (prev !== next) {
+    state.romChecksumDone = false;
+    state.romChecksumFile = "";
+    state.romHashingFile = "";
+    resetPsxCueState();
+    if (!fromProbe) {
+      // A new platform means a different dump — never carry hashes across.
+      state.discs = [];
+      setDiscCount(1);
+      const sel = $("f_disc_count");
+      if (sel) sel.value = "1";
+      resuffixId(prev, next);
+      if (!isDiscPlatform(next)) {
+        csvSet("f_track_counts", []);
+        $("f_require_cue").checked = false;
+      }
+      // Extensions / RomM slugs are platform facts, not repo facts.
+      csvSet("f_rom_extensions", []);
+      csvSet("f_romm_platforms", []);
+    }
+  }
+  applyPlatformDefaults(next);
+  syncPlatformPicker();
+  refreshPlatformCopy();
+  syncChecksumSlots();
+  setChecksumUi("pending", pendingChecksumMessage(next));
+  refreshPreview();
+}
+
 function applyPlatformDefaults(platform) {
   const d = state.platformDefaults?.[platform];
   if (!d) return;
@@ -321,10 +489,14 @@ function fillForm(draft, meta = {}) {
       : "";
   }
 
+  // The platform was chosen in step 1 and sent with the probe; the draft
+  // echoes it back. Only adopt the draft's guess when nothing was chosen.
+  const platform = $("f_platform").value || draft.platform || "";
+  if (platform !== $("f_platform").value) setPlatform(platform, { fromProbe: true });
+
   $("f_id").value = draft.id || "";
   $("f_name").value = draft.name || "";
   $("f_kind").value = draft.kind || "recomp";
-  $("f_platform").value = draft.platform || "";
   $("f_description").value = draft.description || "";
   $("f_homepage").value = draft.homepage || "";
   $("f_release_github").value = draft.release?.github || "";
@@ -383,7 +555,9 @@ function fillForm(draft, meta = {}) {
   $("f_author_notes").value = draft.author_notes || "";
   $("f_notes").value = draft.notes || "";
 
-  applyPlatformDefaults(draft.platform);
+  applyPlatformDefaults(platform);
+  syncPlatformPicker();
+  refreshPlatformCopy();
 
   // Probe does not carry client-side hashes — reset checksum UI for the platform.
   state.romChecksumDone = false;
@@ -391,14 +565,7 @@ function fillForm(draft, meta = {}) {
   state.romHashingFile = "";
   resetPsxCueState();
   syncChecksumSlots();
-  setChecksumUi(
-    "pending",
-    isDiscPlatform(draft.platform)
-      ? state.discCount > 1
-        ? `${state.discCount}-disc set detected — add the .cue and Track 01 .bin for each of the ${state.discCount} discs below. Submit stays blocked until every disc is hashed.`
-        : "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
-      : "No ROM hashed yet — submit stays blocked until this step succeeds."
-  );
+  setChecksumUi("pending", pendingChecksumMessage(platform));
 
   const chips = $("assetChips");
   chips.innerHTML = "";
@@ -422,7 +589,14 @@ function fillForm(draft, meta = {}) {
 }
 
 function refreshPreview() {
-  $("preview").textContent = JSON.stringify(readManifest(), null, 2);
+  const m = readManifest();
+  $("preview").textContent = JSON.stringify(m, null, 2);
+  const line = $("pathLine");
+  if (line) {
+    line.innerHTML = m.platform
+      ? `Lands at <code>${esc(catalogPath(m.platform, m.id))}</code> once approved.`
+      : "";
+  }
 }
 
 /** Mirror worker validateManifest so required fields fail before the API call. */
@@ -455,7 +629,12 @@ function validateManifest(m) {
   if (!m?.kind || !["recomp", "decomp"].includes(m.kind)) {
     errors.push('kind must be "recomp" or "decomp"');
   }
-  if (!m?.platform) errors.push("platform is required");
+  if (!m?.platform) errors.push("platform is required — pick one in step 1");
+  else if (!platformInfo(m.platform)) {
+    errors.push(
+      `platform "${m.platform}" is not a catalog platform (${platformSlugs().join(", ")})`
+    );
+  }
   if (!m?.release?.github) errors.push("release.github is required");
   const glob = m?.release?.asset_glob || {};
   if (!glob.linux && !glob.windows && !glob.macos) {
@@ -534,8 +713,9 @@ function mergeUnique(id, values) {
   csvSet(id, [...cur]);
 }
 
+/** Disc media = cue + Track 01 bin per disc; anything else is one cart file. */
 function isDiscPlatform(platform = $("f_platform").value) {
-  return platform === "psx";
+  return platformInfo(platform)?.media === "disc";
 }
 
 function setSlotStatus(id, kind, message) {
@@ -891,6 +1071,21 @@ async function onRomFile(file, discIdx) {
     return;
   }
 
+  /* Cart platforms hash exactly one dump file. Gate on the platform's own
+     extension list so a .zip or a wrong-system dump is refused up front
+     (digests of a zip would never match the game's gate). */
+  const info = platformInfo(platform);
+  if (info && info.media !== "disc") {
+    const exts = info.rom_extensions || [];
+    if (exts.length && !exts.some((e) => lower.endsWith(String(e).toLowerCase()))) {
+      setChecksumUi(
+        "err",
+        `${file.name} rejected — ${info.label} dumps are ${exts.join(" / ")}. Unzip archives first.`
+      );
+      return;
+    }
+  }
+
   /* .cue sheets are TOC metadata — parse TRACK count; digests come from Track 01. */
   if (lower.endsWith(".cue")) {
     try {
@@ -1084,6 +1279,8 @@ async function init() {
   } catch {
     state.platformDefaults = {};
   }
+  renderPlatformPicker();
+  refreshPlatformCopy();
 
   const gotSession = captureSessionFromHash();
   const params = new URLSearchParams(window.location.search);
@@ -1133,7 +1330,6 @@ async function init() {
     "f_id",
     "f_name",
     "f_kind",
-    "f_platform",
     "f_description",
     "f_build_enabled",
     "f_homepage",
@@ -1170,35 +1366,25 @@ async function init() {
     $(id).addEventListener("change", refreshPreview);
   }
 
-  $("f_platform").addEventListener("change", () => {
-    const plat = $("f_platform").value;
-    state.romChecksumDone = false;
-    state.romChecksumFile = "";
-    state.romHashingFile = "";
-    resetPsxCueState();
-    applyPlatformDefaults(plat);
-    syncChecksumSlots();
-    setChecksumUi(
-      "pending",
-      isDiscPlatform(plat)
-        ? "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
-        : "No ROM hashed yet — submit stays blocked until this step succeeds."
-    );
-    refreshPreview();
-  });
-
   $("probeBtn").onclick = async () => {
     hideBanner();
+    const platform = $("f_platform").value;
+    if (!platform) {
+      showBanner("warn", "Pick a platform in step 1 before probing a repo.");
+      return;
+    }
     $("probeBtn").disabled = true;
     try {
       const data = await api("/api/probe", {
         method: "POST",
-        body: JSON.stringify({ repo: $("repoInput").value }),
+        body: JSON.stringify({ repo: $("repoInput").value, platform }),
       });
       fillForm(data.draft, data.meta);
+      const warnings = (data.meta?.warnings || []).map((w) => `<li>${esc(w)}</li>`);
       showBanner(
-        "ok",
-        "Repo probed. Review fields, then hash your local ROM under <strong>Rom Checksum Submission</strong> before submitting."
+        warnings.length ? "warn" : "ok",
+        "Repo probed. Review fields, then hash your local ROM under <strong>Rom Checksum Submission</strong> before submitting." +
+          (warnings.length ? `<ul>${warnings.join("")}</ul>` : "")
       );
     } catch (err) {
       showBanner("danger", err.message);
@@ -1279,12 +1465,8 @@ async function init() {
   });
 
   syncChecksumSlots();
-  setChecksumUi(
-    "pending",
-    isDiscPlatform()
-      ? "PSX: add the .cue sheet, then hash Track 01 .bin (or drop a self-contained .car image — does both) — submit stays blocked until both succeed."
-      : "No ROM hashed yet — submit stays blocked until this step succeeds."
-  );
+  syncPlatformPicker();
+  setChecksumUi("pending", pendingChecksumMessage());
 
   refreshPreview();
 }

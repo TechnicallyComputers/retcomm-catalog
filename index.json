@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "name": "RetComM supported titles",
   "platform_defaults": {
     "gba": {
@@ -43,6 +43,40 @@
           "ps-22a.bin"
         ]
       }
+    }
+  },
+  "platforms": {
+    "psx": {
+      "name": "Sony PlayStation",
+      "dir": "titles/psx",
+      "titles": [
+        "twisted-metal4-psx",
+        "bomberman-party-edition-psx",
+        "marvel-vs-capcom-clash-of-super-heroes-psx",
+        "masters-of-teras-kasi-psx",
+        "bomberman-world-psx",
+        "street-fighter-alpha-3-psx",
+        "metal-slug-x-psx",
+        "rampage-through-time-psx",
+        "tomba-psx",
+        "klonoa-door-to-phantomile-psx",
+        "bomberman-fantasy-race-psx",
+        "star-wars-episode-i-jedi-power-battles-psx",
+        "legend-of-mana-psx",
+        "final-fantasy-vii-psx",
+        "mortal-kombat-4-psx",
+        "yu-gi-oh-forbidden-memories-psx",
+        "rev-precompile-psx",
+        "sexy-paro-psx",
+        "ktdir-psx",
+        "valkyrie-psx",
+        "fin-fan-tac-psx"
+      ]
+    },
+    "snes": {
+      "name": "Super Nintendo Entertainment System",
+      "dir": "titles/snes",
+      "titles": []
     }
   },
   "titles": [
