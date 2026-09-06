@@ -58,7 +58,7 @@
     "linux": "Digimon_World_2003_Recompiled",
     "macos": "Digimon_World_2003_Recompiled"
   },
-  "name": "Digimon World 2003",
+  "name": "Digimon World",
   "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
   "platform": "psx",
   "release": {
