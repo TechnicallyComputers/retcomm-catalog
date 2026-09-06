@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH5552 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3. RetComM v0.6.35 has a known SCPH5552 generated-source detection limitation; automatic installation can stop after generation.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "d786f0b9"
+    ],
+    "md5": [
+      "32736f17079d0b2b7024407c39bd3050"
+    ],
+    "sha1": [
+      "f6bc2d1f5eb6593de7d089c425ac681d6fffd3f0"
+    ],
+    "sha256": [
+      "1faaa18fa820a0225e488d9f086296b8e6c46df739666093987ff7d8fd352c09"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH5552.BIN",
+      "scph5552.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/diablo-recomp",
+      "ref": "6ccdefcb1ce0bac74939526593eddd45ef6fd773"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "Diablo recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/diablo-recomp",
+  "id": "diablo-psx",
+  "install_dir_name": "diablo-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Diablo_Recompiled.exe",
+    "linux": "Diablo_Recompiled",
+    "macos": "Diablo_Recompiled"
+  },
+  "name": "Diablo",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified. SCPH5552 automatic-install route remains unresolved; submitted under the explicit test waiver.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/diablo-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "0d207413"
+    ],
+    "md5": [
+      "3e8d3509f67344b862f33520a01cbc33"
+    ],
+    "sha1": [
+      "3dcfffb32c962d7ee2b00ea532b044aaeaaeb8ad"
+    ],
+    "sha256": [
+      "a8e56ca1fa612b6f164abf4452492f2e0f1598ec64a43610f23a499a10476fa0"
+    ],
+    "sizes": [
+      653296224
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLES-01156"
+    ],
+    "filenames": [
+      "Diablo (Europe) (En,Fr,De,Sv).cue",
+      "Diablo (Europe) (En,Fr,De,Sv).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

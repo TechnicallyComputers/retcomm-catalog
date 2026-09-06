@@ -1,0 +1,169 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH5552 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3. RetComM v0.6.35 has a known SCPH5552 generated-source detection limitation; automatic installation can stop after generation.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "d786f0b9"
+    ],
+    "md5": [
+      "32736f17079d0b2b7024407c39bd3050"
+    ],
+    "sha1": [
+      "f6bc2d1f5eb6593de7d089c425ac681d6fffd3f0"
+    ],
+    "sha256": [
+      "1faaa18fa820a0225e488d9f086296b8e6c46df739666093987ff7d8fd352c09"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH5552.BIN",
+      "scph5552.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/alone-in-the-dark-the-new-nightmare-recomp",
+      "ref": "c840c7400145db2e4c91252b81778c1835d2965a"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A recompilation setup kit for Alone in the Dark: The New Nightmare.",
+  "homepage": "https://github.com/Alexbeav/alone-in-the-dark-the-new-nightmare-recomp",
+  "id": "alone-in-the-dark-the-new-nightmare-psx",
+  "install_dir_name": "alone-in-the-dark-the-new-nightmare-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Alone_in_the_Dark__The_New_Nightmare.exe",
+    "linux": "Alone_in_the_Dark__The_New_Nightmare",
+    "macos": "Alone_in_the_Dark__The_New_Nightmare"
+  },
+  "name": "Alone in the Dark: The New Nightmare",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified. SCPH5552 automatic-install route remains unresolved; submitted under the explicit test waiver.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/alone-in-the-dark-the-new-nightmare-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "4ad56e6a",
+      "ff74942e"
+    ],
+    "md5": [
+      "e1e8961f76647d00ea5ba93aa0951b6c",
+      "81aeedeac7e806d878b4c9444026604f"
+    ],
+    "sha1": [
+      "270c9d9977a859e0f59e82cf9f3acd9de457f453",
+      "ab2cadfb095ee5980d99740ca584487e469668ba"
+    ],
+    "sha256": [
+      "2d9ff4f66bdce5d1097f0530261f4916984ad90c3061222112bf27e1bacc93d9",
+      "af9a127b07a25f6b3758ade18b24697127240eae2f9a1b31a7dd293fa34b5581"
+    ],
+    "sizes": [
+      605317776,
+      638403360
+    ],
+    "track_counts": [
+      2
+    ],
+    "disc_serials": [
+      "SLES-02801",
+      "SLES-12801"
+    ],
+    "filenames": [
+      "Alone in the Dark - The New Nightmare (Europe) (Disc 1).cue",
+      "Alone in the Dark - The New Nightmare (Europe) (Disc 1) (Track 1).bin",
+      "Alone in the Dark - The New Nightmare (Europe) (Disc 2).cue",
+      "Alone in the Dark - The New Nightmare (Europe) (Disc 2) (Track 1).bin"
+    ],
+    "require_cue": true,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "SLES-02801",
+        "cue_name": "Alone in the Dark - The New Nightmare (Europe) (Disc 1).cue",
+        "bin_name": "Alone in the Dark - The New Nightmare (Europe) (Disc 1) (Track 1).bin",
+        "crc32": [
+          "4ad56e6a"
+        ],
+        "md5": [
+          "e1e8961f76647d00ea5ba93aa0951b6c"
+        ],
+        "sha1": [
+          "270c9d9977a859e0f59e82cf9f3acd9de457f453"
+        ],
+        "sha256": [
+          "2d9ff4f66bdce5d1097f0530261f4916984ad90c3061222112bf27e1bacc93d9"
+        ],
+        "sizes": [
+          605317776
+        ],
+        "track_counts": [
+          2
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "SLES-12801",
+        "cue_name": "Alone in the Dark - The New Nightmare (Europe) (Disc 2).cue",
+        "bin_name": "Alone in the Dark - The New Nightmare (Europe) (Disc 2) (Track 1).bin",
+        "crc32": [
+          "ff74942e"
+        ],
+        "md5": [
+          "81aeedeac7e806d878b4c9444026604f"
+        ],
+        "sha1": [
+          "ab2cadfb095ee5980d99740ca584487e469668ba"
+        ],
+        "sha256": [
+          "af9a127b07a25f6b3758ade18b24697127240eae2f9a1b31a7dd293fa34b5581"
+        ],
+        "sizes": [
+          638403360
+        ],
+        "track_counts": [
+          2
+        ]
+      }
+    ]
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

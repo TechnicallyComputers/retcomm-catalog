@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH5552 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3. RetComM v0.6.35 has a known SCPH5552 generated-source detection limitation; automatic installation can stop after generation.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "d786f0b9"
+    ],
+    "md5": [
+      "32736f17079d0b2b7024407c39bd3050"
+    ],
+    "sha1": [
+      "f6bc2d1f5eb6593de7d089c425ac681d6fffd3f0"
+    ],
+    "sha256": [
+      "1faaa18fa820a0225e488d9f086296b8e6c46df739666093987ff7d8fd352c09"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH5552.BIN",
+      "scph5552.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/wipeout-recomp",
+      "ref": "75307bd0d0c56ed13e09a34efeb1efc7f5625d15"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "WipEout recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/wipeout-recomp",
+  "id": "wipeout-psx",
+  "install_dir_name": "wipeout-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "WipEout_Recompiled.exe",
+    "linux": "WipEout_Recompiled",
+    "macos": "WipEout_Recompiled"
+  },
+  "name": "WipEout",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified. SCPH5552 automatic-install route remains unresolved; submitted under the explicit test waiver.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/wipeout-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "7f6c5a6a"
+    ],
+    "md5": [
+      "23c2abd60259c0ddb84a2c4e72278729"
+    ],
+    "sha1": [
+      "93a70ff5be6d8a4b25bf40ba453e6ded864ad645"
+    ],
+    "sha256": [
+      "928f83ca693941160abf2d08782ea8a2ae24390527ac190240bd25d8887a704b"
+    ],
+    "sizes": [
+      64988112
+    ],
+    "track_counts": [
+      12
+    ],
+    "disc_serials": [
+      "SCES-00010"
+    ],
+    "filenames": [
+      "WipEout (Europe).cue",
+      "WipEout (Europe) (Track 01).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

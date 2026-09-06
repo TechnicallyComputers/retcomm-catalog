@@ -1,0 +1,169 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/in-cold-blood-recomp",
+      "ref": "f92ea0f04d19b89929417c8114d1f98125e98246"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A native recompilation setup host for In Cold Blood.",
+  "homepage": "https://github.com/Alexbeav/in-cold-blood-recomp",
+  "id": "in-cold-blood-psx",
+  "install_dir_name": "in-cold-blood-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "In_Cold_Blood_Recompiled.exe",
+    "linux": "In_Cold_Blood_Recompiled",
+    "macos": "In_Cold_Blood_Recompiled"
+  },
+  "name": "In Cold Blood",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/in-cold-blood-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "3e3f5bcc",
+      "fd450b93"
+    ],
+    "md5": [
+      "42756266fd32297c07ed754e891bb5b4",
+      "3f3fbd4fea74448ffd0d8a7623c37fec"
+    ],
+    "sha1": [
+      "9a33a893574cb28a896691a43ba4c603a0af681a",
+      "f788994d5b2974c2b97551c6e6d73965e64a3e9c"
+    ],
+    "sha256": [
+      "00a1678636168cf76bf5a2f69de6836c1dbb95782bc93ed1f302b5c446bb7862",
+      "403902e429cea403ee09a6dbea1aeec751442d1416e13073f3d6204ee37eb3f3"
+    ],
+    "sizes": [
+      555591792,
+      657543936
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-01294",
+      "SLUS-01314"
+    ],
+    "filenames": [
+      "In Cold Blood (USA) (Disc 1).cue",
+      "In Cold Blood (USA) (Disc 1).bin",
+      "In Cold Blood (USA) (Disc 2).cue",
+      "In Cold Blood (USA) (Disc 2).bin"
+    ],
+    "require_cue": true,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "SLUS-01294",
+        "cue_name": "In Cold Blood (USA) (Disc 1).cue",
+        "bin_name": "In Cold Blood (USA) (Disc 1).bin",
+        "crc32": [
+          "3e3f5bcc"
+        ],
+        "md5": [
+          "42756266fd32297c07ed754e891bb5b4"
+        ],
+        "sha1": [
+          "9a33a893574cb28a896691a43ba4c603a0af681a"
+        ],
+        "sha256": [
+          "00a1678636168cf76bf5a2f69de6836c1dbb95782bc93ed1f302b5c446bb7862"
+        ],
+        "sizes": [
+          555591792
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "SLUS-01314",
+        "cue_name": "In Cold Blood (USA) (Disc 2).cue",
+        "bin_name": "In Cold Blood (USA) (Disc 2).bin",
+        "crc32": [
+          "fd450b93"
+        ],
+        "md5": [
+          "3f3fbd4fea74448ffd0d8a7623c37fec"
+        ],
+        "sha1": [
+          "f788994d5b2974c2b97551c6e6d73965e64a3e9c"
+        ],
+        "sha256": [
+          "403902e429cea403ee09a6dbea1aeec751442d1416e13073f3d6204ee37eb3f3"
+        ],
+        "sizes": [
+          657543936
+        ],
+        "track_counts": [
+          1
+        ]
+      }
+    ]
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

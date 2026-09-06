@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/duke-nukem-time-to-kill-recomp",
+      "ref": "62f7313c39e96a1146967df3beecae06a81df18b"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A recompilation setup kit for Duke Nukem: Time to Kill.",
+  "homepage": "https://github.com/Alexbeav/duke-nukem-time-to-kill-recomp",
+  "id": "duke-nukem-time-to-kill-psx",
+  "install_dir_name": "duke-nukem-time-to-kill-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Duke_Nukem__Time_to_Kill_Recompiled.exe",
+    "linux": "Duke_Nukem__Time_to_Kill_Recompiled",
+    "macos": "Duke_Nukem__Time_to_Kill_Recompiled"
+  },
+  "name": "Duke Nukem: Time to Kill",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/duke-nukem-time-to-kill-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "2380cd98"
+    ],
+    "md5": [
+      "82d6ef06544ac72aab26ba8b94345f8e"
+    ],
+    "sha1": [
+      "a782825520939da0560ef031daa78db8ef720957"
+    ],
+    "sha256": [
+      "708c040436c4a8bfe0ef43379e934172d0b94131ee3db47e406767c9d306a8c1"
+    ],
+    "sizes": [
+      449772960
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-00583"
+    ],
+    "filenames": [
+      "Duke Nukem - Time to Kill (USA).cue",
+      "Duke Nukem - Time to Kill (USA).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

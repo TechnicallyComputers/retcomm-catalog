@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/tony-hawk-s-pro-skater-4-recomp",
+      "ref": "3c906531481d7477d3b5eab42d8aba3347461dd1"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "Tony Hawk's Pro Skater 4 recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/tony-hawk-s-pro-skater-4-recomp",
+  "id": "tony-hawk-s-pro-skater-4-psx",
+  "install_dir_name": "tony-hawk-s-pro-skater-4-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Tony_Hawks_Pro_Skater_4_Recompiled.exe",
+    "linux": "Tony_Hawks_Pro_Skater_4_Recompiled",
+    "macos": "Tony_Hawks_Pro_Skater_4_Recompiled"
+  },
+  "name": "Tony Hawk's Pro Skater 4",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/tony-hawk-s-pro-skater-4-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "41eefd0b"
+    ],
+    "md5": [
+      "fd4f81cd5bdf3e1e4a08c0e54abc3754"
+    ],
+    "sha1": [
+      "4857b347c6aec4180311b8f1beafc281d34a254a"
+    ],
+    "sha256": [
+      "c632a348d7013336c2c182f33ea86ac14a7bae0eba3892a7b5f14b9848ddab09"
+    ],
+    "sizes": [
+      747317424
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-01485"
+    ],
+    "filenames": [
+      "Tony Hawk's Pro Skater 4 (USA).cue",
+      "Tony Hawk's Pro Skater 4 (USA).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

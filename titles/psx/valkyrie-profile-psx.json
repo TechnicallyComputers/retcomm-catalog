@@ -1,0 +1,169 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/valkyrie-profile-recomp",
+      "ref": "6bfa1707d461a9c1c190fbe4709f2c9247b707bb"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "Valkyrie Profile recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/valkyrie-profile-recomp",
+  "id": "valkyrie-profile-psx",
+  "install_dir_name": "valkyrie-profile-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Valkyrie_Profile_Recompiled.exe",
+    "linux": "Valkyrie_Profile_Recompiled",
+    "macos": "Valkyrie_Profile_Recompiled"
+  },
+  "name": "Valkyrie Profile",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.3 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified. Alternate source for existing catalog title valkyrie-psx; separate repository and install directory, no replacement of the other author's entry requested.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/valkyrie-profile-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "dd0422d5",
+      "c2132829"
+    ],
+    "md5": [
+      "f579cb951587081019f91af9458d305b",
+      "19f36bd625e676ea5d74db612d26eb6c"
+    ],
+    "sha1": [
+      "fa13cbde448a47fa87b6c7829df1c5e6215f5f66",
+      "7cc65766b46273b4ee166269170ecbaa433908fd"
+    ],
+    "sha256": [
+      "4c988bac4dcdbfafdf2ae710c6fea7b19c004f50ffd675b9c664ab4dda3d2a78",
+      "7a85baf95064ceedc90cb886fdaffaabfe0c146f2a97f0cb46ee022ff800cd35"
+    ],
+    "sizes": [
+      730448880,
+      747352704
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-01156",
+      "SLUS-01179"
+    ],
+    "filenames": [
+      "Valkyrie Profile (USA) (Disc 1).cue",
+      "Valkyrie Profile (USA) (Disc 1).bin",
+      "Valkyrie Profile (USA) (Disc 2).cue",
+      "Valkyrie Profile (USA) (Disc 2).bin"
+    ],
+    "require_cue": true,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "SLUS-01156",
+        "cue_name": "Valkyrie Profile (USA) (Disc 1).cue",
+        "bin_name": "Valkyrie Profile (USA) (Disc 1).bin",
+        "crc32": [
+          "dd0422d5"
+        ],
+        "md5": [
+          "f579cb951587081019f91af9458d305b"
+        ],
+        "sha1": [
+          "fa13cbde448a47fa87b6c7829df1c5e6215f5f66"
+        ],
+        "sha256": [
+          "4c988bac4dcdbfafdf2ae710c6fea7b19c004f50ffd675b9c664ab4dda3d2a78"
+        ],
+        "sizes": [
+          730448880
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "SLUS-01179",
+        "cue_name": "Valkyrie Profile (USA) (Disc 2).cue",
+        "bin_name": "Valkyrie Profile (USA) (Disc 2).bin",
+        "crc32": [
+          "c2132829"
+        ],
+        "md5": [
+          "19f36bd625e676ea5d74db612d26eb6c"
+        ],
+        "sha1": [
+          "7cc65766b46273b4ee166269170ecbaa433908fd"
+        ],
+        "sha256": [
+          "7a85baf95064ceedc90cb886fdaffaabfe0c146f2a97f0cb46ee022ff800cd35"
+        ],
+        "sizes": [
+          747352704
+        ],
+        "track_counts": [
+          1
+        ]
+      }
+    ]
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

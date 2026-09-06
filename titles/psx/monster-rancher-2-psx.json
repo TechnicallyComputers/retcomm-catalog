@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/monster-rancher-2-recomp",
+      "ref": "1efa38e0393cb01ee71e485e071d6613189af34e"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "Monster Rancher 2 recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/monster-rancher-2-recomp",
+  "id": "monster-rancher-2-psx",
+  "install_dir_name": "monster-rancher-2-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Monster_Rancher_2_Recompiled.exe",
+    "linux": "Monster_Rancher_2_Recompiled",
+    "macos": "Monster_Rancher_2_Recompiled"
+  },
+  "name": "Monster Rancher 2",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/monster-rancher-2-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "30af8007"
+    ],
+    "md5": [
+      "b41f1f33d1075f22cab7e180f812c0ac"
+    ],
+    "sha1": [
+      "e7418d1491e1809490b2e5fe20d738cb730e5e22"
+    ],
+    "sha256": [
+      "4e792f366364d61282a4e291e8dc792133358d8aa571e76608e2420f90d33cd5"
+    ],
+    "sizes": [
+      451280592
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-00917"
+    ],
+    "filenames": [
+      "Monster Rancher 2 (USA).cue",
+      "Monster Rancher 2 (USA).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}
