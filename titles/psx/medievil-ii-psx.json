@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/medievil-ii-recomp",
+      "ref": "a162a29eaa05f6a8499cb4455d03c27b5f3c9adb"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "MediEvil II recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/medievil-ii-recomp",
+  "id": "medievil-ii-psx",
+  "install_dir_name": "medievil-ii-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "MediEvil_II__Recompiled.exe",
+    "linux": "MediEvil_II__Recompiled",
+    "macos": "MediEvil_II__Recompiled"
+  },
+  "name": "MediEvil II",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/medievil-ii-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "9ba3ab69"
+    ],
+    "md5": [
+      "a4bd203f3a59fa92a64c176774919293"
+    ],
+    "sha1": [
+      "017b855353abd86c22aa516690e852b641e4fa71"
+    ],
+    "sha256": [
+      "709558d421e32aeb5a0880762f899ae79938d2396be654b2c819999813848db8"
+    ],
+    "sizes": [
+      450885456
+    ],
+    "track_counts": [
+      2
+    ],
+    "disc_serials": [
+      "SCUS-94564"
+    ],
+    "filenames": [
+      "MediEvil II (USA).cue",
+      "MediEvil II (USA) (Track 1).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

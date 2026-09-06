@@ -1,0 +1,169 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/parasite-eve-recomp",
+      "ref": "8f056ddc1d8d038d18512ffdcbc272789f6f51cb"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A recompilation setup kit for Parasite Eve.",
+  "homepage": "https://github.com/Alexbeav/parasite-eve-recomp",
+  "id": "parasite-eve-psx",
+  "install_dir_name": "parasite-eve-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Parasite_Eve.exe",
+    "linux": "Parasite_Eve",
+    "macos": "Parasite_Eve"
+  },
+  "name": "Parasite Eve",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/parasite-eve-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "488641e0",
+      "226ee2ee"
+    ],
+    "md5": [
+      "efae1df4faf4aadbfd4dc3aa022296cf",
+      "c8e01c1d77baadcb89685eaee839a824"
+    ],
+    "sha1": [
+      "c339455d5b1dae04f77c2ee847d0932adaf2e84b",
+      "6dc5b537527aa0d54bdbbd0c14b458083b0743e4"
+    ],
+    "sha256": [
+      "7f20fce99a7ff18accebf3156419b24d4c0145c5c0f8168d5e86005ccf28f9c4",
+      "20959574cb0db05088b6292f812360075fac619a50080f856d3ffae36504aae3"
+    ],
+    "sizes": [
+      495531120,
+      646877616
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-00662",
+      "SLUS-00668"
+    ],
+    "filenames": [
+      "Parasite Eve (USA) (Disc 1).cue",
+      "Parasite Eve (USA) (Disc 1).bin",
+      "Parasite Eve (USA) (Disc 2).cue",
+      "Parasite Eve (USA) (Disc 2).bin"
+    ],
+    "require_cue": true,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "SLUS-00662",
+        "cue_name": "Parasite Eve (USA) (Disc 1).cue",
+        "bin_name": "Parasite Eve (USA) (Disc 1).bin",
+        "crc32": [
+          "488641e0"
+        ],
+        "md5": [
+          "efae1df4faf4aadbfd4dc3aa022296cf"
+        ],
+        "sha1": [
+          "c339455d5b1dae04f77c2ee847d0932adaf2e84b"
+        ],
+        "sha256": [
+          "7f20fce99a7ff18accebf3156419b24d4c0145c5c0f8168d5e86005ccf28f9c4"
+        ],
+        "sizes": [
+          495531120
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "SLUS-00668",
+        "cue_name": "Parasite Eve (USA) (Disc 2).cue",
+        "bin_name": "Parasite Eve (USA) (Disc 2).bin",
+        "crc32": [
+          "226ee2ee"
+        ],
+        "md5": [
+          "c8e01c1d77baadcb89685eaee839a824"
+        ],
+        "sha1": [
+          "6dc5b537527aa0d54bdbbd0c14b458083b0743e4"
+        ],
+        "sha256": [
+          "20959574cb0db05088b6292f812360075fac619a50080f856d3ffae36504aae3"
+        ],
+        "sizes": [
+          646877616
+        ],
+        "track_counts": [
+          1
+        ]
+      }
+    ]
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

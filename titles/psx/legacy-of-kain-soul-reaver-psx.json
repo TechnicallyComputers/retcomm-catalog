@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH5552 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3. RetComM v0.6.35 has a known SCPH5552 generated-source detection limitation; automatic installation can stop after generation.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "d786f0b9"
+    ],
+    "md5": [
+      "32736f17079d0b2b7024407c39bd3050"
+    ],
+    "sha1": [
+      "f6bc2d1f5eb6593de7d089c425ac681d6fffd3f0"
+    ],
+    "sha256": [
+      "1faaa18fa820a0225e488d9f086296b8e6c46df739666093987ff7d8fd352c09"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH5552.BIN",
+      "scph5552.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/legacy-of-kain-soul-reaver-recomp",
+      "ref": "7c23425d3b43156c925041dffe34322c7db8f42e"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "Legacy of Kain: Soul Reaver recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/legacy-of-kain-soul-reaver-recomp",
+  "id": "legacy-of-kain-soul-reaver-psx",
+  "install_dir_name": "legacy-of-kain-soul-reaver-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Legacy_of_Kain__Soul_Reaver_Recompiled.exe",
+    "linux": "Legacy_of_Kain__Soul_Reaver_Recompiled",
+    "macos": "Legacy_of_Kain__Soul_Reaver_Recompiled"
+  },
+  "name": "Legacy of Kain: Soul Reaver",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified. SCPH5552 automatic-install route remains unresolved; submitted under the explicit test waiver.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/legacy-of-kain-soul-reaver-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "8bc0d7b5"
+    ],
+    "md5": [
+      "9e38befb10415dd4d2fee9d02cf016e7"
+    ],
+    "sha1": [
+      "f1ec508b68d24608f0ce1a939faa3e2a7d80f329"
+    ],
+    "sha256": [
+      "9ac300d56b879699d15331aab395fa57a137752dfdc2aa5569874445a0b933df"
+    ],
+    "sizes": [
+      682987872
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLES-01301"
+    ],
+    "filenames": [
+      "Legacy of Kain - Soul Reaver (Europe).cue",
+      "Legacy of Kain - Soul Reaver (Europe).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

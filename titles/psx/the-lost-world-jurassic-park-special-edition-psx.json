@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/the-lost-world-jurassic-park-special-edition-recomp",
+      "ref": "30a3d23f1436bc26a534477135e3736cdd21bb7f"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A native recompilation setup host for The Lost World: Jurassic Park Special Edition.",
+  "homepage": "https://github.com/Alexbeav/the-lost-world-jurassic-park-special-edition-recomp",
+  "id": "the-lost-world-jurassic-park-special-edition-psx",
+  "install_dir_name": "the-lost-world-jurassic-park-special-edition-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "The_Lost_World__Jurassic_Park_Special_Edition_Recompiled.exe",
+    "linux": "The_Lost_World__Jurassic_Park_Special_Edition_Recompiled",
+    "macos": "The_Lost_World__Jurassic_Park_Special_Edition_Recompiled"
+  },
+  "name": "The Lost World: Jurassic Park Special Edition",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/the-lost-world-jurassic-park-special-edition-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "68a4e32c"
+    ],
+    "md5": [
+      "0ae119ea9f1c1a964277b1777d445771"
+    ],
+    "sha1": [
+      "1fac6ab6b0d7d3d8f5e70b40bb9fae1d2a2287bc"
+    ],
+    "sha256": [
+      "b8487232a410f742753e9c01ab674c3213089cfe0746716e5f529a286f33e0ff"
+    ],
+    "sizes": [
+      264858720
+    ],
+    "track_counts": [
+      3
+    ],
+    "disc_serials": [
+      "SLUS-00515"
+    ],
+    "filenames": [
+      "Lost World, The - Jurassic Park - Special Edition (USA).cue",
+      "Lost World, The - Jurassic Park - Special Edition (USA) (Track 1).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

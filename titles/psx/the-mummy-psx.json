@@ -1,0 +1,111 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/the-mummy-recomp",
+      "ref": "3c99709c46c4d32e3afc63b5a4b52b9e96daf12d"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A native recompilation setup host for The Mummy.",
+  "homepage": "https://github.com/Alexbeav/the-mummy-recomp",
+  "id": "the-mummy-psx",
+  "install_dir_name": "the-mummy-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "The_Mummy_Recompiled.exe",
+    "linux": "The_Mummy_Recompiled",
+    "macos": "The_Mummy_Recompiled"
+  },
+  "name": "The Mummy",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/the-mummy-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "5a6b2b68"
+    ],
+    "md5": [
+      "4c6f8dbed7233c1d1ed74d92aa67b857"
+    ],
+    "sha1": [
+      "ef266fcac356f05950a81aaa350fbf211defcdd8"
+    ],
+    "sha256": [
+      "795dfd23439b4dc3ca47ce4054792d476113df21fea049313a9c3b6b023343fc"
+    ],
+    "sizes": [
+      458103744
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLUS-01187"
+    ],
+    "filenames": [
+      "Mummy, The (USA).cue",
+      "Mummy, The (USA).bin"
+    ],
+    "require_cue": true
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}

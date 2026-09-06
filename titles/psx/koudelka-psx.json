@@ -1,0 +1,233 @@
+{
+  "author_notes": "Setup kit: supply the listed CUE/BIN disc set and your own SCPH1001 BIOS dump. Additional RetComM installation, gameplay and relaunch tests were waived for this submission. Native Linux/macOS use and disc swaps remain unverified. The current macOS packages contain generators targeting macOS 15 and require external Homebrew SDL3.",
+  "bios_identity": {
+    "required": true,
+    "crc32": [
+      "37157331"
+    ],
+    "md5": [
+      "924e392ed05558ffdb115408c263dccf"
+    ],
+    "sha1": [
+      "10155d8d6e6e832d6ea66db9bc098321fb5e8ebf"
+    ],
+    "sha256": [
+      "71af94d1e47a68c11e8fdb9f8368040601514a42a5a399cda48c7d3bff1e99d3"
+    ],
+    "sizes": [
+      524288
+    ],
+    "filenames": [
+      "SCPH1001.BIN",
+      "scph1001.bin"
+    ]
+  },
+  "build": {
+    "cmake": {
+      "build_dir": "build",
+      "config": "Release",
+      "target": "psx-runtime"
+    },
+    "enabled": true,
+    "generate": {
+      "config": "game.toml",
+      "engine": "psxrecomp"
+    },
+    "source": {
+      "github": "Alexbeav/koudelka-recomp",
+      "ref": "f1ff2b0bae76bd8ea987e5a68ab7ecf0e22b21cd"
+    },
+    "toolchain": {
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "macos": "*cmake-clang-v1*macos*",
+        "windows": "*cmake-clang-v1*windows*"
+      },
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "id": "cmake-clang-v1",
+      "min_version": "1.0.3"
+    }
+  },
+  "description": "A native recompilation setup host for Koudelka.",
+  "homepage": "https://github.com/Alexbeav/koudelka-recomp",
+  "id": "koudelka-psx",
+  "install_dir_name": "koudelka-recomp",
+  "kind": "recomp",
+  "launch": {
+    "windows": "Koudelka_Recompiled.exe",
+    "linux": "Koudelka_Recompiled",
+    "macos": "Koudelka_Recompiled"
+  },
+  "name": "Koudelka",
+  "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.3.6 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
+  "platform": "psx",
+  "release": {
+    "github": "Alexbeav/koudelka-recomp",
+    "asset_glob": {
+      "windows": "*windows-x64.zip",
+      "linux": "*linux-x64.zip",
+      "macos": "*macos-*.zip"
+    }
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "rom_identity": {
+    "crc32": [
+      "61cb5610",
+      "40cf1cc5",
+      "2e810962",
+      "fee955d2"
+    ],
+    "md5": [
+      "4644d60361161a52212dd9053413626d",
+      "a00cdc548e99d59b13e299dce769680b",
+      "9cd01443686d19677c6b51b8ae19aef3",
+      "137c2512d55e9d6174fe4685bf553860"
+    ],
+    "sha1": [
+      "43cfec263deaaf482536506596d53b175972fe7f",
+      "8e779283ee927d9793e82e31cf6251afe61591e4",
+      "cab865b5d55be812d8004832921ebadabae174fe",
+      "3a64731471a96b917207e609610bd7c3e5eb64f1"
+    ],
+    "sha256": [
+      "8cfe819d0065fa06978fb8f18e02fc129c45fd7a038806b51f4bffbcdb4d2927",
+      "fce2cb5c0b099d3ddc350c5bf8a4be48546e5bfeefe87e352a65b8179cb22007",
+      "754b6ecb5512481810d19547f5223e3907631e615ff63bf9bc3a7aab60dad4c2",
+      "35c6344ab604c385fbb7816504fce9811332ffb5b0c9ccd94dda676c995e0bb9"
+    ],
+    "sizes": [
+      542302992,
+      527073792,
+      680294832,
+      633061968
+    ],
+    "track_counts": [
+      1
+    ],
+    "disc_serials": [
+      "SLES-02897",
+      "SLES-12897",
+      "SLES-22897",
+      "SLES-32897"
+    ],
+    "filenames": [
+      "Koudelka (Europe) (Disc 1).cue",
+      "Koudelka (Europe) (Disc 1).bin",
+      "Koudelka (Europe) (Disc 2).cue",
+      "Koudelka (Europe) (Disc 2).bin",
+      "Koudelka (Europe) (Disc 3).cue",
+      "Koudelka (Europe) (Disc 3).bin",
+      "Koudelka (Europe) (Disc 4).cue",
+      "Koudelka (Europe) (Disc 4).bin"
+    ],
+    "require_cue": true,
+    "discs": [
+      {
+        "index": 1,
+        "serial": "SLES-02897",
+        "cue_name": "Koudelka (Europe) (Disc 1).cue",
+        "bin_name": "Koudelka (Europe) (Disc 1).bin",
+        "crc32": [
+          "61cb5610"
+        ],
+        "md5": [
+          "4644d60361161a52212dd9053413626d"
+        ],
+        "sha1": [
+          "43cfec263deaaf482536506596d53b175972fe7f"
+        ],
+        "sha256": [
+          "8cfe819d0065fa06978fb8f18e02fc129c45fd7a038806b51f4bffbcdb4d2927"
+        ],
+        "sizes": [
+          542302992
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 2,
+        "serial": "SLES-12897",
+        "cue_name": "Koudelka (Europe) (Disc 2).cue",
+        "bin_name": "Koudelka (Europe) (Disc 2).bin",
+        "crc32": [
+          "40cf1cc5"
+        ],
+        "md5": [
+          "a00cdc548e99d59b13e299dce769680b"
+        ],
+        "sha1": [
+          "8e779283ee927d9793e82e31cf6251afe61591e4"
+        ],
+        "sha256": [
+          "fce2cb5c0b099d3ddc350c5bf8a4be48546e5bfeefe87e352a65b8179cb22007"
+        ],
+        "sizes": [
+          527073792
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 3,
+        "serial": "SLES-22897",
+        "cue_name": "Koudelka (Europe) (Disc 3).cue",
+        "bin_name": "Koudelka (Europe) (Disc 3).bin",
+        "crc32": [
+          "2e810962"
+        ],
+        "md5": [
+          "9cd01443686d19677c6b51b8ae19aef3"
+        ],
+        "sha1": [
+          "cab865b5d55be812d8004832921ebadabae174fe"
+        ],
+        "sha256": [
+          "754b6ecb5512481810d19547f5223e3907631e615ff63bf9bc3a7aab60dad4c2"
+        ],
+        "sizes": [
+          680294832
+        ],
+        "track_counts": [
+          1
+        ]
+      },
+      {
+        "index": 4,
+        "serial": "SLES-32897",
+        "cue_name": "Koudelka (Europe) (Disc 4).cue",
+        "bin_name": "Koudelka (Europe) (Disc 4).bin",
+        "crc32": [
+          "fee955d2"
+        ],
+        "md5": [
+          "137c2512d55e9d6174fe4685bf553860"
+        ],
+        "sha1": [
+          "3a64731471a96b917207e609610bd7c3e5eb64f1"
+        ],
+        "sha256": [
+          "35c6344ab604c385fbb7816504fce9811332ffb5b0c9ccd94dda676c995e0bb9"
+        ],
+        "sizes": [
+          633061968
+        ],
+        "track_counts": [
+          1
+        ]
+      }
+    ]
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  }
+}
