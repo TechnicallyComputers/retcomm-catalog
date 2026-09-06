@@ -71,7 +71,8 @@
         "ktdir-psx",
         "valkyrie-psx",
         "fin-fan-tac-psx",
-        "ace-combat-3-electrosphere-usa-psx"
+        "ace-combat-3-electrosphere-usa-psx",
+        "xena-warrior-princess-psx"
       ]
     },
     "snes": {
@@ -105,8 +106,9 @@
     "valkyrie-psx",
     "fin-fan-tac-psx",
     "ace-combat-3-electrosphere-usa-psx",
+    "xena-warrior-princess-psx",
     "gundam-wing-endless-duel-snes"
   ],
-  "catalog_date": "2026-09-06T07:46:25Z",
-  "release_tag": "v2026.09.06.074625.33"
+  "catalog_date": "2026-09-06T07:46:42Z",
+  "release_tag": "v2026.09.06.074642.32"
 }

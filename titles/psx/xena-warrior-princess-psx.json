@@ -1,0 +1,89 @@
+{
+  "id": "xena-warrior-princess-psx",
+  "name": "Xena: Warrior Princess",
+  "kind": "recomp",
+  "platform": "psx",
+  "description": "Xena: Warrior Princess recompiled for modern systems using psxrecomp.",
+  "homepage": "https://github.com/Alexbeav/xena-warrior-princess-recomp",
+  "rom_identity": {
+    "crc32": [
+      "3ff3122d"
+    ],
+    "md5": [
+      "cd3bd419b83deb658cff86ec356e965a"
+    ],
+    "sha1": [
+      "2f7ee5625aaa02c536938fb66fcf06d4d8f6b422"
+    ],
+    "sha256": [
+      "d5affb92a8301a501097445194a074cfb8b14b3945c2e2f6debd75519d26af0d"
+    ],
+    "disc_serials": [
+      "SLUS-00977"
+    ],
+    "sizes": [
+      322790832
+    ],
+    "filenames": [
+      "Xena - Warrior Princess (USA).cue",
+      "Xena - Warrior Princess (USA).bin"
+    ],
+    "track_counts": [
+      1
+    ],
+    "require_cue": true
+  },
+  "rom_extensions": [
+    ".cue",
+    ".bin"
+  ],
+  "release": {
+    "github": "Alexbeav/xena-warrior-princess-recomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "xena-warrior-princess-recomp",
+  "launch": {
+    "linux": "Xena__Warrior_Princess_Recompiled",
+    "windows": "Xena__Warrior_Princess_Recompiled.exe",
+    "macos": "Xena__Warrior_Princess_Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "ps",
+      "psx",
+      "ps1"
+    ]
+  },
+  "author_notes": "Use the verified USA SLUS-00977 single-track CUE/BIN dump and your own SCPH-1001 BIOS dump. Windows installation, generation, build, gameplay and relaunch have been tested. Linux and macOS full installation and gameplay remain unverified. Current Mac archives require macOS 15 for their generators and external Homebrew SDL3; a package refresh is pending.",
+  "notes": "Prepared from the exact public v0.1.2 Windows package and locally rehashed owned disc. RetComM v0.6.33 full Windows pilot passed on 2026-09-04; v0.6.34 catalog, ownership, package extraction and launch-plan checks passed on 2026-09-06. Before approval, include the explicit SCPH-1001 BIOS identity and pin build.source.ref to acb27a20e1c940a243447a1e4b27bccaafdd82eb, as specified in the maintainer note. Netplay is not qualified.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "Alexbeav/xena-warrior-princess-recomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "psxrecomp",
+      "config": "game.toml"
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "psx-runtime",
+      "config": "Release"
+    }
+  }
+}
