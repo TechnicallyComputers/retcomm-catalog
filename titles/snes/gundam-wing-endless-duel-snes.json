@@ -1,0 +1,64 @@
+{
+  "id": "gundam-wing-endless-duel-snes",
+  "name": "Gundam Wing Endless Duel SNES",
+  "kind": "recomp",
+  "platform": "snes",
+  "description": "Made with SNESrecomp, a Super Nintendo game static recompiler ecosystem · Part of the R.A.I.D. community",
+  "homepage": "https://github.com/TechnicallyComputers/GundamWingEndlessDuelSNESRecomp",
+  "rom_identity": {
+    "crc32": [
+      "c0aecdca"
+    ],
+    "md5": [
+      "e2c3cc007c2c1c358bfe50ead5c8b9ac"
+    ],
+    "sha1": [
+      "6710686b5a3d6620df9fd6a5820e1717afff2d95"
+    ],
+    "sha256": [
+      "dd94308d822636c6ddf73c5e2644c84f2eb8fb4d9201150fc5f37d44d6f423f1"
+    ],
+    "disc_serials": [],
+    "sizes": [
+      2097152
+    ],
+    "filenames": [
+      "Shin Kidou Senki Gundam W - Endless Duel (Japan).sfc"
+    ],
+    "track_counts": [],
+    "require_cue": false
+  },
+  "rom_extensions": [
+    ".sfc",
+    ".smc",
+    ".fig",
+    ".swc"
+  ],
+  "release": {
+    "github": "TechnicallyComputers/GundamWingEndlessDuelSNESRecomp",
+    "asset_glob": {
+      "linux": "*linux*",
+      "windows": "*windows*",
+      "macos": "*macos*"
+    }
+  },
+  "install_dir_name": "GundamWingEndlessDuelSNESRecomp",
+  "launch": {
+    "linux": "GundamWingEndlessDuelSNES_Recompiled",
+    "windows": "GundamWingEndlessDuelSNES_Recompiled.exe",
+    "macos": "GundamWingEndlessDuelSNES_Recompiled"
+  },
+  "romm": {
+    "platforms": [
+      "snes"
+    ]
+  },
+  "netplay": {
+    "supported": true,
+    "stack": "recomp-net",
+    "game_name": "Gundam Wing Endless Duel",
+    "game_version": "0.1.1",
+    "max_slots": 2
+  },
+  "notes": "Digests auto-extracted from README."
+}

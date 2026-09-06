@@ -76,7 +76,9 @@
     "snes": {
       "name": "Super Nintendo Entertainment System",
       "dir": "titles/snes",
-      "titles": []
+      "titles": [
+        "gundam-wing-endless-duel-snes"
+      ]
     }
   },
   "titles": [
@@ -100,8 +102,9 @@
     "sexy-paro-psx",
     "ktdir-psx",
     "valkyrie-psx",
-    "fin-fan-tac-psx"
+    "fin-fan-tac-psx",
+    "gundam-wing-endless-duel-snes"
   ],
-  "catalog_date": "2026-09-04T22:36:56Z",
-  "release_tag": "v2026.09.04.223656.29"
+  "catalog_date": "2026-09-06T07:46:08Z",
+  "release_tag": "v2026.09.06.074608.34"
 }
