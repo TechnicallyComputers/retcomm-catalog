@@ -70,7 +70,8 @@
         "sexy-paro-psx",
         "ktdir-psx",
         "valkyrie-psx",
-        "fin-fan-tac-psx"
+        "fin-fan-tac-psx",
+        "ace-combat-3-electrosphere-usa-psx"
       ]
     },
     "snes": {
@@ -103,8 +104,9 @@
     "ktdir-psx",
     "valkyrie-psx",
     "fin-fan-tac-psx",
+    "ace-combat-3-electrosphere-usa-psx",
     "gundam-wing-endless-duel-snes"
   ],
-  "catalog_date": "2026-09-06T07:46:08Z",
-  "release_tag": "v2026.09.06.074608.34"
+  "catalog_date": "2026-09-06T07:46:25Z",
+  "release_tag": "v2026.09.06.074625.33"
 }
