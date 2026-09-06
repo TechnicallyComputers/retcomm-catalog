@@ -58,7 +58,7 @@
     "linux": "Tony_Hawks_Pro_Skater_Recompiled",
     "macos": "Tony_Hawks_Pro_Skater_Recompiled"
   },
-  "name": "Tony Hawks Pro Skater",
+  "name": "Tony Hawk's Pro Skater",
   "notes": "Bulk submission authorized by Alexbeav on 2026-09-06. Public v0.1.2 Windows package digest and executable name inspected; owned disc identity measured locally. No new generation, compilation or gameplay test is claimed. Fixed source ref and explicit BIOS identity must be preserved. Netplay is not qualified.",
   "platform": "psx",
   "release": {
