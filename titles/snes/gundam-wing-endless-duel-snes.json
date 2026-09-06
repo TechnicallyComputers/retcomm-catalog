@@ -60,5 +60,37 @@
     "game_version": "0.1.1",
     "max_slots": 2
   },
-  "notes": "Digests auto-extracted from README. Launch binary is the CMake project name GundamWingEndlessDuelSNESRecomp (README.txt in the setup pack); the submission probe guessed *_Recompiled because the zip wraps its files in one folder."
+  "notes": "Digests auto-extracted from README. Launch binary is the CMake project name GundamWingEndlessDuelSNESRecomp (README.txt in the setup pack); the submission probe guessed *_Recompiled because the zip wraps its files in one folder. Build recipe mirrors the worker's snesrecomp defaults (tools/regen.sh + CMake target); the release zip is a setup kit with no generated game, so RetComM builds locally instead of leaving it to the in-game wizard.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "TechnicallyComputers/GundamWingEndlessDuelSNESRecomp",
+      "ref": "main"
+    },
+    "sdk": {
+      "id": "snesrecomp-tools"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "TechnicallyComputers/retcomm-toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "snesrecomp",
+      "cfg_dir": "recomp",
+      "out_dir": "src/gen",
+      "funcs_h": "recomp/funcs.h",
+      "cfg_roots": true
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "GundamWingEndlessDuelSNESRecomp",
+      "config": "Release"
+    }
+  }
 }
