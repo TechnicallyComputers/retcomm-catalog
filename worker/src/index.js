@@ -950,6 +950,21 @@ async function listZipTopLevelNames(downloadUrl, env) {
   }
 }
 
+/**
+ * Release zips often wrap everything in one "<slug>-<ver>-<os>/" folder, so
+ * every entry carries that prefix and pickBestLaunchName sees no root-level
+ * binary. Peel the wrapper (repeatedly) when ALL entries share it.
+ */
+function stripZipWrapperDir(names) {
+  let out = (names || []).slice();
+  for (let depth = 0; depth < 4 && out.length; depth++) {
+    const first = out[0].split("/")[0];
+    if (!first || !out.every((n) => n.startsWith(`${first}/`))) break;
+    out = out.map((n) => n.slice(first.length + 1)).filter(Boolean);
+  }
+  return out;
+}
+
 function assetMatchesGlob(name, glob) {
   if (!glob) return false;
   const esc = glob
@@ -994,8 +1009,17 @@ async function inferLaunch(repoName, assetGlobs, opts = {}) {
     if (!glob) continue;
     const asset = pickAsset(glob);
     if (!asset?.browser_download_url) continue;
-    const names = await listZipTopLevelNames(asset.browser_download_url, env);
-    const hit = pickBestLaunchName(names, { wantExe });
+    const names = stripZipWrapperDir(
+      await listZipTopLevelNames(asset.browser_download_url, env)
+    );
+    // snesrecomp ports name the exe after the CMake project, which is the repo
+    // name (GundamWingEndlessDuelSNESRecomp). That form scores below the
+    // *_Recompiled threshold in pickBestLaunchName, so match it explicitly.
+    const repoLower = String(repoName || "").toLowerCase();
+    const exact = names.find(
+      (n) => !n.includes("/") && n.replace(/\.exe$/i, "").toLowerCase() === repoLower
+    );
+    const hit = exact || pickBestLaunchName(names, { wantExe });
     if (hit) {
       base = hit.replace(/\.exe$/i, "");
       source = `release zip (${osKey})`;

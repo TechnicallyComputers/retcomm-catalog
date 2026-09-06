@@ -3,7 +3,7 @@
   "name": "Gundam Wing Endless Duel SNES",
   "kind": "recomp",
   "platform": "snes",
-  "description": "Made with SNESrecomp, a Super Nintendo game static recompiler ecosystem · Part of the R.A.I.D. community",
+  "description": "Made with SNESrecomp, a Super Nintendo game static recompiler ecosystem \u00b7 Part of the R.A.I.D. community",
   "homepage": "https://github.com/TechnicallyComputers/GundamWingEndlessDuelSNESRecomp",
   "rom_identity": {
     "crc32": [
@@ -44,9 +44,9 @@
   },
   "install_dir_name": "GundamWingEndlessDuelSNESRecomp",
   "launch": {
-    "linux": "GundamWingEndlessDuelSNES_Recompiled",
-    "windows": "GundamWingEndlessDuelSNES_Recompiled.exe",
-    "macos": "GundamWingEndlessDuelSNES_Recompiled"
+    "linux": "GundamWingEndlessDuelSNESRecomp",
+    "windows": "GundamWingEndlessDuelSNESRecomp.exe",
+    "macos": "GundamWingEndlessDuelSNESRecomp"
   },
   "romm": {
     "platforms": [
@@ -60,5 +60,5 @@
     "game_version": "0.1.1",
     "max_slots": 2
   },
-  "notes": "Digests auto-extracted from README."
+  "notes": "Digests auto-extracted from README. Launch binary is the CMake project name GundamWingEndlessDuelSNESRecomp (README.txt in the setup pack); the submission probe guessed *_Recompiled because the zip wraps its files in one folder."
 }
