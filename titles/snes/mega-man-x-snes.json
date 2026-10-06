@@ -1,0 +1,91 @@
+{
+  "id": "mega-man-x-snes",
+  "name": "Mega Man X",
+  "kind": "recomp",
+  "platform": "snes",
+  "description": "Mega Man X recompiled for the Super Nintendo using snesrecomp · Part of the R.A.I.D. community",
+  "homepage": "https://github.com/mstan/MegaManXSNESRecomp",
+  "rom_identity": {
+    "crc32": [
+      "ded53c64"
+    ],
+    "md5": [
+      "df1cc0c8c8c4b61e3b834cc03366611c"
+    ],
+    "sha1": [
+      "c65216760ba99178100a10d98457cf11496c2097"
+    ],
+    "sha256": [
+      "b8f70a6e7fb93819f79693578887e2c11e196bdf1ac6ddc7cb924b1ad0be2d32"
+    ],
+    "disc_serials": [],
+    "sizes": [
+      1572864
+    ],
+    "filenames": [
+      "mmx.sfc",
+      "rockmanx.sfc",
+      "Mega Man X (USA) (Rev 1).sfc"
+    ],
+    "track_counts": [],
+    "require_cue": false
+  },
+  "rom_extensions": [
+    ".sfc",
+    ".smc",
+    ".fig",
+    ".swc"
+  ],
+  "release": {
+    "github": "mstan/MegaManXSNESRecomp",
+    "asset_glob": {
+      "linux": "*appimage*",
+      "windows": "*windows*",
+      "macos": ""
+    }
+  },
+  "install_dir_name": "MegaManXSNESRecomp",
+  "launch": {
+    "linux": "mmx_render_capture",
+    "windows": "mmx_render_capture.exe",
+    "macos": ""
+  },
+  "romm": {
+    "platforms": [
+      "snes"
+    ]
+  },
+  "notes": "Digests auto-extracted from README, tools/regen.sh.",
+  "build": {
+    "enabled": true,
+    "source": {
+      "github": "mstan/MegaManXSNESRecomp",
+      "ref": "main"
+    },
+    "toolchain": {
+      "id": "cmake-clang-v1",
+      "github": "RetroPortingToolKit/RetroPorting-Toolchains",
+      "min_version": "1.0.3",
+      "asset_glob": {
+        "linux": "*cmake-clang-v1*linux*",
+        "windows": "*cmake-clang-v1*windows*",
+        "macos": "*cmake-clang-v1*macos*"
+      }
+    },
+    "generate": {
+      "engine": "snesrecomp",
+      "cfg_dir": "recomp",
+      "out_dir": "src/gen",
+      "funcs_h": "recomp/funcs.h",
+      "cfg_roots": true
+    },
+    "cmake": {
+      "build_dir": "build",
+      "target": "mmx_render_capture",
+      "config": "Release"
+    },
+    "sdk": {
+      "id": "snesrecomp-tools"
+    }
+  }
+}
